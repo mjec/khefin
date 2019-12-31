@@ -54,6 +54,12 @@ install: release docs installdirs
 	install -g 0 -o 0 -p -m 0644 $(DISTDIR)/share/man/man1/$(APPNAME).1.gz $(DESTDIR)$(PREFIX)/share/man/man1/$(APPNAME).1.gz
 	install -g 0 -o 0 -p -m 0644 $(DISTDIR)/share/bash-completion/completions/$(APPNAME) $(DESTDIR)$(PREFIX)/share/bash-completion/completions/$(APPNAME)
 
+.PHONY: uninstall
+uninstall:
+	$(RM) $(DESTDIR)$(PREFIX)/share/bash-completion/completions/$(APPNAME)
+	$(RM) $(DESTDIR)$(PREFIX)/share/man/man1/$(APPNAME).1.gz
+	$(RM) $(DESTDIR)$(PREFIX)/bin/$(APPNAME)
+
 .PHONY: clean
 clean: cleandep cleanobj cleandist
 
