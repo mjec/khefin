@@ -11,7 +11,11 @@ Note that `make install` requires root privileges, because the binary should run
 
 ## How this works
 
-The authenticator has a credential-scoped secret which is used to calculate the HMAC-SHA256 over some data they call a salt. During the `enrol` step, we create a file containing a randomly-generated salt, a credential ID (specified by the authenticator), and a randomly generated relying party ID (a credential on the authenticator is scoped to a relying party ID, which is specified when creating the credential). This data is encrypted with the passphrase you specify, and saved to disk. The `generate` command decrypts this data, sends it to the authenticator, and prints the result. This results in the same value being returned every time; but that value cannot be obtained without both the decrypted keyfile (which requires your passphrase) and the authenticator device.
+The authenticator has a credential-scoped secret which is used to calculate the HMAC-SHA256 over some data they call a salt.
+
+During the `enrol` step, we create a file containing a randomly-generated salt, a credential ID (specified by the authenticator), and a randomly generated relying party ID (a credential on the authenticator is scoped to a relying party ID, which is specified when creating the credential). This data is encrypted with the passphrase you specify, and saved to disk.
+
+The `generate` command decrypts this data, sends it to the authenticator, and prints the result. This results in the same value being returned every time; but that value cannot be obtained without both the decrypted keyfile (which requires your passphrase) and the authenticator device.
 
 ### Encrypted keyfile
 
