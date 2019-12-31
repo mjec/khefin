@@ -11,6 +11,8 @@ Note that `make install` requires root privileges, because the binary should run
 
 ## How this works
 
+The authenticator has a credential-scoped secret which is used to calculate the HMAC-SHA256 over some data they call a salt. During the `enrol` step, we create a file containing a randomly-generated salt, a credential ID (specified by the authenticator), and a randomly generated relying party ID (a credential on the authenticator is scoped to a relying party ID, which is specified when creating the credential). This data is encrypted with the passphrase you specify, and saved to disk. The `generate` command decrypts this data, sends it to the authenticator, and prints the result. This results in the same value being returned every time; but that value cannot be obtained without both the decrypted keyfile (which requires your passphrase) and the authenticator device.
+
 ### Encrypted keyfile
 
 This is a CBOR-encoded array with the following elements:
@@ -55,6 +57,8 @@ The relying party ID contained in this data is in fact only used as part of that
 The number one risk is that by playing around with encryption like this you will lose your data. Keep good, offline backups of your data. Test your backups regularly, to ensure files can be recovered without access to any of your usual hardware or software.
 
 [Backup your LUKS header](https://gitlab.com/cryptsetup/cryptsetup/wikis/FrequentlyAskedQuestions#6-backup-and-data-recovery) and data before using this for disk encryption keys. Seriously.
+
+The security of this sytem depends on the security of your authenticator device, libsodium, libfido2, and the quality of your passphrase. It's also possible -- and indeed more likely than any of the former issues -- that there's a bug in the code for this application which compromises its security somehow. Pull requests and issues are very welcome.
 
 ## Warrant canary (but not a warranty)
 
