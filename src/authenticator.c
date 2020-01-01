@@ -13,8 +13,6 @@ devices_list_t *list_devices(void) {
 	int r;
 	devices_list_t *result = malloc(sizeof(devices_list_t));
 
-	fido_init(0);
-
 	if ((list = fido_dev_info_new(MAX_DEVICES_TO_LIST)) == NULL) {
 		errx(EXIT_OUT_OF_MEMORY, "Unable to create new list of devices");
 	}
@@ -48,11 +46,7 @@ void free_devices_list(devices_list_t *devices_list) {
 
 fido_dev_t *get_device(const char *path) {
 	fido_dev_t *device;
-	fido_cbor_info_t *device_info;
 	int r;
-	bool hmac_secret_supported = false;
-
-	fido_init(0);
 
 	if ((device = fido_dev_new()) == NULL) {
 		errx(EXIT_OUT_OF_MEMORY,
@@ -69,6 +63,27 @@ fido_dev_t *get_device(const char *path) {
 		errx(EXIT_AUTHENTICATOR_ERROR,
 		     "Device at %s is not a FIDO2 authenticator", path);
 	}
+
+	return device;
+}
+
+bool device_supports_hmac_secret(fido_cbor_info_t *device_info) {
+	char *const *extensions = fido_cbor_info_extensions_ptr(device_info);
+	size_t extensions_length = fido_cbor_info_extensions_len(device_info);
+
+	for (size_t i = 0; i < extensions_length; i++) {
+		if (strcmp("hmac-secret", extensions[i]) == 0) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+fido_cbor_info_t *get_device_info(fido_dev_t *device) {
+	fido_cbor_info_t *device_info;
+	int r;
+
 	if ((device_info = fido_cbor_info_new()) == NULL) {
 		errx(EXIT_OUT_OF_MEMORY,
 		     "Unable to create device info structure (out of memory?)");
@@ -76,27 +91,16 @@ fido_dev_t *get_device(const char *path) {
 
 	if ((r = fido_dev_get_cbor_info(device, device_info)) != FIDO_OK) {
 		errx(EXIT_AUTHENTICATOR_ERROR,
-		     "Unable to get info from device at %s: %s (0x%x)", path,
-		     fido_strerr(r), r);
+		     "Unable to get info from device: %s (0x%x)", fido_strerr(r), r);
 	}
 
-	char *const *extensions = fido_cbor_info_extensions_ptr(device_info);
-	size_t extensions_length = fido_cbor_info_extensions_len(device_info);
+	return device_info;
+}
 
-	for (size_t i = 0; i < extensions_length; i++) {
-		if (strcmp("hmac-secret", extensions[i]) == 0) {
-			hmac_secret_supported = true;
-			break;
-		}
+void free_device_info(fido_cbor_info_t *cbor_info) {
+	if (cbor_info) {
+		fido_cbor_info_free(&cbor_info);
 	}
-
-	if (!hmac_secret_supported) {
-		errx(EXIT_AUTHENTICATOR_ERROR,
-		     "Device at %s does not support the required hmac-secret extension",
-		     path);
-	}
-
-	return device;
 }
 
 void close_and_free_device_ignoring_errors(fido_dev_t *device) {
@@ -366,13 +370,13 @@ int get_secret_consuming_authenticator_params(
 	r = fido_dev_get_assert(device, assertion, NULL);
 	if (r != FIDO_OK) {
 		free_parameters(params);
-		close_and_free_device_ignoring_errors(device);
 		fido_assert_free(&assertion);
 		if (r == FIDO_ERR_INVALID_CREDENTIAL ||
 		    r == FIDO_ERR_USER_ACTION_PENDING || r == FIDO_ERR_NO_CREDENTIALS ||
 		    r == FIDO_ERR_ACTION_TIMEOUT) {
 			return r;
 		}
+		close_and_free_device_ignoring_errors(device);
 		errx(EXIT_AUTHENTICATOR_ERROR,
 		     "Unable to get secret from device: %s (0x%x)", fido_strerr(r), r);
 	}

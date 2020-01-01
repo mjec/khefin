@@ -30,8 +30,8 @@
 
 typedef struct deserialized_cleartext {
 	uint8_t version;
-	uint16_t device_vendor;
-	uint16_t device_product;
+	unsigned char *device_aaguid;
+	size_t device_aaguid_size;
 
 	unsigned char *kdf_salt;
 	size_t kdf_salt_size;

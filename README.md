@@ -21,17 +21,18 @@ The `generate` command decrypts this data, sends it to the authenticator, and pr
 
 This is a CBOR-encoded array with the following elements:
 
-| Field | Name           | Type                    | Notes                       |
-|:-----:|----------------|-------------------------|-----------------------------|
-| 0     | version        | unsigned 8 bit integer  | Schama version; always `1`  |
-| 1     | device vendor  | unsigned 16 bit integer | `fido_dev_info_vendor`      |
-| 2     | device product | unsigned 16 bit integer | `fido_dev_info_product`     |
-| 3     | password salt  | definite bytestring     | See `crypto_pwhash`         |
-| 4     | opslimit       | unsigned 64 bit integer | See `crypto_pwhash`         |
-| 5     | memlimit       | unsigned 64 bit integer | See `crypto_pwhash`         |
-| 6     | algorithm      | unsigned 16 bit integer | See `crypto_pwhash`         |
-| 7     | nonce          | definite bytestring     | See `crypto_secretbox_easy` |
-| 8     | encrypted data | definite bytestring     |                             |
+| Field | Name           | Type                    | Notes                         |
+|:-----:|----------------|-------------------------|-------------------------------|
+| 0     | version        | unsigned 8 bit integer  | Schama version; always `1`    |
+| 1     | device AAGUID  | definite bytestring     | Device make & model, or empty |
+| 2     | password salt  | definite bytestring     | See `crypto_pwhash`           |
+| 3     | opslimit       | unsigned 64 bit integer | See `crypto_pwhash`           |
+| 4     | memlimit       | unsigned 64 bit integer | See `crypto_pwhash`           |
+| 5     | algorithm      | unsigned 16 bit integer | See `crypto_pwhash`           |
+| 6     | nonce          | definite bytestring     | See `crypto_secretbox_easy`   |
+| 7     | encrypted data | definite bytestring     |                               |
+
+Device AAGUID will be empty if and only if the `enrol` step is done with `--obfuscate-device-info`. If it's empty, every hmac-secret-supporting device will be tried during the `generate` step. If it's not empty, only devices with a matching AAGUID are returned.
 
 Any modification of any of the fields (except version, device vendor and device product) will irrecoverably render the key unusable.
 

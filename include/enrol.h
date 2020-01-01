@@ -19,6 +19,6 @@ RPID_ENCODING_TABLE[RPID_ENCODING_TABLE_SIZE] = {
 #define SALT_SIZE_BYTES 64
 #endif
 
-void enrol_device(devices_list_t *devices_list, invocation_state_t *invocation);
+void enrol_device(invocation_state_t *invocation);
 
 #endif

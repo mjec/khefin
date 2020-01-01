@@ -1,7 +1,7 @@
 .TH "m4_APPNAME" 1 "m4_APPDATE" "m4_APPVERSION" "m4_APPNAME man page"
 
 .SH NAME
-m4_APPNAME  generate passphrase-protected secrets from a FIDO2 authenticator that supports the hmac\-secret extension
+m4_APPNAME  generate passphrase\-protected secrets from a FIDO2 authenticator that supports the hmac\-secret extension
 
 .SH SYNOPSIS
 .B m4_APPNAME
@@ -31,7 +31,7 @@ generate an HMAC across the data contained in \fIfile\fR, once it has been decry
 .BR \-d ", " \-\-device =\fIdevice\fR
 REQUIRED for the \fBenrol\fR subcommand, otherwise prohibited.
 The path to the authenticator to enrol, e.g. /dev/hidraw0; see \fBenumerate\fR.
-This device MUST support the FIDO2 hmac-secret extension (supported by most Yubico Security Keys and YubiKeys).
+This device MUST support the FIDO2 hmac\-secret extension (supported by most Yubico Security Keys and YubiKeys).
 
 .TP
 .BR \-f ", " \-\-file =\fIfile\fR
@@ -47,13 +47,25 @@ If not specified, you will be prompted to enter a passphrase.
 .TP
 .BR \-o ", " \-\-obfuscate\-device\-info
 Optional for the \fBenrol\fR subcommand, otherwise prohibited.
-If specified, do not store the \fIdevice\fR vendor and product ID in \fIfile\fR.
+If specified, do not store the \fIdevice\fR AAGUID (identifier of device make and model) in \fIfile\fR.
 
 .SH DESCRIPTION
 
 m4_APPNAME produces deterministic output which can only be reproduced without \fIfile\fR, the \fIpassphrase\fR and the same authenticator \fIdevice\fR that was used during the \fBenrol\fR step.
 
 The canonical use case for m4_APPNAME is for generating an encryption key (or key material) that depends on two factors (a passphrase you know, and a device you have).
+
+The \fBenumerate\fR subcommand produces a list of connected authenticators, one per line, with the following tab\-separated fields:
+
+.RS
+1. a one\-character field, containing a \fB!\fR if the authenticator does not support the hmac\-secret extension and otherwise a blank space
+
+2. the path to the authenticator, e.g. /dev/hidraw0
+
+3. the authenticator name and manufacturer, e.g. Yubico Security Key by Yubico
+
+4. the authenticator AAGUID, e.g. f8a011f3-8c0a-4d15-8006-17111f9edc7d
+.RE
 
 .SH EXIT STATUS
 
@@ -111,7 +123,7 @@ These errors normally only occur if m4_APPNAME is not running as root, or with s
 .SH FILES
 
 \fIfile\fR (or the key file) contains information essential to producing the output of m4_APPNAME.
-Parts of the file are unencrypted, including the authenticator \fIdevice\fR vendor and product ID (unless --obfuscate-device-info is set during the \fBenrol\fR step), nonces, and the parameters for the key derivation algorithm used for the encrypted part of the file.
+Parts of the file are unencrypted, including the authenticator \fIdevice\fR AAGUID (unless \-\-obfuscate\-device\-info is set during the \fBenrol\fR step, this identifies the make and model of device), nonces, and the parameters for the key derivation algorithm used for the encrypted part of the file.
 
 Each key file can be used to produce exactly one secret, given exactly one passphrase and exactly one device.
 There is no support for having a backup authenticator for a given file, for example; instead you should create two key files.
@@ -131,19 +143,19 @@ The aim of this is to ensure memory is never swapped or dumped to disk, potentia
 
 .SH SECURITY
 
-This system depends on the security of (and thus can never be more secure than) your authenticator device, the FIDO2 standard, libsodium, HMAC-SHA256 and your passphrase.
+This system depends on the security of (and thus can never be more secure than) your authenticator device, the FIDO2 standard, libsodium, HMAC\-SHA256 and your passphrase.
 
 Because the output of m4_APPNAME is the same every time, you should rotate key files regularly.
 
 This also means that m4_APPNAME is not an ideal solution for authentication.
 Where possible, you should use a system which relies on a challenge being signed by your authenticator device.
 Examples of such systems which use FIDO2 authenticators are WebAuthn and pam_u2f.
-In particular, for providing a second factor for sign-in or privilege escallation using PAM, pam_u2f is a better solution.
+In particular, for providing a second factor for sign\-in or privilege escallation using PAM, pam_u2f is a better solution.
 
 .SH BUGS
 .UR https://github.com/mjec/fido2\-hmac\-secret/issues
 .UE
-has an up-to-date list of known issues. Bugs can also be reported there.
+has an up\-to\-date list of known issues. Bugs can also be reported there.
 
 .SH SEE ALSO
 

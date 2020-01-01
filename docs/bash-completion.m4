@@ -7,17 +7,21 @@ m4_COMPLETION_FUNCTION_NAME`'() {
 	local cur prev words cword split
 	local subcommands="help version enumerate enrol generate"
 	local opts="-f -d -p -o --file --device --passphrase --obfuscate-device-info"
-    _init_completion -s || return
+	_init_completion -s || return
 
 	case "$prev" in
-        help|version|enumerate|--help)
-            return
-            ;;
-        --file|--device|-!(-*)f|-!(-*)d)
-            _filedir
-            return
-            ;;
-    esac
+		help|version|enumerate|--help)
+			return
+			;;
+		--file|-!(-*)f)
+			_filedir
+			return
+			;;
+		--device|-!(-*)d)
+			COMPREPLY=($("${words[0]}" enumerate | grep -v '^!' | cut -f 2))
+			return
+			;;
+	esac
 
 	if [[ "$prev" == "m4_APPNAME" ]]; then
 		COMPREPLY=($(compgen -W "$subcommands" -- "$cur"))

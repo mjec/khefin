@@ -8,37 +8,20 @@
 #include "exit.h"
 #include "serialization.h"
 
-void enrol_device(devices_list_t *devices_list,
-                  invocation_state_t *invocation) {
-	uint16_t device_vendor;
-	uint16_t device_product;
+void enrol_device(invocation_state_t *invocation) {
 	fido_dev_t *authenticator;
 	authenticator_parameters_t *authenticator_params;
 	deserialized_cleartext *cleartext;
 
-	if (invocation->obfuscate_device_info) {
-		device_vendor = OBFUSCATED_DEVICE_SENTINEL;
-		device_product = OBFUSCATED_DEVICE_SENTINEL;
-	} else {
-		bool got_device_info = false;
-		for (size_t i = 0; i < devices_list->count; i++) {
-			const fido_dev_info_t *di =
-			    fido_dev_info_ptr(devices_list->list, i);
-			if (strcmp(fido_dev_info_path(di), invocation->device) == 0) {
-				device_vendor = fido_dev_info_vendor(di);
-				device_product = fido_dev_info_product(di);
-				got_device_info = true;
-				break;
-			}
-		}
-		if (!got_device_info) {
-			errx(EXIT_AUTHENTICATOR_ERROR,
-			     "Could not find authenticator in manifest of %d device%s",
-			     (int)devices_list->count, devices_list->count == 1 ? "" : "s");
-		}
+	authenticator = get_device(invocation->device);
+	fido_cbor_info_t *device_info = get_device_info(authenticator);
+	if (!device_supports_hmac_secret(device_info)) {
+		free_device_info(device_info);
+		errx(EXIT_AUTHENTICATOR_ERROR,
+		     "Device at %s does not support the required hmac-secret extension",
+		     invocation->device);
 	}
 
-	authenticator = get_device(invocation->device);
 	authenticator_params = allocate_parameters(0, SALT_SIZE_BYTES);
 	authenticator_params->salt = malloc(SALT_SIZE_BYTES);
 	randombytes_buf(authenticator_params->salt, SALT_SIZE_BYTES);
@@ -50,12 +33,17 @@ void enrol_device(devices_list_t *devices_list,
 	authenticator_params->relying_party_id[RELYING_PARTY_ID_SIZE] = (char)0;
 	strcat(authenticator_params->relying_party_id, RELYING_PARTY_SUFFIX);
 	create_credential(authenticator, authenticator_params);
+	close_and_free_device_ignoring_errors(authenticator);
 
 	cleartext =
 	    build_deserialized_cleartext_from_authenticator_parameters_and_passphrase(
 	        authenticator_params, invocation->passphrase);
-	cleartext->device_vendor = device_vendor;
-	cleartext->device_product = device_product;
+
+	cleartext->device_aaguid_size = fido_cbor_info_aaguid_len(device_info);
+	cleartext->device_aaguid = malloc(cleartext->device_aaguid_size);
+	memcpy(cleartext->device_aaguid, fido_cbor_info_aaguid_ptr(device_info),
+	       cleartext->device_aaguid_size);
+	free_device_info(device_info);
 	free_parameters(authenticator_params);
 	authenticator_params = NULL;
 	// We no longer need the passphrase, so zero it out, even though we'll need

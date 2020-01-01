@@ -37,6 +37,9 @@ M4FLAGS=-Dm4_APPNAME="$(APPNAME)" -Dm4_APPVERSION="$(APPVERSION)" -Dm4_APPDATE="
 .PHONY: all
 all: release docs
 
+.PHONY: all-debug
+all-debug: debug docs
+
 .PHONY: release
 release: CFLAGS+=-O3
 release: LDFLAGS+=-O3 -s

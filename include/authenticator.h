@@ -42,6 +42,9 @@ devices_list_t *list_devices(void);
 void free_devices_list(devices_list_t *devices_list);
 
 fido_dev_t *get_device(const char *path);
+bool device_supports_hmac_secret(fido_cbor_info_t *device_info);
+fido_cbor_info_t *get_device_info(fido_dev_t *device);
+void free_device_info(fido_cbor_info_t *cbor_info);
 void close_and_free_device_ignoring_errors(fido_dev_t *device);
 void close_and_free_device(fido_dev_t *device);
 

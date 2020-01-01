@@ -40,31 +40,25 @@ deserialize_cleartext_from_cbor_v1(cbor_item_t *cbor_root) {
 	cbor_decref(&cbor_version);
 	cbor_version = NULL;
 
-	cbor_item_t *cbor_device_vendor =
-	    cbor_array_get(cbor_root, CLEAR_FIELD_DEVICE_VENDOR);
-	if (!cbor_isa_uint(cbor_device_vendor) ||
-	    cbor_int_get_width(cbor_device_vendor) != CBOR_INT_16) {
+	cbor_item_t *cbor_device_aaguid =
+	    cbor_array_get(cbor_root, CLEAR_FIELD_DEVICE_AAGUID);
+	if (!cbor_isa_bytestring(cbor_device_aaguid) ||
+	    !cbor_bytestring_is_definite(cbor_device_aaguid)) {
 		errx(EXIT_DESERIALIZATION_ERROR,
-		     "File has the wrong format (field %d should be a device vendor "
-		     "number stored as an 16-bit unsigned integer)",
-		     CLEAR_FIELD_DEVICE_VENDOR);
+		     "File has the wrong format (field %d should be a AAGUID as a "
+		     "definite bytestring)",
+		     CLEAR_FIELD_DEVICE_AAGUID);
 	}
-	clear->device_vendor = cbor_get_uint16(cbor_device_vendor);
-	cbor_decref(&cbor_device_vendor);
-	cbor_device_vendor = NULL;
-
-	cbor_item_t *cbor_device_product =
-	    cbor_array_get(cbor_root, CLEAR_FIELD_DEVICE_PRODUCT);
-	if (!cbor_isa_uint(cbor_device_product) ||
-	    cbor_int_get_width(cbor_device_product) != CBOR_INT_16) {
-		errx(EXIT_DESERIALIZATION_ERROR,
-		     "File has the wrong format (field %d should be a device product "
-		     "number stored as an 16-bit unsigned integer)",
-		     CLEAR_FIELD_DEVICE_PRODUCT);
+	clear->device_aaguid_size = cbor_bytestring_length(cbor_device_aaguid);
+	if (clear->device_aaguid_size > 0) {
+		clear->device_aaguid = malloc(clear->device_aaguid_size);
+		memcpy(clear->device_aaguid, cbor_bytestring_handle(cbor_device_aaguid),
+		       clear->device_aaguid_size);
+	} else {
+		clear->device_aaguid = NULL;
 	}
-	clear->device_product = cbor_get_uint16(cbor_device_product);
-	cbor_decref(&cbor_device_product);
-	cbor_device_product = NULL;
+	cbor_decref(&cbor_device_aaguid);
+	cbor_device_aaguid = NULL;
 
 	cbor_item_t *cbor_kdf_salt =
 	    cbor_array_get(cbor_root, CLEAR_FIELD_KDF_SALT);
@@ -121,7 +115,7 @@ deserialize_cleartext_from_cbor_v1(cbor_item_t *cbor_root) {
 		     "integer)",
 		     CLEAR_FIELD_ALGORITHM);
 	}
-	clear->algorithm = (int)cbor_get_uint32(cbor_algorithm);
+	clear->algorithm = (int)cbor_get_uint16(cbor_algorithm);
 	cbor_decref(&cbor_algorithm);
 	cbor_algorithm = NULL;
 
@@ -181,14 +175,10 @@ cbor_item_t *serialize_cleartext_to_cbor_v1(deserialized_cleartext *clear) {
 	cbor_array_push(root, version);
 
 	FIELD_COUNTER_ASSERT("serialize_cleartext_to_cbor_v1",
-	                     CLEAR_FIELD_DEVICE_VENDOR, __FILE__, __LINE__);
-	cbor_item_t *device_vendor = cbor_build_uint16(clear->device_vendor);
-	cbor_array_push(root, device_vendor);
-
-	FIELD_COUNTER_ASSERT("serialize_cleartext_to_cbor_v1",
-	                     CLEAR_FIELD_DEVICE_PRODUCT, __FILE__, __LINE__);
-	cbor_item_t *device_product = cbor_build_uint16(clear->device_product);
-	cbor_array_push(root, device_product);
+	                     CLEAR_FIELD_DEVICE_AAGUID, __FILE__, __LINE__);
+	cbor_item_t *device_aaguid =
+	    cbor_build_bytestring(clear->device_aaguid, clear->device_aaguid_size);
+	cbor_array_push(root, device_aaguid);
 
 	FIELD_COUNTER_ASSERT("serialize_cleartext_to_cbor_v1", CLEAR_FIELD_KDF_SALT,
 	                     __FILE__, __LINE__);

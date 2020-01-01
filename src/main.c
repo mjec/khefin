@@ -1,3 +1,4 @@
+#include <fido.h>
 #include <sodium.h>
 
 #include "authenticator.h"
@@ -18,10 +19,12 @@ int main(int argc, char **argv) {
 		errx(EXIT_CRYPTOGRAPHY_ERROR, "Unable to initialize libsodium");
 	}
 
+	fido_init(0);
+
 	invocation_state_t *invocation =
 	    parse_arguments_and_get_passphrase(argc, argv);
 
-	devices_list_t *devices_list = list_devices();
+	devices_list_t *devices_list;
 
 	switch (invocation->subcommand) {
 	case help:
@@ -33,15 +36,19 @@ int main(int argc, char **argv) {
 		return EXIT_SUCCESS;
 
 	case enumerate:
+		devices_list = list_devices();
 		print_devices_list(devices_list);
+		free_devices_list(devices_list);
 		return EXIT_SUCCESS;
 
 	case enrol:
-		enrol_device(devices_list, invocation);
+		enrol_device(invocation);
 		return EXIT_SUCCESS;
 
 	case generate:
+		devices_list = list_devices();
 		print_secret_result = print_secret(invocation, devices_list);
+		free_devices_list(devices_list);
 		switch (print_secret_result) {
 		case EXIT_NO_DEVICES:
 			errx(EXIT_NO_DEVICES,
