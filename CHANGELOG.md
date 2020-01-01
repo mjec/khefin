@@ -1,7 +1,7 @@
 ## Next version (unreleased)
 _These changes are on the branch `master`, but not yet in a versioned release._
 
-* _(None yet)_
+* Improve bash completion, removing invalid options for `generate`
 
 ## Version 0.2.0
 

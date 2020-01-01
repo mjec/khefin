@@ -6,7 +6,7 @@ m4_dnl
 m4_COMPLETION_FUNCTION_NAME`'() {
 	local cur prev words cword split
 	local subcommands="help version enumerate enrol generate"
-	local opts="-f -d -p -o --file --device --passphrase --obfuscate-device-info"
+	local opts
 	_init_completion -s || return
 
 	case "$prev" in
@@ -20,6 +20,15 @@ m4_COMPLETION_FUNCTION_NAME`'() {
 		--device|-!(-*)d)
 			COMPREPLY=($("${words[0]}" enumerate | grep -v '^!' | cut -f 2))
 			return
+			;;
+	esac
+
+	case "${words[1]}" in
+		generate)
+			opts="-f --file"
+			;;
+		enrol)
+			opts="-f -d -p -o --file --device --passphrase --obfuscate-device-info"
 			;;
 	esac
 
