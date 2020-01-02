@@ -8,6 +8,7 @@ PREFIX=/usr/local
 SRCDIR=$(abspath ./src)
 INCDIR=$(abspath ./include)
 DOCDIR=$(abspath ./docs)
+SCRIPTDIR=$(abspath ./scripts)
 DISTDIR=$(abspath ./dist)
 BINPATH=$(DISTDIR)/bin/$(APPNAME)
 
@@ -34,31 +35,31 @@ LDFLAGS=$(WARNINGFLAGS) $(DEFINEFLAGS)
 M4FLAGS=-Dm4_APPNAME="$(APPNAME)" -Dm4_APPVERSION="$(APPVERSION)" -Dm4_APPDATE="$(APPDATE)" --prefix-builtins
 
 # Release build targets
-.PHONY: all
-all: release docs
-
-.PHONY: all-debug
-all-debug: debug docs
-
 .PHONY: release
 release: CFLAGS+=-O3
 release: LDFLAGS+=-O3 -s
-release: $(BINPATH) docs bash-completion
+release: $(BINPATH) manpage bash-completion
 
 .PHONY: installdirs
 installdirs:
 	mkdir -p $(DESTDIR)$(PREFIX)/bin
 	mkdir -p $(DESTDIR)$(PREFIX)/share/man/man1
 	mkdir -p $(DESTDIR)$(PREFIX)/share/bash-completion/completions
+	[ -f $(DISTDIR)/etc/initcpio/install/$(APPNAME) ] && mkdir -p $(DESTDIR)/etc/initcpio/install/ || true
+	[ -f $(DISTDIR)/etc/initcpio/hooks/$(APPNAME) ] && mkdir -p $(DESTDIR)/etc/initcpio/hooks/ || true
 
 .PHONY: install
-install: release docs installdirs
+install: release installdirs
 	install -g 0 -o 0 -p -m 4755 $(DISTDIR)/bin/$(APPNAME) $(DESTDIR)$(PREFIX)/bin/$(APPNAME)
 	install -g 0 -o 0 -p -m 0644 $(DISTDIR)/share/man/man1/$(APPNAME).1.gz $(DESTDIR)$(PREFIX)/share/man/man1/$(APPNAME).1.gz
 	install -g 0 -o 0 -p -m 0644 $(DISTDIR)/share/bash-completion/completions/$(APPNAME) $(DESTDIR)$(PREFIX)/share/bash-completion/completions/$(APPNAME)
+	[ -f $(DISTDIR)/etc/initcpio/install/$(APPNAME) ] && install -g 0 -o 0 -p -m 0644 $(DISTDIR)/etc/initcpio/install/$(APPNAME) $(DESTDIR)/etc/initcpio/install/$(APPNAME) || true
+	[ -f $(DISTDIR)/etc/initcpio/hooks/$(APPNAME) ] && install -g 0 -o 0 -p -m 0644 $(DISTDIR)/etc/initcpio/hooks/$(APPNAME) $(DESTDIR)/etc/initcpio/hooks/$(APPNAME) || true
 
 .PHONY: uninstall
 uninstall:
+	$(RM) $(DESTDIR)/etc/initcpio/hooks/$(APPNAME)
+	$(RM) $(DESTDIR)/etc/initcpio/install/$(APPNAME)
 	$(RM) $(DESTDIR)$(PREFIX)/share/bash-completion/completions/$(APPNAME)
 	$(RM) $(DESTDIR)$(PREFIX)/share/man/man1/$(APPNAME).1.gz
 	$(RM) $(DESTDIR)$(PREFIX)/bin/$(APPNAME)
@@ -93,9 +94,6 @@ $(INCDIR)/help.h: $(METAPATH)
 	$(CC) $(CFLAGS) $< -MM -MT $(@:.d=.o) >$@
 
 # Ancillary files targets
-.PHONY: docs
-docs: manpage bash-completion
-
 .PHONY: manpage
 manpage: $(DISTDIR)/share/man/man1/$(APPNAME).1.gz
 
@@ -107,12 +105,27 @@ $(DISTDIR)/share/man/man1/$(APPNAME).1: $(DOCDIR)/manpage.m4 $(METAPATH)
 	mkdir -p $(DISTDIR)/share/man/man1
 	m4 $(M4FLAGS) $(DOCDIR)/manpage.m4 > $@
 
+
 .PHONY: bash-completion
 bash-completion: $(DISTDIR)/share/bash-completion/completions/$(APPNAME)
 
 $(DISTDIR)/share/bash-completion/completions/$(APPNAME): $(DOCDIR)/bash-completion.m4 $(METAPATH)
 	mkdir -p $(DISTDIR)/share/bash-completion/completions
 	m4 $(M4FLAGS) $(DOCDIR)/bash-completion.m4 > $@
+
+
+.PHONY: initcpio
+initcpio: $(DISTDIR)/etc/initcpio/install/$(APPNAME) $(DISTDIR)/etc/initcpio/hooks/$(APPNAME)
+
+INITCPIO_M4FLAGS=-Dm4_DEFAULT_MAX_PASSPHRASE_ATTEMPTS=3 -Dm4_DEFAULT_ENCRYPTED_KEYFILE_DIR="/keyfiles" -Dm4_DEFAULT_KEYFILES_SOURCE_DIR="/boot/keyfiles"
+
+$(DISTDIR)/etc/initcpio/install/$(APPNAME): $(SCRIPTDIR)/initcpio-install.m4
+	mkdir -p $(DISTDIR)/etc/initcpio/install
+	m4 $(M4FLAGS) $(INITCPIO_M4FLAGS) $(SCRIPTDIR)/initcpio-install.m4 > $@
+
+$(DISTDIR)/etc/initcpio/hooks/$(APPNAME): $(SCRIPTDIR)/initcpio-run.m4
+	mkdir -p $(DISTDIR)/etc/initcpio/hooks
+	m4 $(M4FLAGS) $(INITCPIO_M4FLAGS) $(SCRIPTDIR)/initcpio-run.m4 > $@
 
 # Cleanup targets
 .PHONY: cleandist

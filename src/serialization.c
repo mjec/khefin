@@ -25,8 +25,8 @@ build_authenticator_parameters_from_deserialized_cleartext_and_passphrase(
 	if (crypto_secretbox_open_easy(decrypted, cleartext->encrypted_data,
 	                               cleartext->encrypted_data_size,
 	                               cleartext->nonce, key_bytes) != 0) {
-		errx(EXIT_BAD_PASSWORD, "Could not decrypt secrets; this likely means "
-		                        "the password was wrong");
+		errx(EXIT_BAD_PASSPHRASE, "Could not decrypt secrets; this likely means "
+		                        "the passphrase was wrong");
 	}
 	deserialized_secrets *secrets = load_secrets_from_bytes(
 	    decrypted, cleartext->encrypted_data_size - crypto_secretbox_MACBYTES);

@@ -4,7 +4,7 @@
 #include <err.h>
 
 // Three categories of error:
-//  - user errors, like a bad password
+//  - user errors, like a bad passphrase
 //  - runtime errors, like out of memory
 //  - programmer errors, which are bugs
 // In each category, we have 5 bits (32 codes) available to be more specific.
@@ -20,7 +20,7 @@
 #endif
 
 #define EXIT_BAD_INVOCATION (0 | _USER_ERROR_BITS)
-#define EXIT_BAD_PASSWORD (1 | _USER_ERROR_BITS)
+#define EXIT_BAD_PASSPHRASE (1 | _USER_ERROR_BITS)
 #define EXIT_NO_DEVICES (2 | _USER_ERROR_BITS)
 #define EXIT_NO_VALID_AUTHENTICATOR (3 | _USER_ERROR_BITS)
 #define EXIT_DESERIALIZATION_ERROR (4 | _USER_ERROR_BITS)

@@ -1,13 +1,15 @@
 # fido2-hmac-secret
-A system for using a FIDO2 authenticator with [hmac-secret extension](https://fidoalliance.org/specs/fido-v2.0-id-20180227/fido-client-to-authenticator-protocol-v2.0-id-20180227.html#sctn-hmac-secret-extension) support to generate password-protected secrets.
+A system for using a FIDO2 authenticator with [hmac-secret extension](https://fidoalliance.org/specs/fido-v2.0-id-20180227/fido-client-to-authenticator-protocol-v2.0-id-20180227.html#sctn-hmac-secret-extension) support to generate passphrase-protected secrets.
 
 ## Installation
 
-`make && sudo make install`
+`make release && sudo make install`
 
 The `DESTDIR` and `PREFIX` variables are respected (so you can do `sudo make install PREFIX=/usr`, for example, to install to `/usr/bin` instead of `/usr/local/bin`).
 
 Note that `make install` requires root privileges, because the binary should run as setuid root.
+
+If you want to install the mkinitcpio hooks, you have to build those specifically too: `make release initcpio && sudo make install`.
 
 ## How this works
 
@@ -21,22 +23,22 @@ The `generate` command decrypts this data, sends it to the authenticator, and pr
 
 This is a CBOR-encoded array with the following elements:
 
-| Field | Name           | Type                    | Notes                         |
-|:-----:|----------------|-------------------------|-------------------------------|
-| 0     | version        | unsigned 8 bit integer  | Schama version; always `1`    |
-| 1     | device AAGUID  | definite bytestring     | Device make & model, or empty |
-| 2     | password salt  | definite bytestring     | See `crypto_pwhash`           |
-| 3     | opslimit       | unsigned 64 bit integer | See `crypto_pwhash`           |
-| 4     | memlimit       | unsigned 64 bit integer | See `crypto_pwhash`           |
-| 5     | algorithm      | unsigned 16 bit integer | See `crypto_pwhash`           |
-| 6     | nonce          | definite bytestring     | See `crypto_secretbox_easy`   |
-| 7     | encrypted data | definite bytestring     |                               |
+| Field | Name            | Type                    | Notes                         |
+|:-----:|-----------------|-------------------------|-------------------------------|
+| 0     | version         | unsigned 8 bit integer  | Schama version; always `1`    |
+| 1     | device AAGUID   | definite bytestring     | Device make & model, or empty |
+| 2     | passphrase salt | definite bytestring     | See `crypto_pwhash`           |
+| 3     | opslimit        | unsigned 64 bit integer | See `crypto_pwhash`           |
+| 4     | memlimit        | unsigned 64 bit integer | See `crypto_pwhash`           |
+| 5     | algorithm       | unsigned 16 bit integer | See `crypto_pwhash`           |
+| 6     | nonce           | definite bytestring     | See `crypto_secretbox_easy`   |
+| 7     | encrypted data  | definite bytestring     |                               |
 
 Device AAGUID will be empty if and only if the `enrol` step is done with `--obfuscate-device-info`. If it's empty, every hmac-secret-supporting device will be tried during the `generate` step. If it's not empty, only devices with a matching AAGUID are returned.
 
 Any modification of any of the fields (except version, device vendor and device product) will irrecoverably render the key unusable.
 
-The user will be prompted for a password, which is run through libsodium's `crypto_pwhash`, with parameters from fields 3, 4, 5 and 6 to give a key.
+The user will be prompted for a passphrase, which is run through libsodium's `crypto_pwhash`, with parameters from fields 3, 4, 5 and 6 to give a key.
 
 That key, combined with the nonce in field 7, is used to decrypt the encrypted data in field 8 with libsodium's `crypto_secretbox_easy`.
 

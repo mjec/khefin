@@ -43,6 +43,7 @@ The path to write to (for \fBenrol\fR; this file will be overwritten) or read fr
 Optional for the \fBenrol\fR and \fBgenerate\fR subcommands, otherwise prohibited.
 The passphrase to use to encrypt (for \fBenrol\fR) or decrypt (for \fBgenerate\fR) \fIfile\fR.
 If not specified, you will be prompted to enter a passphrase.
+Note that either way, passphrases must \fBnot\fR contain a null (0x00) byte.
 
 .TP
 .BR \-o ", " \-\-obfuscate\-device\-info
