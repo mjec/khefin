@@ -11,6 +11,14 @@ Note that `make install` requires root privileges, because the binary should run
 
 If you want to install the mkinitcpio hooks, you have to build those specifically too: `make release initcpio && sudo make install`.
 
+Before building or running this tool, you'll need the following dependencies installed:
+
+ * [libfido2](https://developers.yubico.com/libfido2/)
+ * [libcbor](https://libcbor.readthedocs.io/en/v0.5.0/) - also a dependency of libfido2
+ * [libsodium](https://download.libsodium.org/doc/)
+
+At the moment I believe this tool is linux-only; issue reports or pull requests to improve portability are gratefully accepted.
+
 ## How this works
 
 The authenticator has a credential-scoped secret which is used to calculate the HMAC-SHA256 over some data they call a salt.
@@ -59,7 +67,7 @@ At the very least, the credential ID offers an additional [100 bits of entropy](
 
 The relying party ID contained in this data is in fact only used as part of that ID, and it is always a 32 character string composed of characters in the range [a-z0-7], for a total of 160 bits of entropy. The aim here is to ensure that any protections in the authenticator against cross-origin key use detection are available. I doubt any key has such protection, but again it costs us nothing.
 
-# Risks
+## Risks
 
 The number one risk is that by playing around with encryption like this you will lose your data. Keep good, offline backups of your data. Test your backups regularly, to ensure files can be recovered without access to any of your usual hardware or software.
 
@@ -71,11 +79,7 @@ The security of this sytem depends on the security of your authenticator device,
 
 At the time of writing, I have not received or complied with any government or non-government requests for information or services relating to this software.
 
-### Output format
+## Output format
 
 The usual output format is a series of 128 characters ASCII, being the hex-encoded (lowercase) form of the key, with no whitespace (plus a new line character). This avoids potential problems with interfaces that are not 8-bit clean (including the risk of a NUL byte or newline causing key material truncation). You can also type in such a key by hand with any keyboard, if that is important.
 
-## Dependencies
- * libfido2
- * libsodium
- * libcbor
