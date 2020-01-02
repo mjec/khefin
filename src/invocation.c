@@ -32,7 +32,8 @@ invocation_state_t *parse_arguments_and_get_passphrase(int argc, char **argv) {
 	} else if (strcmp(argv[1], "enumerate") == 0) {
 		result->subcommand = enumerate;
 	} else {
-		result->subcommand = unknown;
+		print_usage(argv[0]);
+		exit(EXIT_BAD_INVOCATION);
 	}
 
 	int c;
