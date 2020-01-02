@@ -60,9 +60,9 @@ void free_parameters(authenticator_parameters_t *params);
 void create_credential(fido_dev_t *device, authenticator_parameters_t *params);
 
 secret_t *allocate_secret(size_t size);
-int get_secret_consuming_authenticator_params(
-    fido_dev_t *device, authenticator_parameters_t *params,
-    secret_t *secret_struct);
+int get_secret_from_authenticator_params(fido_dev_t *device,
+                                         authenticator_parameters_t *params,
+                                         secret_t *secret_struct);
 void free_secret(secret_t *secret_struct);
 
 #endif

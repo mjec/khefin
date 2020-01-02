@@ -282,7 +282,7 @@ void create_credential(fido_dev_t *device, authenticator_parameters_t *params) {
 	fido_cred_free(&credential);
 }
 
-int get_secret_consuming_authenticator_params(
+int get_secret_from_authenticator_params(
     fido_dev_t *device, authenticator_parameters_t *params,
     secret_t *secret_struct) { // cred_id_t *cred_struct, unsigned char *salt,
 	                           // size_t salt_length) {
@@ -369,19 +369,17 @@ int get_secret_consuming_authenticator_params(
 	// TODO: PIN support
 	r = fido_dev_get_assert(device, assertion, NULL);
 	if (r != FIDO_OK) {
-		free_parameters(params);
 		fido_assert_free(&assertion);
 		if (r == FIDO_ERR_INVALID_CREDENTIAL ||
 		    r == FIDO_ERR_USER_ACTION_PENDING || r == FIDO_ERR_NO_CREDENTIALS ||
 		    r == FIDO_ERR_ACTION_TIMEOUT) {
 			return r;
 		}
+		free_parameters(params);
 		close_and_free_device_ignoring_errors(device);
 		errx(EXIT_AUTHENTICATOR_ERROR,
 		     "Unable to get secret from device: %s (0x%x)", fido_strerr(r), r);
 	}
-
-	free_parameters(params);
 
 	secret_pointer = fido_assert_hmac_secret_ptr(assertion, 0);
 	secret_size = fido_assert_hmac_secret_len(assertion, 0);

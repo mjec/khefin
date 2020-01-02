@@ -35,7 +35,7 @@ unsigned short int print_secret(invocation_state_t *invocation,
 			}
 
 			secret_t *secret = malloc(sizeof(secret_t));
-			int result = get_secret_consuming_authenticator_params(
+			int result = get_secret_from_authenticator_params(
 			    authenticator, authenticator_params, secret);
 			close_and_free_device_ignoring_errors(authenticator);
 			free_device_info(device_info);

@@ -1,6 +1,7 @@
 ## Next version (unreleased)
 _These changes are on the branch `master`, but not yet in a versioned release._
 
+* Change `get_secret_consuming_authenticator_params` to stop consuming params, thus avoiding double-free
 * Fix bug where providing an invalid subcommand did not print usage and exit with EXIT_BAD_INVOCATION
 * Improve bash completion, removing invalid options for `generate`
 
