@@ -3,6 +3,12 @@
 
 #include <stdbool.h>
 
+#ifndef LONGEST_VALID_PASSPHRASE
+#define LONGEST_VALID_PASSPHRASE 1024
+#endif
+
+#define NL_CHARACTER_TO_STRIP 0x0a
+
 typedef enum subcommand_t {
 	unknown,
 	help,

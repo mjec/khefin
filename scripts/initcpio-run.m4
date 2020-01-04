@@ -79,7 +79,7 @@ run_hook() {
 				printf "Trying to decrypt %s.\n" "$encrypted_keyfile"
 			fi
 
-			m4_APPNAME generate -f "$encrypted_keyfile" -p "$encrypted_keyfile_passphrase" > "$decrypted_keyfile_path"
+			printf "%s" "$encrypted_keyfile_passphrase" | m4_APPNAME generate -f "$encrypted_keyfile" > "$decrypted_keyfile_path"
 			result=$?
 			if [ $result -eq 0 ]; then
 				unset encrypted_keyfile_passphrase

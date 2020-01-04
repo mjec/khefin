@@ -1,6 +1,8 @@
 ## Next version (unreleased)
 _These changes are on the branch `master`, but not yet in a versioned release._
 
+* Permit passphrase to be supplied on STDIN, if not a tty (issue #2)
+
 ## Version 0.3.0
 
 * Add mkinitcpio hooks for using this with encrypted root device on Arch Linux

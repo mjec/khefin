@@ -2,6 +2,7 @@
 METAPATH=$(abspath ./metadata.make)
 -include $(METAPATH)
 APPDATE=$(shell date -d "$$(stat --printf "%y" $(METAPATH))" "+%d %B %Y")
+LONGEST_VALID_PASSPHRASE=1024
 
 # Paths
 PREFIX=/usr/local
@@ -23,7 +24,7 @@ PREREQUISITES=$(SRCS:.c=.d)
 # Compiler options
 CC=clang
 WARNINGFLAGS=-Wall -Wshadow -Wwrite-strings -Wmissing-prototypes -Wimplicit-fallthrough -pedantic -fstack-protector-all -fno-strict-aliasing
-DEFINEFLAGS=-DAPPNAME=\"$(APPNAME)\" -DAPPVERSION=\"$(APPVERSION)\"
+DEFINEFLAGS=-DAPPNAME=\"$(APPNAME)\" -DAPPVERSION=\"$(APPVERSION)\" -DLONGEST_VALID_PASSPHRASE=$(LONGEST_VALID_PASSPHRASE)
 INCLUDEFLAGS=$(shell pkg-config --cflags libfido2 libcbor libsodium) -iquote $(INCDIR)
 LDLIBS=$(shell pkg-config --libs libfido2 libcbor libsodium)
 
@@ -32,7 +33,7 @@ CFLAGS=$(INCLUDEFLAGS) $(DEFINEFLAGS) $(WARNINGFLAGS)
 LDFLAGS=$(WARNINGFLAGS) $(DEFINEFLAGS)
 
 # m4 preprocessor options
-M4FLAGS=-Dm4_APPNAME="$(APPNAME)" -Dm4_APPVERSION="$(APPVERSION)" -Dm4_APPDATE="$(APPDATE)" --prefix-builtins
+M4FLAGS=-Dm4_APPNAME="$(APPNAME)" -Dm4_APPVERSION="$(APPVERSION)" -Dm4_APPDATE="$(APPDATE)" -Dm4_LONGEST_VALID_PASSPHRASE=$(LONGEST_VALID_PASSPHRASE) --prefix-builtins
 
 # Release build targets
 .PHONY: release

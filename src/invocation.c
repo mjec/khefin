@@ -1,9 +1,12 @@
 #include "invocation.h"
 
+#include <errno.h>
 #include <getopt.h>
 #include <stdbool.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <termios.h>
 #include <unistd.h>
 
 #include "exit.h"
@@ -160,7 +163,42 @@ invocation_state_t *parse_arguments_and_get_passphrase(int argc, char **argv) {
 
 	if (result->passphrase == NULL &&
 	    (result->subcommand == enrol || result->subcommand == generate)) {
-		result->passphrase = getpass("Passphrase: ");
+		result->passphrase = malloc(LONGEST_VALID_PASSPHRASE + 1);
+		if (result->passphrase == NULL) {
+			err(EXIT_OUT_OF_MEMORY, "Unable to allocate memory for passphrase");
+		}
+
+		if (isatty(STDIN_FILENO)) {
+			struct termios terminal_settings;
+			if (tcgetattr(STDIN_FILENO, &terminal_settings) != 0) {
+				err(EXIT_UNABLE_TO_GET_PASSPHRASE, "Unable to get passphrase");
+			}
+			tcflag_t previous_c_lflag = terminal_settings.c_lflag;
+			terminal_settings.c_lflag &= ~(ECHO | ECHOE | ECHOK);
+			terminal_settings.c_lflag |= ECHONL;
+			if (tcsetattr(STDIN_FILENO, TCSANOW, &terminal_settings) != 0) {
+				err(EXIT_UNABLE_TO_GET_PASSPHRASE, "Unable to get passphrase");
+			}
+			printf("Passphrase: ");
+			fgets(result->passphrase, LONGEST_VALID_PASSPHRASE, stdin);
+
+			// Remove trailing \n
+			if (result->passphrase[strlen(result->passphrase) - 1] ==
+			    NL_CHARACTER_TO_STRIP) {
+				result->passphrase[strlen(result->passphrase) - 1] = 0x00;
+			}
+
+			// Reset settings
+			terminal_settings.c_lflag = previous_c_lflag;
+			if (tcsetattr(STDIN_FILENO, TCSANOW, &terminal_settings) != 0) {
+				err(EXIT_UNABLE_TO_GET_PASSPHRASE,
+				    "Unable to reset terminal after getting passphrase");
+			}
+		} else if (errno == ENOTTY) {
+			fgets(result->passphrase, LONGEST_VALID_PASSPHRASE, stdin);
+		} else {
+			err(EXIT_UNABLE_TO_GET_PASSPHRASE, "Unable to get passphrase");
+		}
 	}
 
 	return result;
