@@ -1,3 +1,4 @@
+m4_define(`m4_silence_memlock_divert_destination', m4_ifelse(m4_ALWAYS_SILENCE_MEMORY_LOCK_ERRORS, 1, -1, 0))m4_dnl
 .TH "m4_APPNAME" 1 "m4_APPDATE" "m4_APPVERSION" "m4_APPNAME man page"
 
 .SH NAME
@@ -126,6 +127,7 @@ Unable to get passphrase safely (no TTY or STDIN)
 .BR 96
 This is evidence of a bug; please report it (see \fBBUGS\fR below).
 
+m4_divert(m4_silence_memlock_divert_destination)m4_dnl
 .SH ENVIRONMENT
 
 .TP
@@ -133,6 +135,7 @@ This is evidence of a bug; please report it (see \fBBUGS\fR below).
 If this environment variable is set, errors locking memory will be ignored.
 These errors normally only occur if m4_APPNAME is not running as root, or with setuid root; see \fBNOTES\fR below.
 
+m4_divert(0)m4_dnl
 .SH FILES
 
 \fIfile\fR (or the key file) contains information essential to producing the output of m4_APPNAME.
@@ -146,6 +149,7 @@ The sensitive components of this file are encrypted with a key derived solely fr
 As such, you should \fBnever\fR store your passphrase with the key file.
 You can store a backup of the key file in public unencrypted storage without compromising the security of the system per se, though it is good practice to ensure there are reasonable controls preventing public access.
 
+m4_divert(m4_silence_memlock_divert_destination)m4_dnl
 .SH NOTES
 
 By default, m4_APPNAME will be installed as setuid and owned by root.
@@ -154,6 +158,7 @@ m4_APPNAME will disable core dumps and increase RLIMIT_MEMLOCK to 512MiB before 
 If privileges cannot be dropped, m4_APPNAME will terminate with an appropriate code; see \fBEXIT STATUS\fR above.
 The aim of this is to ensure memory is never swapped or dumped to disk, potentially revealing secrets.
 
+m4_divert(0)m4_dnl
 .SH SECURITY
 
 This system depends on the security of (and thus can never be more secure than) your authenticator device, the FIDO2 standard, libsodium, HMAC\-SHA256 and your passphrase.

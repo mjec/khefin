@@ -7,7 +7,7 @@ A system for using a FIDO2 authenticator with [hmac-secret extension](https://fi
 
 The `DESTDIR` and `PREFIX` variables are respected (so you can do `sudo make install PREFIX=/usr`, for example, to install to `/usr/bin` instead of `/usr/local/bin`).
 
-Note that `make install` requires root privileges, because the binary should run as setuid root.
+Note that by default `make install` requires root privileges, because the binary runs as setuid root; see the setuid section below.
 
 If you want to install the mkinitcpio hooks, you have to build those specifically too: `make release initcpio && sudo make install`.
 
@@ -18,6 +18,14 @@ Before building or running this tool, you'll need the following dependencies ins
  * [libsodium](https://download.libsodium.org/doc/)
 
 At the moment I believe this tool is linux-only; issue reports or pull requests to improve portability are gratefully accepted.
+
+## setuid
+
+By default, `fido2-hmac-secret` will be installed as setuid and owned by root. This is done to ensure it has the `CAP_IPC_LOCK` capability and no hard `RLIMIT_MEMLOCK` limit. `fido2-hmac-secret` will disable core dumps and increase `RLIMIT_MEMLOCK` to 512MiB before dropping privileges to those of the real user ID. If privileges cannot be dropped, `fido2-hmac-secret` will terminate with exit code 67. The aim of this is to ensure memory is never swapped or dumped to disk, potentially revealing secrets.
+
+If you are not worried about secrets being swapped out or revealed in core dumps, you can safely run this application without setuid as any user. By default this will print warnings about not running as setuid root. You can disable those warnings by setting the `FIDO2_HMAC_SECRET_SILENCE_MEMLOCK_ERRORS` environment variable to any value.
+
+You can also compile this application not to warn about running as a lower-privileged user (or without setuid root) by running `make release -DALWAYS_SILENCE_MEMORY_LOCK_ERRORS=1`.
 
 ## How this works
 
