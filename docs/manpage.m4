@@ -1,4 +1,4 @@
-m4_define(`m4_silence_memlock_divert_destination', m4_ifelse(m4_ALWAYS_SILENCE_MEMORY_LOCK_ERRORS, 1, -1, 0))m4_dnl
+m4_define(`m4_MEMLOCK_WARNINGS_DIVERT_DESTINATION', m4_ifelse(m4_WARN_ON_MEMORY_LOCK_ERRORS, 0, -1, 0))m4_dnl
 .TH "m4_APPNAME" 1 "m4_APPDATE" "m4_APPVERSION" "m4_APPNAME man page"
 
 .SH NAME
@@ -127,15 +127,6 @@ Unable to get passphrase safely (no TTY or STDIN)
 .BR 96
 This is evidence of a bug; please report it (see \fBBUGS\fR below).
 
-m4_divert(m4_silence_memlock_divert_destination)m4_dnl
-.SH ENVIRONMENT
-
-.TP
-.BR FIDO2_HMAC_SECRET_SILENCE_MEMLOCK_ERRORS
-If this environment variable is set, errors locking memory will be ignored.
-These errors normally only occur if m4_APPNAME is not running as root, or with setuid root; see \fBNOTES\fR below.
-
-m4_divert(0)m4_dnl
 .SH FILES
 
 \fIfile\fR (or the key file) contains information essential to producing the output of m4_APPNAME.
@@ -149,14 +140,16 @@ The sensitive components of this file are encrypted with a key derived solely fr
 As such, you should \fBnever\fR store your passphrase with the key file.
 You can store a backup of the key file in public unencrypted storage without compromising the security of the system per se, though it is good practice to ensure there are reasonable controls preventing public access.
 
-m4_divert(m4_silence_memlock_divert_destination)m4_dnl
 .SH NOTES
+If you run m4_APPNAME under \fBsudo\fR(8), it will drop privileges to the invoking user (specified by the \fBSUDO_UID\fR environment variable) after locking memory.
 
-By default, m4_APPNAME will be installed as setuid and owned by root.
-This is done to ensure it has the CAP_IPC_LOCK capability and no hard RLIMIT_MEMLOCK limit.
-m4_APPNAME will disable core dumps and increase RLIMIT_MEMLOCK to 512MiB before dropping privileges to those of the real user ID.
-If privileges cannot be dropped, m4_APPNAME will terminate with an appropriate code; see \fBEXIT STATUS\fR above.
-The aim of this is to ensure memory is never swapped or dumped to disk, potentially revealing secrets.
+m4_divert(m4_MEMLOCK_WARNINGS_DIVERT_DESTINATION)m4_dnl
+If you are seeing errors like \fBUnable to lock memory, which means secrets may be swapped to disk\fR, this means that RLIMIT_MEMLOCK is too low for m4_APPNAME to lock all its memory.
+The risk from this is that memory could be swapped to disk, resulting in secrets being written to swap space.
+You can fix this by raising RLIMIT_MEMLOCK, running m4_APPNAME as root, or by giving the binary the CAP_IPC_LOCK capability (so it can bypass RLIMIT_MEMLOCK) by running the following command as root:
+
+.TP
+setcap cap_ipc_lock+ep /path/to/m4_APPNAME
 
 m4_divert(0)m4_dnl
 .SH SECURITY
@@ -178,3 +171,7 @@ has an up\-to\-date list of known issues. Bugs can also be reported there.
 .SH SEE ALSO
 
 .BR pam_u2f (8)
+m4_divert(m4_MEMLOCK_WARNINGS_DIVERT_DESTINATION)m4_dnl
+.BR setcap (8)
+m4_divert(0)m4_dnl
+.BR sudo (8)

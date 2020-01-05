@@ -3,7 +3,8 @@ METAPATH=$(abspath ./metadata.make)
 -include $(METAPATH)
 APPDATE=$(shell date -d "$$(stat --printf "%y" $(METAPATH))" "+%d %B %Y")
 LONGEST_VALID_PASSPHRASE=1024
-ALWAYS_SILENCE_MEMORY_LOCK_ERRORS=0
+WARN_ON_MEMORY_LOCK_ERRORS=1
+SETCAP_BINARY=1
 
 # Paths
 PREFIX=/usr/local
@@ -25,7 +26,7 @@ PREREQUISITES=$(SRCS:.c=.d)
 # Compiler options
 CC=clang
 WARNINGFLAGS=-Wall -Wshadow -Wwrite-strings -Wmissing-prototypes -Wimplicit-fallthrough -pedantic -fstack-protector-all -fno-strict-aliasing
-DEFINEFLAGS=-DAPPNAME=\"$(APPNAME)\" -DAPPVERSION=\"$(APPVERSION)\" -DLONGEST_VALID_PASSPHRASE=$(LONGEST_VALID_PASSPHRASE) -DALWAYS_SILENCE_MEMORY_LOCK_ERRORS=$(ALWAYS_SILENCE_MEMORY_LOCK_ERRORS)
+DEFINEFLAGS=-DAPPNAME=\"$(APPNAME)\" -DAPPVERSION=\"$(APPVERSION)\" -DLONGEST_VALID_PASSPHRASE=$(LONGEST_VALID_PASSPHRASE) -DWARN_ON_MEMORY_LOCK_ERRORS=$(WARN_ON_MEMORY_LOCK_ERRORS)
 INCLUDEFLAGS=$(shell pkg-config --cflags libfido2 libcbor libsodium) -iquote $(INCDIR)
 LDLIBS=$(shell pkg-config --libs libfido2 libcbor libsodium)
 
@@ -34,7 +35,7 @@ CFLAGS=$(INCLUDEFLAGS) $(DEFINEFLAGS) $(WARNINGFLAGS)
 LDFLAGS=$(WARNINGFLAGS) $(DEFINEFLAGS)
 
 # m4 preprocessor options
-M4FLAGS=-Dm4_APPNAME="$(APPNAME)" -Dm4_APPVERSION="$(APPVERSION)" -Dm4_APPDATE="$(APPDATE)" -Dm4_LONGEST_VALID_PASSPHRASE=$(LONGEST_VALID_PASSPHRASE) -Dm4_ALWAYS_SILENCE_MEMORY_LOCK_ERRORS=$(ALWAYS_SILENCE_MEMORY_LOCK_ERRORS) --prefix-builtins
+M4FLAGS=-Dm4_APPNAME="$(APPNAME)" -Dm4_APPVERSION="$(APPVERSION)" -Dm4_APPDATE="$(APPDATE)" -Dm4_LONGEST_VALID_PASSPHRASE=$(LONGEST_VALID_PASSPHRASE) -Dm4_WARN_ON_MEMORY_LOCK_ERRORS=$(WARN_ON_MEMORY_LOCK_ERRORS) --prefix-builtins
 
 # Release build targets
 .PHONY: release
@@ -52,7 +53,8 @@ installdirs:
 
 .PHONY: install
 install: release installdirs
-	install -g 0 -o 0 -p -m 4755 $(DISTDIR)/bin/$(APPNAME) $(DESTDIR)$(PREFIX)/bin/$(APPNAME)
+	install -g 0 -o 0 -p -m 0755 $(DISTDIR)/bin/$(APPNAME) $(DESTDIR)$(PREFIX)/bin/$(APPNAME)
+	[ "$(SETCAP_BINARY)" -eq 0 ] || setcap cap_ipc_lock+ep $(DESTDIR)$(PREFIX)/bin/$(APPNAME)
 	install -g 0 -o 0 -p -m 0644 $(DISTDIR)/share/man/man1/$(APPNAME).1.gz $(DESTDIR)$(PREFIX)/share/man/man1/$(APPNAME).1.gz
 	[ -f $(DISTDIR)/share/bash-completion/completions/$(APPNAME) ] && install -g 0 -o 0 -p -m 0644 $(DISTDIR)/share/bash-completion/completions/$(APPNAME) $(DESTDIR)$(PREFIX)/share/bash-completion/completions/$(APPNAME) || true
 	[ -f $(DISTDIR)/etc/initcpio/install/$(APPNAME) ] && install -g 0 -o 0 -p -m 0644 $(DISTDIR)/etc/initcpio/install/$(APPNAME) $(DESTDIR)/etc/initcpio/install/$(APPNAME) || true

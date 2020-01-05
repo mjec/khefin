@@ -3,29 +3,40 @@ A system for using a FIDO2 authenticator with [hmac-secret extension](https://fi
 
 ## Installation
 
-`make release && sudo make install`
-
-The `DESTDIR` and `PREFIX` variables are respected (so you can do `sudo make install PREFIX=/usr`, for example, to install to `/usr/bin` instead of `/usr/local/bin`).
-
-Note that by default `make install` requires root privileges, because the binary runs as setuid root; see the setuid section below.
-
-If you want to install the mkinitcpio hooks, you have to build those specifically too: `make release initcpio && sudo make install`.
+### Dependencies
 
 Before building or running this tool, you'll need the following dependencies installed:
 
  * [libfido2](https://developers.yubico.com/libfido2/)
  * [libcbor](https://libcbor.readthedocs.io/en/v0.5.0/) - also a dependency of libfido2
  * [libsodium](https://download.libsodium.org/doc/)
+ * [libcap](https://sites.google.com/site/fullycapable/) - required for `make install` by default/with `SETCAP_BINARY=1`
 
 At the moment I believe this tool is linux-only; issue reports or pull requests to improve portability are gratefully accepted.
 
-## setuid
+### Building
 
-By default, `fido2-hmac-secret` will be installed as setuid and owned by root. This is done to ensure it has the `CAP_IPC_LOCK` capability and no hard `RLIMIT_MEMLOCK` limit. `fido2-hmac-secret` will disable core dumps and increase `RLIMIT_MEMLOCK` to 512MiB before dropping privileges to those of the real user ID. If privileges cannot be dropped, `fido2-hmac-secret` will terminate with exit code 67. The aim of this is to ensure memory is never swapped or dumped to disk, potentially revealing secrets.
+`make release` is the main compile target.
 
-If you are not worried about secrets being swapped out or revealed in core dumps, you can safely run this application without setuid as any user. By default this will print warnings about not running as setuid root. You can disable those warnings by setting the `FIDO2_HMAC_SECRET_SILENCE_MEMLOCK_ERRORS` environment variable to any value.
+If you want a [bash-completion](https://github.com/scop/bash-completion) script, add the `bash-completion` target; and if you want `mkinitcpio` hooks add the `initcpio` target. To compile with all, run `make release bash-completion initcpio`.
 
-You can also compile this application not to warn about running as a lower-privileged user (or without setuid root) by running `make release -DALWAYS_SILENCE_MEMORY_LOCK_ERRORS=1`.
+You can set the maximum passphrase length (defaults to 1024; everything after this will be ignored) by appending `LONGEST_VALID_PASSPHRASE=<some integer>` after the list of targets.
+
+You disable memory locking warnings (default to on) by setting `WARN_ON_MEMORY_LOCK_ERRORS=0` (see the memeory locking section below).
+
+### Installing
+
+`make install` is the main installation target. That will install bash completions and `mkinitcpio` hooks if they were compiled.
+
+The `DESTDIR` and `PREFIX` variables are respected (so you can do `sudo make install PREFIX=/usr`, for example, to install to `/usr/bin` instead of `/usr/local/bin`).
+
+By default `make install` will give the installed binary `CAP_IPC_LOCK` capabilities (see the memory locking section below). You can skip this by running `make install SETCAP_BINARY=0` instead.
+
+## Memory locking
+
+To avoid secrets accidentally being written to disk (including swap space), the binary will disable core dumps and lock all allocated memory. The success of this depends on your locally-configured limits (and in particular `RLIMIT_MEMLOCK`) and the capabilities of the binary. To ensure success, by default the binary is given the `CAP_IPC_LOCK` capability during `make install` (see above). This bypasses `RLIMIT_MEMLOCK`.
+
+If for any reason core dumps cannot be disabled or memory cannot be locked, a warning will be generated, unless the binary was compiled with `WARN_ON_MEMORY_LOCK_ERRORS=0`.
 
 ## How this works
 
