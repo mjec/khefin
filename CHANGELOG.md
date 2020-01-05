@@ -1,6 +1,8 @@
 ## Next version (unreleased)
 _These changes are on the branch `master`, but not yet in a versioned release._
 
+* Move bash-completion script from docs/ to scripts/
+* Do not generate bash-completion script by default
 * Include reasons for setuid root in README, and add ALWAYS_SILENCE_MEMORY_LOCK_ERRORS compile option (issue #3)
 * Permit passphrase to be supplied on STDIN, if not a tty (issue #2)
 

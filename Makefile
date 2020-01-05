@@ -40,13 +40,13 @@ M4FLAGS=-Dm4_APPNAME="$(APPNAME)" -Dm4_APPVERSION="$(APPVERSION)" -Dm4_APPDATE="
 .PHONY: release
 release: CFLAGS+=-O3
 release: LDFLAGS+=-O3 -s
-release: $(BINPATH) manpage bash-completion
+release: $(BINPATH) manpage
 
 .PHONY: installdirs
 installdirs:
 	mkdir -p $(DESTDIR)$(PREFIX)/bin
 	mkdir -p $(DESTDIR)$(PREFIX)/share/man/man1
-	mkdir -p $(DESTDIR)$(PREFIX)/share/bash-completion/completions
+	[ -f $(DISTDIR)/share/bash-completion/completions/$(APPNAME) ] && mkdir -p $(DESTDIR)$(PREFIX)/share/bash-completion/completions || true
 	[ -f $(DISTDIR)/etc/initcpio/install/$(APPNAME) ] && mkdir -p $(DESTDIR)/etc/initcpio/install/ || true
 	[ -f $(DISTDIR)/etc/initcpio/hooks/$(APPNAME) ] && mkdir -p $(DESTDIR)/etc/initcpio/hooks/ || true
 
@@ -54,7 +54,7 @@ installdirs:
 install: release installdirs
 	install -g 0 -o 0 -p -m 4755 $(DISTDIR)/bin/$(APPNAME) $(DESTDIR)$(PREFIX)/bin/$(APPNAME)
 	install -g 0 -o 0 -p -m 0644 $(DISTDIR)/share/man/man1/$(APPNAME).1.gz $(DESTDIR)$(PREFIX)/share/man/man1/$(APPNAME).1.gz
-	install -g 0 -o 0 -p -m 0644 $(DISTDIR)/share/bash-completion/completions/$(APPNAME) $(DESTDIR)$(PREFIX)/share/bash-completion/completions/$(APPNAME)
+	[ -f $(DISTDIR)/share/bash-completion/completions/$(APPNAME) ] && install -g 0 -o 0 -p -m 0644 $(DISTDIR)/share/bash-completion/completions/$(APPNAME) $(DESTDIR)$(PREFIX)/share/bash-completion/completions/$(APPNAME) || true
 	[ -f $(DISTDIR)/etc/initcpio/install/$(APPNAME) ] && install -g 0 -o 0 -p -m 0644 $(DISTDIR)/etc/initcpio/install/$(APPNAME) $(DESTDIR)/etc/initcpio/install/$(APPNAME) || true
 	[ -f $(DISTDIR)/etc/initcpio/hooks/$(APPNAME) ] && install -g 0 -o 0 -p -m 0644 $(DISTDIR)/etc/initcpio/hooks/$(APPNAME) $(DESTDIR)/etc/initcpio/hooks/$(APPNAME) || true
 
@@ -111,9 +111,9 @@ $(DISTDIR)/share/man/man1/$(APPNAME).1: $(DOCDIR)/manpage.m4 $(METAPATH)
 .PHONY: bash-completion
 bash-completion: $(DISTDIR)/share/bash-completion/completions/$(APPNAME)
 
-$(DISTDIR)/share/bash-completion/completions/$(APPNAME): $(DOCDIR)/bash-completion.m4 $(METAPATH)
+$(DISTDIR)/share/bash-completion/completions/$(APPNAME): $(SCRIPTDIR)/bash-completion.m4 $(METAPATH)
 	mkdir -p $(DISTDIR)/share/bash-completion/completions
-	m4 $(M4FLAGS) $(DOCDIR)/bash-completion.m4 > $@
+	m4 $(M4FLAGS) $(SCRIPTDIR)/bash-completion.m4 > $@
 
 
 .PHONY: initcpio
