@@ -53,8 +53,23 @@ void lock_memory_and_drop_privileges(void) {
 			original_uid = 0;
 		}
 
-		if (original_uid != 0 && setuid(original_uid) != 0) {
-			err(EXIT_OVER_PRIVILEGED, "Unable to drop privileges");
+		if (original_uid != 0) {
+			r = setrlimit(
+			    RLIMIT_MEMLOCK,
+			    &(struct rlimit){MEMLOCK_LIMIT_BYTES, MEMLOCK_LIMIT_BYTES});
+			if (r != 0) {
+#if WARN_ON_MEMORY_LOCK_ERRORS
+				warn("Unable to set RLIMIT_MEMLOCK soft and hard limits to %d "
+				     "bytes, which may cause out of memory errors. Disabling "
+				     "memory locking for future allocations.",
+				     MEMLOCK_LIMIT_BYTES);
+#endif
+				munlockall();
+				mlockall(MCL_CURRENT);
+			}
+			if (setuid(original_uid) != 0) {
+				err(EXIT_OVER_PRIVILEGED, "Unable to drop privileges");
+			}
 		}
 	}
 }
