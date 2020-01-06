@@ -43,23 +43,15 @@ release: CFLAGS+=-O3
 release: LDFLAGS+=-O3 -s
 release: $(BINPATH) manpages
 
-.PHONY: installdirs
-installdirs:
-	mkdir -p $(DESTDIR)$(PREFIX)/bin
-	mkdir -p $(DESTDIR)$(PREFIX)/share/man/man1
-	[ -f $(DISTDIR)/share/bash-completion/completions/$(APPNAME) ] && mkdir -p $(DESTDIR)$(PREFIX)/share/bash-completion/completions || true
-	[ -f $(DISTDIR)/lib/initcpio/install/$(APPNAME) ] && mkdir -p $(DESTDIR)$(PREFIX)/lib/initcpio/install/ || true
-	[ -f $(DISTDIR)/lib/initcpio/hooks/$(APPNAME) ] && mkdir -p $(DESTDIR)$(PREFIX)/lib/initcpio/hooks/ || true
-
 .PHONY: install
-install: release installdirs
-	install -g 0 -o 0 -p -m 0755 $(DISTDIR)/bin/$(APPNAME) $(DESTDIR)$(PREFIX)/bin/$(APPNAME)
+install: release
+	install -g 0 -o 0 -p -m 0755 -D $(DISTDIR)/bin/$(APPNAME) $(DESTDIR)$(PREFIX)/bin/$(APPNAME)
 	[ "$(SETCAP_BINARY)" -eq 0 ] || setcap cap_ipc_lock+ep $(DESTDIR)$(PREFIX)/bin/$(APPNAME)
-	install -g 0 -o 0 -p -m 0644 $(DISTDIR)/share/man/man1/$(APPNAME).1.gz $(DESTDIR)$(PREFIX)/share/man/man1/$(APPNAME).1.gz
+	install -g 0 -o 0 -p -m 0644 -D $(DISTDIR)/share/man/man1/$(APPNAME).1.gz $(DESTDIR)$(PREFIX)/share/man/man1/$(APPNAME).1.gz
 	[ -f $(DISTDIR)/share/bash-completion/completions/$(APPNAME) ] && install -g 0 -o 0 -p -m 0644 $(DISTDIR)/share/bash-completion/completions/$(APPNAME) $(DESTDIR)$(PREFIX)/share/bash-completion/completions/$(APPNAME) || true
-	[ -f $(DISTDIR)/lib/initcpio/install/$(APPNAME) ] && install -g 0 -o 0 -p -m 0644 $(DISTDIR)/lib/initcpio/install/$(APPNAME) $(DESTDIR)$(PREFIX)/lib/initcpio/install/$(APPNAME) || true
-	[ -f $(DISTDIR)/lib/initcpio/hooks/$(APPNAME) ] && install -g 0 -o 0 -p -m 0644 $(DISTDIR)/lib/initcpio/hooks/$(APPNAME) $(DESTDIR)$(PREFIX)/lib/initcpio/hooks/$(APPNAME) || true
-	[ -f $(DISTDIR)/bin/$(APPNAME)-add-luks-key ] && install -g 0 -o 0 -p -m 0755 $(DISTDIR)/bin/$(APPNAME)-add-luks-key $(DESTDIR)$(PREFIX)/bin/$(APPNAME)-add-luks-key || true
+	[ -f $(DISTDIR)/lib/initcpio/install/$(APPNAME) ] && install -g 0 -o 0 -p -m 0644 -D $(DISTDIR)/lib/initcpio/install/$(APPNAME) $(DESTDIR)$(PREFIX)/lib/initcpio/install/$(APPNAME) || true
+	[ -f $(DISTDIR)/lib/initcpio/hooks/$(APPNAME) ] && install -g 0 -o 0 -p -m 0644 -D $(DISTDIR)/lib/initcpio/hooks/$(APPNAME) $(DESTDIR)$(PREFIX)/lib/initcpio/hooks/$(APPNAME) || true
+	[ -f $(DISTDIR)/bin/$(APPNAME)-add-luks-key ] && install -g 0 -o 0 -p -m 0755 -D $(DISTDIR)/bin/$(APPNAME)-add-luks-key $(DESTDIR)$(PREFIX)/bin/$(APPNAME)-add-luks-key || true
 
 .PHONY: uninstall
 uninstall:
