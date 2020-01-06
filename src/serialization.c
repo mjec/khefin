@@ -80,8 +80,11 @@ build_deserialized_cleartext_from_authenticator_parameters_and_passphrase(
 
 	unsigned char *serialized_unencrypted_secrets;
 	size_t serialized_unencrypted_secrets_size;
-	cbor_serialize_alloc(cbor_encoded_secrets, &serialized_unencrypted_secrets,
-	                     &serialized_unencrypted_secrets_size);
+	if (cbor_serialize_alloc(cbor_encoded_secrets,
+	                         &serialized_unencrypted_secrets,
+	                         &serialized_unencrypted_secrets_size) == 0) {
+		errx(EXIT_OUT_OF_MEMORY, "Unable to serialize secrets");
+	}
 
 	cleartext->encrypted_data =
 	    malloc(serialized_unencrypted_secrets_size + crypto_secretbox_MACBYTES);
@@ -201,8 +204,10 @@ void write_cleartext_to_file(deserialized_cleartext *cleartext,
 
 	unsigned char *serialized_cleartext;
 	size_t serialized_cleartext_size;
-	cbor_serialize_alloc(cbor_cleartext, &serialized_cleartext,
-	                     &serialized_cleartext_size);
+	if (cbor_serialize_alloc(cbor_cleartext, &serialized_cleartext,
+	                         &serialized_cleartext_size) == 0) {
+		errx(EXIT_OUT_OF_MEMORY, "Unable to serialize cleartext");
+	}
 
 	if (fwrite(serialized_cleartext, serialized_cleartext_size, 1, fp) != 1) {
 		errx(EXIT_DESERIALIZATION_ERROR, "Unable to write file at %s", path);

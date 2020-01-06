@@ -5,3 +5,5 @@ FormatStyle: 'file'
 CheckOptions:
   - key:             google-runtime-int.TypeSufix
     value:           '_t'
+  - key:             bugprone-unused-return-value.CheckedFunctions
+    value:           'malloc;sodium_init;crypto_pwhash;crypto_secretbox_open_easy;crypto_secretbox_easy;cbor_serialize_alloc;cbor_load;fido_assert_allow_cred;fido_assert_set_clientdata_hash;fido_assert_set_extensions;fido_assert_set_hmac_salt;fido_assert_set_rp;fido_assert_set_up;fido_cred_set_clientdata_hash;fido_cred_set_extensions;fido_cred_set_rp;fido_cred_set_type;fido_cred_set_user;fido_dev_open;fido_dev_close;fido_dev_get_assert;fido_dev_get_cbor_info;fido_dev_info_manifest;fido_dev_make_cred'

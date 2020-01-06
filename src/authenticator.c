@@ -107,7 +107,11 @@ void close_and_free_device_ignoring_errors(fido_dev_t *device) {
 	if (device == NULL) {
 		return;
 	}
-	fido_dev_close(device);
+	int r;
+	if ((r = fido_dev_close(device)) != FIDO_OK) {
+		warnx("Unable to close device: %s (0x%x)", fido_strerr(r), r);
+		return;
+	};
 	fido_dev_free(&device);
 }
 
