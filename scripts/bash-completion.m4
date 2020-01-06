@@ -3,8 +3,10 @@ m4_define(`m4_APPNAME_US', m4_translit(m4_APPNAME, `-', `_'))m4_dnl
 m4_define(`m4_COMPLETION_FUNCTION_NAME', `_complete_'m4_APPNAME_US)m4_dnl
 m4_dnl
 m4_dnl
+#!/bin/bash
+
 m4_COMPLETION_FUNCTION_NAME`'() {
-	local cur prev words cword split
+	local cur prev words
 	local subcommands="help version enumerate enrol generate"
 	local opts
 	_init_completion -s || return
@@ -18,7 +20,7 @@ m4_COMPLETION_FUNCTION_NAME`'() {
 			return
 			;;
 		--device|-!(-*)d)
-			COMPREPLY=($("${words[0]}" enumerate | grep -v '^!' | cut -f 2))
+			mapfile -t COMPREPLY < <("${words[0]}" enumerate | grep -v '^!' | cut -f 2)
 			return
 			;;
 	esac
@@ -33,10 +35,10 @@ m4_COMPLETION_FUNCTION_NAME`'() {
 	esac
 
 	if [[ "$prev" == "m4_APPNAME" ]]; then
-		COMPREPLY=($(compgen -W "$subcommands" -- "$cur"))
-		[[ $COMPREPLY == *= ]] && compopt -o nospace
+		mapfile -t COMPREPLY < <(compgen -W "$subcommands" -- "$cur")
+		[[ ${COMPREPLY[0]} == *= ]] && compopt -o nospace
 	else
-		COMPREPLY=($(compgen -W "$opts" -- "$cur"))
+		mapfile -t COMPREPLY < <(compgen -W "$opts" -- "$cur")
 	fi
 }
 

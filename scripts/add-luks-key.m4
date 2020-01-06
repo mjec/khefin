@@ -45,8 +45,9 @@ printf "Enter your passphrase for %s: " "$1"
 read -r encrypted_keyfile_passphrase
 stty echo
 printf "\n"
-raw_key="$(printf "$encrypted_keyfile_passphrase" | m4_APPNAME generate -f "$1")"
+raw_key="$(printf "%s" "$encrypted_keyfile_passphrase" | m4_APPNAME generate -f "$1")"
 unset encrypted_keyfile_passphrase
+# shellcheck disable=SC2003
 raw_key_length="$(expr length "$raw_key" + 1)"
 loopback_device="$(losetup -f)"
 backing_file=$(mktemp -t "$decrypted_keyfile_device.XXXXXXXX")

@@ -82,6 +82,10 @@ debug: $(BINPATH)
 lint:
 	clang-tidy --fix $(SRCS) -- $(INCLUDEFLAGS) $(DEFINEFLAGS)
 
+.PHONY: shellcheck
+shellcheck:
+	shellcheck $^
+
 .PHONY: format
 format:
 	clang-format -style=file -i $(SRCS) $(HEADERS)
@@ -121,6 +125,7 @@ $(DISTDIR)/share/man/man8/%.8: $(MANDIR)/8/%.m4 $(METAPATH)
 
 .PHONY: bash-completion
 bash-completion: $(DISTDIR)/share/bash-completion/completions/$(APPNAME)
+shellcheck: $(DISTDIR)/share/bash-completion/completions/$(APPNAME)
 
 $(DISTDIR)/share/bash-completion/completions/$(APPNAME): $(SCRIPTDIR)/bash-completion.m4 $(METAPATH)
 	mkdir -p $(DISTDIR)/share/bash-completion/completions
@@ -129,6 +134,7 @@ $(DISTDIR)/share/bash-completion/completions/$(APPNAME): $(SCRIPTDIR)/bash-compl
 
 .PHONY: initcpio
 initcpio: $(DISTDIR)/lib/initcpio/install/$(APPNAME) $(DISTDIR)/lib/initcpio/hooks/$(APPNAME) $(DISTDIR)/bin/$(APPNAME)-add-luks-key
+shellcheck: $(DISTDIR)/lib/initcpio/install/$(APPNAME) $(DISTDIR)/lib/initcpio/hooks/$(APPNAME) $(DISTDIR)/bin/$(APPNAME)-add-luks-key
 
 INITCPIO_M4FLAGS=-Dm4_DEFAULT_MAX_PASSPHRASE_ATTEMPTS=3 -Dm4_DEFAULT_ENCRYPTED_KEYFILE_DIR="/keyfiles" -Dm4_DEFAULT_KEYFILES_SOURCE_DIR="/boot/keyfiles"
 

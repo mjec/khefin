@@ -72,6 +72,7 @@ run_hook() {
 
 			raw_key="$(printf '%s' "$encrypted_keyfile_passphrase" | m4_APPNAME generate -f "$encrypted_keyfile")"
 			result=$?
+			# shellcheck disable=SC2003
 			raw_key_length="$(expr length "$raw_key" + 1)"
 
 			if [ $result -eq 0 ]; then

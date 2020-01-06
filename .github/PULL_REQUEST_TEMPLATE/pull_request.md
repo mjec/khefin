@@ -19,7 +19,9 @@ Use this checklist to prepare your pull request for merging. Pull requests that 
 
 - [ ] `make format` has been run to conform to code style
 
-- [ ] `make lint` finishes with no non-suppressed warnings
+- [ ] `make lint` finishes with no non-suppressed warnings (please do not add new suppressions without flagging this)
+
+- [ ] `make shellcheck` finishes with no non-suppressed warnings (please do not add new suppressions without flagging this)
 
 - [ ] Checked that `make`, `make release`, `make install` and `make clean` all work as expected
 
