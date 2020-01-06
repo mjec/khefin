@@ -16,6 +16,9 @@ build() {
 
 	add_binary m4_APPNAME
 	add_binary stty
+	add_binary tr
+
+	add_module loop
 
 	find "$keyfiles_source_dir" -maxdepth 1 ! -name "$(printf "*\n*")" -type f -print \
 	| while IFS= read -r keyfile; do
@@ -33,17 +36,12 @@ You can use a different passphrase for every keyfile, or set the kernel paramete
 
 Those files are copied to \$encrypted_keyfile_dir in the initcpio image, which you can set by a kernel parameter. By default that directory is m4_DEFAULT_ENCRYPTED_KEYFILE_DIR.
 
-To make use of this hook, it must be set to run BEFORE the encrypt hook, and you must be using a keyfile, specified by cryptkey=rootfs:/tmp/keyfile (or some other path to a cryptsetup keyfile). NOTE: that cryptsetup keyfile path WILL BE OVERWRITTEN with the output of m4_APPNAME generate, or the file deleted if generate never succeeds. The only exception is if there are no attached devices, in which case the file will never be created/will be left alone.
+To make use of this hook, it must be set to run BEFORE the encrypt hook. On success, this hook will set cryptkey, overriding the preivous setting (which may be absent).
 
-You will also need to add these keys to a key slot for your disk by running the following commands (with relevant path substitutions as required, and after backing up your LUKS header):
-	m4_APPNAME generate \\
-		-f "\$keyfiles_source_dir/your-keyfile" \\
-		> /tmp/keyfile
-	sudo cryptsetup -v luksAddKey \\
-		/dev/your-disk \\
-		/tmp/keyfile
-	shred /tmp/keyfile && rm /tmp/keyfile
+You will also need to add these keys to a key slot for your disk. You can do this by running m4_APPNAME-add-luks-key.
 
-If an authenticator is not plugged in, or you get the passphrase wrong three times, this hook will not write your cryptsetup keyfile and the encrypt hook will fall back to prompting you for a passphrase. Note that you MUST plug the authenticator in BEFORE the udev hook runs, i.e. before switching on your computer.
+If an authenticator is not plugged in, or you get the passphrase wrong too many times, this hook will not write your cryptsetup keyfile and the encrypt hook will fall back to prompting you for a passphrase.
+
+Note that you MUST plug the authenticator in BEFORE the hook runs, which normally means before you turn on your computer.
 HELPEOF
 }

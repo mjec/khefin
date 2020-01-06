@@ -1,29 +1,20 @@
 m4_define(`m4_PROMPT_NEVER', 0)m4_dnl
 m4_define(`m4_PROMPT_ONCE', 1)m4_dnl
 m4_define(`m4_PROMPT_ALWAYS', 2)m4_dnl
-#!/bin/bash
+#!/bin/sh
 
+# Include a UUID, so this value should never appear otherwise
 undefined="undefined 110d43d6-f20a-4f29-bae4-1a58f813980c"
 
-get_file_paths_from_env() {
-	export encrypted_keyfile_dir=${encrypted_keyfile_dir-m4_DEFAULT_ENCRYPTED_KEYFILE_DIR}
-	if [ "${cryptkey-$undefined}" = "$undefined" ]; then
-		return
-	fi
-	IFS=: read -r ckdev ckarg1 <<EOF
-$cryptkey
-EOF
-	if [ "$ckdev" = "rootfs" ]; then
-		export decrypted_keyfile_path=$ckarg1
-	fi
-}
+# Include a UUID, so this value should never appear otherwise
+decrypted_keyfile_device="8931c13b-8f4f-468e-b372-967e12955c54"
 
 run_hook() {
-	get_file_paths_from_env
+	encrypted_keyfile_dir=${encrypted_keyfile_dir-m4_DEFAULT_ENCRYPTED_KEYFILE_DIR}
 
-	if [ "${decrypted_keyfile_path-$undefined}" = "$undefined" ]; then
-		return
-	fi
+	# if [ "${decrypted_keyfile_path-$undefined}" = "$undefined" ]; then
+	# 	return
+	# fi
 
 	# From m4_APPNAME man page, EXIT CODES section:
 	#   34     No authenticator device connected
@@ -67,8 +58,8 @@ run_hook() {
 			if [ "${encrypted_keyfile_passphrase-$undefined}" = "$undefined" ]; then
 				stty -echo
 				case $passphrase_prompt_option in
-					1) printf "Enter your passphrase for all keyfiles in %s: " "$encrypted_keyfile_dir" ;;
-					2) printf "Enter your passphrase for %s: " "$encrypted_keyfile" ;;
+					m4_PROMPT_ONCE) printf "Enter your passphrase for all keyfiles in %s: " "$encrypted_keyfile_dir" ;;
+					m4_PROMPT_ALWAYS) printf "Enter your passphrase for %s: " "$encrypted_keyfile" ;;
 				esac
 				read -r encrypted_keyfile_passphrase
 				stty echo
@@ -79,10 +70,30 @@ run_hook() {
 				printf "Trying to decrypt %s.\n" "$encrypted_keyfile"
 			fi
 
-			printf "%s" "$encrypted_keyfile_passphrase" | m4_APPNAME generate -f "$encrypted_keyfile" > "$decrypted_keyfile_path"
+			raw_key="$(printf '%s' "$encrypted_keyfile_passphrase" | m4_APPNAME generate -f "$encrypted_keyfile")"
 			result=$?
+			raw_key_length="$(expr length "$raw_key" + 1)"
+
 			if [ $result -eq 0 ]; then
 				unset encrypted_keyfile_passphrase
+				m4_translit(m4_APPNAME, `-', `_')_loopback_device="$(losetup -f)"
+				export m4_translit(m4_APPNAME, `-', `_')_loopback_device
+				backing_file=$(mktemp -t "$decrypted_keyfile_device.XXXXXXXX")
+				dd if=/dev/zero of="$backing_file" bs=1024 count=64 2>/dev/null
+				losetup "$m4_translit(m4_APPNAME, `-', `_')_loopback_device" "$backing_file"
+				# Get a random passphrase and pipe it into cryptsetup open. We don't need to keep this.
+				# Use `tr` to remove control characters, DEL (0o177) and 0xff (0o377).
+				# This means removing 33 characters of 256 possibilities, or ~13% of the input.
+				# We generate 600 characters of input, thus expect a ~522 byte useful passphrase.
+				# If the output of /dev/urandom is non-uniform, we have bigger problems ;).
+				dd if=/dev/urandom bs=600 count=1 2>/dev/null \
+					| tr -d "\000-\037\177\377" \
+					| cryptsetup open --type plain "$m4_translit(m4_APPNAME, `-', `_')_loopback_device" "$decrypted_keyfile_device"
+				decrypted_keyfile_path="/dev/mapper/$decrypted_keyfile_device"
+				printf "%s\n" "$raw_key" > "$decrypted_keyfile_path"
+				unset raw_key
+				export cryptkey="$decrypted_keyfile_path:0:$raw_key_length"
+				unset raw_key_length
 				return
 			elif [ $result -eq 33 ] && [ $passphrase_prompt_option -ne m4_PROMPT_NEVER ]; then
 				# From m4_APPNAME man page, EXIT CODES section:
@@ -106,12 +117,7 @@ run_hook() {
 }
 
 run_cleanuphook() {
-	get_file_paths_from_env
-
-	if [ ! -f "$decrypted_keyfile_path" ]; then
-		return
-	fi
-
-	dd if=/dev/zero of="$decrypted_keyfile_path" bs=1 count="$(stat -c %s "$decrypted_keyfile_path")" 2>/dev/null
-	rm -f "$decrypted_keyfile_path"
+	cryptsetup close "$decrypted_keyfile_device"
+	losetup -d "$m4_translit(m4_APPNAME, `-', `_')_loopback_device"
+	rm -f /tmp/"$decrypted_keyfile_device".*
 }

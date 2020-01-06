@@ -92,6 +92,8 @@ The number one risk is that by playing around with encryption like this you will
 
 [Backup your LUKS header](https://gitlab.com/cryptsetup/cryptsetup/wikis/FrequentlyAskedQuestions#6-backup-and-data-recovery) and data before using this for disk encryption keys. Seriously.
 
+Keep a backup of the keyfile created by this application as well. If you lose that file, it is impossible to recover the secret.
+
 The security of this sytem depends on the security of your authenticator device, libsodium, libfido2, and the quality of your passphrase. It's also possible -- and indeed more likely than any of the former issues -- that there's a bug in the code for this application which compromises its security somehow. Pull requests and issues are very welcome.
 
 ## Warrant canary (but not a warranty)

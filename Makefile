@@ -10,7 +10,7 @@ SETCAP_BINARY=1
 PREFIX=/usr/local
 SRCDIR=$(abspath ./src)
 INCDIR=$(abspath ./include)
-DOCDIR=$(abspath ./docs)
+MANDIR=$(abspath ./man)
 SCRIPTDIR=$(abspath ./scripts)
 DISTDIR=$(abspath ./dist)
 BINPATH=$(DISTDIR)/bin/$(APPNAME)
@@ -41,15 +41,15 @@ M4FLAGS=-Dm4_APPNAME="$(APPNAME)" -Dm4_APPVERSION="$(APPVERSION)" -Dm4_APPDATE="
 .PHONY: release
 release: CFLAGS+=-O3
 release: LDFLAGS+=-O3 -s
-release: $(BINPATH) manpage
+release: $(BINPATH) manpages
 
 .PHONY: installdirs
 installdirs:
 	mkdir -p $(DESTDIR)$(PREFIX)/bin
 	mkdir -p $(DESTDIR)$(PREFIX)/share/man/man1
 	[ -f $(DISTDIR)/share/bash-completion/completions/$(APPNAME) ] && mkdir -p $(DESTDIR)$(PREFIX)/share/bash-completion/completions || true
-	[ -f $(DISTDIR)/etc/initcpio/install/$(APPNAME) ] && mkdir -p $(DESTDIR)/etc/initcpio/install/ || true
-	[ -f $(DISTDIR)/etc/initcpio/hooks/$(APPNAME) ] && mkdir -p $(DESTDIR)/etc/initcpio/hooks/ || true
+	[ -f $(DISTDIR)/lib/initcpio/install/$(APPNAME) ] && mkdir -p $(DESTDIR)$(PREFIX)/lib/initcpio/install/ || true
+	[ -f $(DISTDIR)/lib/initcpio/hooks/$(APPNAME) ] && mkdir -p $(DESTDIR)$(PREFIX)/lib/initcpio/hooks/ || true
 
 .PHONY: install
 install: release installdirs
@@ -57,13 +57,14 @@ install: release installdirs
 	[ "$(SETCAP_BINARY)" -eq 0 ] || setcap cap_ipc_lock+ep $(DESTDIR)$(PREFIX)/bin/$(APPNAME)
 	install -g 0 -o 0 -p -m 0644 $(DISTDIR)/share/man/man1/$(APPNAME).1.gz $(DESTDIR)$(PREFIX)/share/man/man1/$(APPNAME).1.gz
 	[ -f $(DISTDIR)/share/bash-completion/completions/$(APPNAME) ] && install -g 0 -o 0 -p -m 0644 $(DISTDIR)/share/bash-completion/completions/$(APPNAME) $(DESTDIR)$(PREFIX)/share/bash-completion/completions/$(APPNAME) || true
-	[ -f $(DISTDIR)/etc/initcpio/install/$(APPNAME) ] && install -g 0 -o 0 -p -m 0644 $(DISTDIR)/etc/initcpio/install/$(APPNAME) $(DESTDIR)/etc/initcpio/install/$(APPNAME) || true
-	[ -f $(DISTDIR)/etc/initcpio/hooks/$(APPNAME) ] && install -g 0 -o 0 -p -m 0644 $(DISTDIR)/etc/initcpio/hooks/$(APPNAME) $(DESTDIR)/etc/initcpio/hooks/$(APPNAME) || true
+	[ -f $(DISTDIR)/lib/initcpio/install/$(APPNAME) ] && install -g 0 -o 0 -p -m 0644 $(DISTDIR)/lib/initcpio/install/$(APPNAME) $(DESTDIR)$(PREFIX)/lib/initcpio/install/$(APPNAME) || true
+	[ -f $(DISTDIR)/lib/initcpio/hooks/$(APPNAME) ] && install -g 0 -o 0 -p -m 0644 $(DISTDIR)/lib/initcpio/hooks/$(APPNAME) $(DESTDIR)$(PREFIX)/lib/initcpio/hooks/$(APPNAME) || true
+	[ -f $(DISTDIR)/bin/$(APPNAME)-add-luks-key ] && install -g 0 -o 0 -p -m 0755 $(DISTDIR)/bin/$(APPNAME)-add-luks-key $(DESTDIR)$(PREFIX)/bin/$(APPNAME)-add-luks-key || true
 
 .PHONY: uninstall
 uninstall:
-	$(RM) $(DESTDIR)/etc/initcpio/hooks/$(APPNAME)
-	$(RM) $(DESTDIR)/etc/initcpio/install/$(APPNAME)
+	$(RM) $(DESTDIR)/lib/initcpio/hooks/$(APPNAME)
+	$(RM) $(DESTDIR)/lib/initcpio/install/$(APPNAME)
 	$(RM) $(DESTDIR)$(PREFIX)/share/bash-completion/completions/$(APPNAME)
 	$(RM) $(DESTDIR)$(PREFIX)/share/man/man1/$(APPNAME).1.gz
 	$(RM) $(DESTDIR)$(PREFIX)/bin/$(APPNAME)
@@ -98,16 +99,24 @@ $(INCDIR)/help.h: $(METAPATH)
 	$(CC) $(CFLAGS) $< -MM -MT $(@:.d=.o) >$@
 
 # Ancillary files targets
-.PHONY: manpage
-manpage: $(DISTDIR)/share/man/man1/$(APPNAME).1.gz
+.PHONY: manpages
+manpages: $(DISTDIR)/share/man/man1/$(APPNAME).1.gz $(DISTDIR)/share/man/man8/$(APPNAME)-add-luks-key.8.gz
 
-$(DISTDIR)/share/man/man1/$(APPNAME).1.gz: $(DISTDIR)/share/man/man1/$(APPNAME).1
+$(DISTDIR)/share/man/man1/%.1.gz: $(DISTDIR)/share/man/man1/%.1
 	gzip -f $<
 
-.INTERMEDIATE: $(DISTDIR)/share/man/man1/$(APPNAME).1
-$(DISTDIR)/share/man/man1/$(APPNAME).1: $(DOCDIR)/manpage.m4 $(METAPATH)
+$(DISTDIR)/share/man/man8/%.8.gz: $(DISTDIR)/share/man/man8/%.8
+	gzip -f $<
+
+.INTERMEDIATE: $(DISTDIR)/share/man/man1/%.1
+$(DISTDIR)/share/man/man1/%.1: $(MANDIR)/1/%.m4 $(METAPATH)
 	mkdir -p $(DISTDIR)/share/man/man1
-	m4 $(M4FLAGS) $(DOCDIR)/manpage.m4 > $@
+	m4 $(M4FLAGS) $< > $@
+
+.INTERMEDIATE: $(DISTDIR)/share/man/man8/%.8
+$(DISTDIR)/share/man/man8/%.8: $(MANDIR)/8/%.m4 $(METAPATH)
+	mkdir -p $(DISTDIR)/share/man/man8
+	m4 $(M4FLAGS) $< > $@
 
 
 .PHONY: bash-completion
@@ -119,17 +128,21 @@ $(DISTDIR)/share/bash-completion/completions/$(APPNAME): $(SCRIPTDIR)/bash-compl
 
 
 .PHONY: initcpio
-initcpio: $(DISTDIR)/etc/initcpio/install/$(APPNAME) $(DISTDIR)/etc/initcpio/hooks/$(APPNAME)
+initcpio: $(DISTDIR)/lib/initcpio/install/$(APPNAME) $(DISTDIR)/lib/initcpio/hooks/$(APPNAME) $(DISTDIR)/bin/$(APPNAME)-add-luks-key
 
 INITCPIO_M4FLAGS=-Dm4_DEFAULT_MAX_PASSPHRASE_ATTEMPTS=3 -Dm4_DEFAULT_ENCRYPTED_KEYFILE_DIR="/keyfiles" -Dm4_DEFAULT_KEYFILES_SOURCE_DIR="/boot/keyfiles"
 
-$(DISTDIR)/etc/initcpio/install/$(APPNAME): $(SCRIPTDIR)/initcpio-install.m4
-	mkdir -p $(DISTDIR)/etc/initcpio/install
+$(DISTDIR)/lib/initcpio/install/$(APPNAME): $(SCRIPTDIR)/initcpio-install.m4
+	mkdir -p $(DISTDIR)/lib/initcpio/install
 	m4 $(M4FLAGS) $(INITCPIO_M4FLAGS) $(SCRIPTDIR)/initcpio-install.m4 > $@
 
-$(DISTDIR)/etc/initcpio/hooks/$(APPNAME): $(SCRIPTDIR)/initcpio-run.m4
-	mkdir -p $(DISTDIR)/etc/initcpio/hooks
+$(DISTDIR)/lib/initcpio/hooks/$(APPNAME): $(SCRIPTDIR)/initcpio-run.m4
+	mkdir -p $(DISTDIR)/lib/initcpio/hooks
 	m4 $(M4FLAGS) $(INITCPIO_M4FLAGS) $(SCRIPTDIR)/initcpio-run.m4 > $@
+
+$(DISTDIR)/bin/$(APPNAME)-add-luks-key: $(SCRIPTDIR)/add-luks-key.m4
+	mkdir -p $(DISTDIR)/bin
+	m4 $(M4FLAGS) $(INITCPIO_M4FLAGS) $(SCRIPTDIR)/add-luks-key.m4 > $@
 
 # Cleanup targets
 .PHONY: cleandist
