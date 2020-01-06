@@ -19,6 +19,10 @@ invocation_state_t *parse_arguments_and_get_passphrase(int argc, char **argv) {
 	}
 
 	invocation_state_t *result = malloc(sizeof(invocation_state_t));
+	if (result == NULL) {
+		err(EXIT_OUT_OF_MEMORY,
+		    "Unable to allocate memory for invocation state");
+	}
 	result->device = NULL;
 	result->file = NULL;
 	result->passphrase = NULL;
