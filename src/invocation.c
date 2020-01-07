@@ -184,7 +184,12 @@ invocation_state_t *parse_arguments_and_get_passphrase(int argc, char **argv) {
 				err(EXIT_UNABLE_TO_GET_PASSPHRASE, "Unable to get passphrase");
 			}
 			printf("Passphrase: ");
-			fgets(result->passphrase, LONGEST_VALID_PASSPHRASE, stdin);
+			if (fgets(result->passphrase, LONGEST_VALID_PASSPHRASE, stdin) ==
+			    NULL) {
+				errx(EXIT_UNABLE_TO_GET_PASSPHRASE,
+				     "Unable to get passphrase on STDIN: fgets error 0x%02x",
+				     ferror(stdin));
+			}
 
 			// Remove trailing \n
 			if (result->passphrase[strlen(result->passphrase) - 1] ==
@@ -199,7 +204,12 @@ invocation_state_t *parse_arguments_and_get_passphrase(int argc, char **argv) {
 				    "Unable to reset terminal after getting passphrase");
 			}
 		} else if (errno == ENOTTY) {
-			fgets(result->passphrase, LONGEST_VALID_PASSPHRASE, stdin);
+			if (fgets(result->passphrase, LONGEST_VALID_PASSPHRASE, stdin) ==
+			    NULL) {
+				errx(EXIT_UNABLE_TO_GET_PASSPHRASE,
+				     "Unable to get passphrase on STDIN: fgets error 0x%02x",
+				     ferror(stdin));
+			}
 		} else {
 			err(EXIT_UNABLE_TO_GET_PASSPHRASE, "Unable to get passphrase");
 		}
