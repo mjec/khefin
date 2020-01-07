@@ -48,13 +48,13 @@ release: $(BINPATH) manpages
 .PHONY: install
 install: release
 	install -g 0 -o 0 -p -m 0755 -D $(DISTDIR)/bin/$(APPNAME) $(DESTDIR)$(PREFIX)/bin/$(APPNAME)
-	[ "$(SETCAP_BINARY)" -eq 0 ] || setcap cap_ipc_lock+ep $(DESTDIR)$(PREFIX)/bin/$(APPNAME)
+	if [ "$(SETCAP_BINARY)" -ne 0 ]; then setcap cap_ipc_lock+ep $(DESTDIR)$(PREFIX)/bin/$(APPNAME); fi
 	install -g 0 -o 0 -p -m 0644 -D $(DISTDIR)/share/man/man1/$(APPNAME).1.gz $(DESTDIR)$(PREFIX)/share/man/man1/$(APPNAME).1.gz
-	[ -f $(DISTDIR)/share/bash-completion/completions/$(APPNAME) ] && install -g 0 -o 0 -p -m -D 0644 $(DISTDIR)/share/bash-completion/completions/$(APPNAME) $(DESTDIR)$(PREFIX)/share/bash-completion/completions/$(APPNAME) || true
-	[ -f $(DISTDIR)/lib/initcpio/install/$(APPNAME) ] && install -g 0 -o 0 -p -m 0644 -D $(DISTDIR)/lib/initcpio/install/$(APPNAME) $(DESTDIR)$(PREFIX)/lib/initcpio/install/$(APPNAME) || true
-	[ -f $(DISTDIR)/lib/initcpio/hooks/$(APPNAME) ] && install -g 0 -o 0 -p -m 0644 -D $(DISTDIR)/lib/initcpio/hooks/$(APPNAME) $(DESTDIR)$(PREFIX)/lib/initcpio/hooks/$(APPNAME) || true
-	[ -f $(DISTDIR)/bin/$(APPNAME)-add-luks-key ] && install -g 0 -o 0 -p -m 0755 -D $(DISTDIR)/bin/$(APPNAME)-add-luks-key $(DESTDIR)$(PREFIX)/bin/$(APPNAME)-add-luks-key || true
-	[ -f $(DISTDIR)/share/man/man8/$(APPNAME)-add-luks-key.8.gz ] && install -g 0 -o 0 -p -m 0644 -D $(DISTDIR)/share/man/man8/$(APPNAME)-add-luks-key.8.gz $(DESTDIR)$(PREFIX)/share/man/man8/$(APPNAME)-add-luks-key.8.gz || true
+	if [ -f $(DISTDIR)/share/bash-completion/completions/$(APPNAME) ]; then install -g 0 -o 0 -p -m 0644 -D $(DISTDIR)/share/bash-completion/completions/$(APPNAME) $(DESTDIR)$(PREFIX)/share/bash-completion/completions/$(APPNAME); fi
+	if [ -f $(DISTDIR)/lib/initcpio/install/$(APPNAME) ]; then install -g 0 -o 0 -p -m 0644 -D $(DISTDIR)/lib/initcpio/install/$(APPNAME) $(DESTDIR)$(PREFIX)/lib/initcpio/install/$(APPNAME); fi
+	if [ -f $(DISTDIR)/lib/initcpio/hooks/$(APPNAME) ]; then install -g 0 -o 0 -p -m 0644 -D $(DISTDIR)/lib/initcpio/hooks/$(APPNAME) $(DESTDIR)$(PREFIX)/lib/initcpio/hooks/$(APPNAME); fi
+	if [ -f $(DISTDIR)/bin/$(APPNAME)-add-luks-key ]; then install -g 0 -o 0 -p -m 0755 -D $(DISTDIR)/bin/$(APPNAME)-add-luks-key $(DESTDIR)$(PREFIX)/bin/$(APPNAME)-add-luks-key; fi
+	if [ -f $(DISTDIR)/share/man/man8/$(APPNAME)-add-luks-key.8.gz ]; then install -g 0 -o 0 -p -m 0644 -D $(DISTDIR)/share/man/man8/$(APPNAME)-add-luks-key.8.gz $(DESTDIR)$(PREFIX)/share/man/man8/$(APPNAME)-add-luks-key.8.gz; fi
 
 .PHONY: uninstall
 uninstall:
