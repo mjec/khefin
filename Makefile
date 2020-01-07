@@ -24,23 +24,25 @@ OBJS=$(SRCS:.c=.o)
 PREREQUISITES=$(SRCS:.c=.d)
 
 # Compiler options
+ifeq ($(origin CC),default)
 CC=clang
+endif
 WARNINGFLAGS=-Wall -Wshadow -Wwrite-strings -Wmissing-prototypes -Wimplicit-fallthrough -pedantic -fstack-protector-all -fno-strict-aliasing
 DEFINEFLAGS=-DAPPNAME=\"$(APPNAME)\" -DAPPVERSION=\"$(APPVERSION)\" -DLONGEST_VALID_PASSPHRASE=$(LONGEST_VALID_PASSPHRASE) -DWARN_ON_MEMORY_LOCK_ERRORS=$(WARN_ON_MEMORY_LOCK_ERRORS)
 INCLUDEFLAGS=$(shell pkg-config --cflags libfido2 libcbor libsodium) -iquote $(INCDIR)
 LDLIBS=$(shell pkg-config --libs libfido2 libcbor libsodium)
 
 # Derived compiler options
-CFLAGS=$(INCLUDEFLAGS) $(DEFINEFLAGS) $(WARNINGFLAGS)
-LDFLAGS=$(WARNINGFLAGS) $(DEFINEFLAGS)
+CFLAGS:=$(INCLUDEFLAGS) $(DEFINEFLAGS) $(WARNINGFLAGS) $(CFLAGS)
+LDFLAGS:=$(WARNINGFLAGS) $(DEFINEFLAGS) $(LDFLAGS)
 
 # m4 preprocessor options
 M4FLAGS=-Dm4_APPNAME="$(APPNAME)" -Dm4_APPVERSION="$(APPVERSION)" -Dm4_APPDATE="$(APPDATE)" -Dm4_LONGEST_VALID_PASSPHRASE=$(LONGEST_VALID_PASSPHRASE) -Dm4_WARN_ON_MEMORY_LOCK_ERRORS=$(WARN_ON_MEMORY_LOCK_ERRORS) --prefix-builtins
 
 # Release build targets
 .PHONY: release
-release: CFLAGS+=-O3
-release: LDFLAGS+=-O3 -s
+release: CFLAGS:=-O3 $(CFLAGS)
+release: LDFLAGS:=-O3 -s $(LDFLAGS)
 release: $(BINPATH) manpages
 
 .PHONY: install
@@ -67,8 +69,8 @@ clean: cleandep cleanobj cleandist
 
 # Development build targets
 .PHONY: debug
-debug: CFLAGS+=-g -DDEBUG
-debug: LDFLAGS+=-g -DDEBUG
+debug: CFLAGS:=-g -DDEBUG $(CFLAGS)
+debug: LDFLAGS:=-g -DDEBUG $(LDFLAGS)
 debug: $(BINPATH)
 
 .PHONY: lint
