@@ -1,0 +1,31 @@
+pkgname=fido2-hmac-secret-git
+_pkgname=fido2-hmac-secret
+pkgver=0.3.0.r12.ge474de5
+pkgrel=1
+pkgdesc="A simple way to generate password-proteceted secrets from a FIDO2 authenticator with the hmac-secret extension"
+arch=('x86_64')
+url="https://github.com/mjec/fido2-hmac-secret"
+license=('GPL3')
+depends=('bash' 'libfido2' 'libcbor' 'libsodium' 'libcap')
+makedepends=('clang' 'git')
+optdepends=('bash-completion: bash completion support'
+            'mkinitcpio: initramfs support')
+source=("git+$url.git")
+sha256sums=('SKIP')
+install="$_pkgname.install"
+
+pkgver() {
+  cd "$_pkgname"
+  git describe --long --tags | sed 's/^v//;s/\([^-]*-g\)/r\1/;s/-/./g'
+}
+
+build() {
+  cd "$_pkgname"
+  make release bash-completion initcpio
+}
+
+package() {
+  cd "$_pkgname"
+  # Adding file capabilties doesn't work during build, it will be done later through fido2-hmac-secret.install
+  make DESTDIR="$pkgdir" PREFIX=/usr SETCAP_BINARY=0 install
+}
