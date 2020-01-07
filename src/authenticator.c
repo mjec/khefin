@@ -298,12 +298,12 @@ int get_secret_from_authenticator_params(
 	if (params->credential_id == NULL || params->credential_id_size < 1) {
 		close_and_free_device_ignoring_errors(device);
 		errx(EXIT_PROGRAMMER_ERROR, "BUG (%s:%d): No credential ID supplied",
-		     __FILE__, __LINE__);
+		     __func__, __LINE__);
 	}
 
 	if (params->salt == NULL || params->salt_size < 1) {
 		close_and_free_device_ignoring_errors(device);
-		errx(EXIT_PROGRAMMER_ERROR, "BUG (%s:%d): No salt supplied", __FILE__,
+		errx(EXIT_PROGRAMMER_ERROR, "BUG (%s:%d): No salt supplied", __func__,
 		     __LINE__);
 	}
 

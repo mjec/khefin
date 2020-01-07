@@ -35,7 +35,7 @@ deserialize_cleartext_from_cbor_v1(cbor_item_t *cbor_root) {
 		errx(EXIT_PROGRAMMER_ERROR,
 		     "BUG (%s:%d): deserialize_cleartext_from_cbor_v1() called when "
 		     "file version is not %d (version is %d)",
-		     __FILE__, __LINE__, SERIALIZATION_VERSION, clear->version);
+		     __func__, __LINE__, SERIALIZATION_VERSION, clear->version);
 	}
 	cbor_decref(&cbor_version);
 	cbor_version = NULL;
@@ -169,45 +169,37 @@ cbor_item_t *serialize_cleartext_to_cbor_v1(deserialized_cleartext *clear) {
 
 	FIELD_COUNTER_ASSERT_START;
 
-	FIELD_COUNTER_ASSERT("serialize_cleartext_to_cbor_v1", CLEAR_FIELD_VERSION,
-	                     __FILE__, __LINE__);
+	FIELD_COUNTER_ASSERT(__func__, CLEAR_FIELD_VERSION, __LINE__);
 	cbor_item_t *version = cbor_build_uint8(clear->version);
 	cbor_array_push(root, version);
 
-	FIELD_COUNTER_ASSERT("serialize_cleartext_to_cbor_v1",
-	                     CLEAR_FIELD_DEVICE_AAGUID, __FILE__, __LINE__);
+	FIELD_COUNTER_ASSERT(__func__, CLEAR_FIELD_DEVICE_AAGUID, __LINE__);
 	cbor_item_t *device_aaguid =
 	    cbor_build_bytestring(clear->device_aaguid, clear->device_aaguid_size);
 	cbor_array_push(root, device_aaguid);
 
-	FIELD_COUNTER_ASSERT("serialize_cleartext_to_cbor_v1", CLEAR_FIELD_KDF_SALT,
-	                     __FILE__, __LINE__);
+	FIELD_COUNTER_ASSERT(__func__, CLEAR_FIELD_KDF_SALT, __LINE__);
 	cbor_item_t *salt =
 	    cbor_build_bytestring(clear->kdf_salt, clear->kdf_salt_size);
 	cbor_array_push(root, salt);
 
-	FIELD_COUNTER_ASSERT("serialize_cleartext_to_cbor_v1", CLEAR_FIELD_OPSLIMIT,
-	                     __FILE__, __LINE__);
+	FIELD_COUNTER_ASSERT(__func__, CLEAR_FIELD_OPSLIMIT, __LINE__);
 	cbor_item_t *opslimit = cbor_build_uint64(clear->opslimit);
 	cbor_array_push(root, opslimit);
 
-	FIELD_COUNTER_ASSERT("serialize_cleartext_to_cbor_v1", CLEAR_FIELD_MEMLIMIT,
-	                     __FILE__, __LINE__);
+	FIELD_COUNTER_ASSERT(__func__, CLEAR_FIELD_MEMLIMIT, __LINE__);
 	cbor_item_t *memlimit = cbor_build_uint64(clear->memlimit);
 	cbor_array_push(root, memlimit);
 
-	FIELD_COUNTER_ASSERT("serialize_cleartext_to_cbor_v1",
-	                     CLEAR_FIELD_ALGORITHM, __FILE__, __LINE__);
+	FIELD_COUNTER_ASSERT(__func__, CLEAR_FIELD_ALGORITHM, __LINE__);
 	cbor_item_t *algorithm = cbor_build_uint16(clear->algorithm);
 	cbor_array_push(root, algorithm);
 
-	FIELD_COUNTER_ASSERT("serialize_cleartext_to_cbor_v1", CLEAR_FIELD_NONCE,
-	                     __FILE__, __LINE__);
+	FIELD_COUNTER_ASSERT(__func__, CLEAR_FIELD_NONCE, __LINE__);
 	cbor_item_t *nonce = cbor_build_bytestring(clear->nonce, clear->nonce_size);
 	cbor_array_push(root, nonce);
 
-	FIELD_COUNTER_ASSERT("serialize_cleartext_to_cbor_v1",
-	                     CLEAR_FIELD_ENCRYPTED_DATA, __FILE__, __LINE__);
+	FIELD_COUNTER_ASSERT(__func__, CLEAR_FIELD_ENCRYPTED_DATA, __LINE__);
 	cbor_item_t *encrypted_data = cbor_build_bytestring(
 	    clear->encrypted_data, clear->encrypted_data_size);
 	cbor_array_push(root, encrypted_data);
@@ -245,7 +237,7 @@ deserialized_secrets *deserialize_secrets_from_cbor_v1(cbor_item_t *cbor_root) {
 		errx(EXIT_PROGRAMMER_ERROR,
 		     "BUG (%s:%d): deserialize_secrets_from_cbor_v1() called when file "
 		     "version is not %d (version is %d)",
-		     __FILE__, __LINE__, SERIALIZATION_VERSION, secrets->version);
+		     __func__, __LINE__, SERIALIZATION_VERSION, secrets->version);
 	}
 	cbor_decref(&cbor_version);
 	cbor_version = NULL;
@@ -321,25 +313,21 @@ cbor_item_t *serialize_secrets_to_cbor_v1(deserialized_secrets *secrets) {
 
 	FIELD_COUNTER_ASSERT_START;
 
-	FIELD_COUNTER_ASSERT("serialize_secrets_to_cbor_v1",
-	                     ENCRYPTED_FIELD_VERSION, __FILE__, __LINE__);
+	FIELD_COUNTER_ASSERT(__func__, ENCRYPTED_FIELD_VERSION, __LINE__);
 	cbor_item_t *version = cbor_build_uint8(secrets->version);
 	cbor_array_push(root, version);
 
-	FIELD_COUNTER_ASSERT("serialize_secrets_to_cbor_v1", ENCRYPTED_FIELD_RP_ID,
-	                     __FILE__, __LINE__);
+	FIELD_COUNTER_ASSERT(__func__, ENCRYPTED_FIELD_RP_ID, __LINE__);
 	cbor_item_t *relying_party_id =
 	    cbor_build_string(secrets->relying_party_id);
 	cbor_array_push(root, relying_party_id);
 
-	FIELD_COUNTER_ASSERT("serialize_secrets_to_cbor_v1",
-	                     ENCRYPTED_FIELD_CREDENTIAL_ID, __FILE__, __LINE__);
+	FIELD_COUNTER_ASSERT(__func__, ENCRYPTED_FIELD_CREDENTIAL_ID, __LINE__);
 	cbor_item_t *credential_id = cbor_build_bytestring(
 	    secrets->credential_id, secrets->credential_id_size);
 	cbor_array_push(root, credential_id);
 
-	FIELD_COUNTER_ASSERT("serialize_secrets_to_cbor_v1",
-	                     ENCRYPTED_FIELD_HMAC_SALT, __FILE__, __LINE__);
+	FIELD_COUNTER_ASSERT(__func__, ENCRYPTED_FIELD_HMAC_SALT, __LINE__);
 	cbor_item_t *salt =
 	    cbor_build_bytestring(secrets->salt, secrets->salt_size);
 	cbor_array_push(root, salt);

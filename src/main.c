@@ -63,13 +63,13 @@ int main(int argc, char **argv) {
 		default:
 			errx(EXIT_PROGRAMMER_ERROR,
 			     "BUG (%s:%d): unhandled return value from print_secret() (%d)",
-			     __FILE__, __LINE__, print_secret_result);
+			     __func__, __LINE__, print_secret_result);
 		}
 		break;
 
 	default:
 		errx(EXIT_PROGRAMMER_ERROR,
-		     "BUG (%s:%d): Unhandled but valid subcommand (%d)\n", __FILE__,
+		     "BUG (%s:%d): Unhandled but valid subcommand (%d)\n", __func__,
 		     __LINE__, invocation->subcommand);
 	}
 }

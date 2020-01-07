@@ -16,16 +16,15 @@
 
 #ifdef DEBUG
 #define FIELD_COUNTER_ASSERT_START unsigned short __field_counter_assert = 0;
-#define FIELD_COUNTER_ASSERT(function, expected, file, line)                   \
+#define FIELD_COUNTER_ASSERT(function, expected, line)                         \
 	if (__field_counter_assert++ != expected)                                  \
 		errx(EXIT_PROGRAMMER_ERROR,                                            \
-		     "BUG (%s:%d): Serializing in %s is messed up: field %d should "   \
-		     "be at "                                                          \
+		     "BUG (%s:%d): Serializing s is messed up: field %d should be at " \
 		     "position %d",                                                    \
-		     file, line, function, __field_counter_assert, expected);
+		     function, line, __field_counter_assert, expected);
 #else
 #define FIELD_COUNTER_ASSERT_START
-#define FIELD_COUNTER_ASSERT(function, expected, file, line)
+#define FIELD_COUNTER_ASSERT(function, expected, line)
 #endif
 
 typedef struct deserialized_cleartext {
