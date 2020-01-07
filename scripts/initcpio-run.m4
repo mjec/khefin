@@ -1,7 +1,8 @@
 m4_define(`m4_PROMPT_NEVER', 0)m4_dnl
 m4_define(`m4_PROMPT_ONCE', 1)m4_dnl
 m4_define(`m4_PROMPT_ALWAYS', 2)m4_dnl
-#!/bin/sh
+#!/usr/bin/ash
+# shellcheck shell=dash
 
 # Include a UUID, so this value should never appear otherwise
 undefined="undefined 110d43d6-f20a-4f29-bae4-1a58f813980c"
