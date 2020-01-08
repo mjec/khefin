@@ -22,7 +22,7 @@ If you want a [bash-completion](https://github.com/scop/bash-completion) script,
 
 You can set the maximum passphrase length (defaults to 1024; everything after this will be ignored) by appending `LONGEST_VALID_PASSPHRASE=<some integer>` after the list of targets.
 
-You disable memory locking warnings (default to on) by setting `WARN_ON_MEMORY_LOCK_ERRORS=0` (see the memeory locking section below).
+You disable memory locking warnings (default to on) by setting `WARN_ON_MEMORY_LOCK_ERRORS=0` (see the memory locking section below).
 
 ### Installing
 
@@ -94,7 +94,7 @@ The number one risk is that by playing around with encryption like this you will
 
 Keep a backup of the keyfile created by this application as well. If you lose that file, it is impossible to recover the secret.
 
-The security of this sytem depends on the security of your authenticator device, libsodium, libfido2, and the quality of your passphrase. It's also possible -- and indeed more likely than any of the former issues -- that there's a bug in the code for this application which compromises its security somehow. Pull requests and issues are very welcome.
+The security of this system depends on the security of your authenticator device, libsodium, libfido2, and the quality of your passphrase. It's also possible -- and indeed more likely than any of the former issues -- that there's a bug in the code for this application which compromises its security somehow. Pull requests and issues are very welcome.
 
 ## Warrant canary (but not a warranty)
 
