@@ -124,7 +124,7 @@ void close_and_free_device(fido_dev_t *device) {
 	int r;
 
 	if ((r = fido_dev_close(device)) != FIDO_OK) {
-		errx(EXIT_AUTHENTICATOR_ERROR, "Unable to close device");
+		errx(EXIT_AUTHENTICATOR_ERROR, "Unable to close device: %s (0x%x)", fido_strerr(r), r);
 	}
 
 	fido_dev_free(&device);
