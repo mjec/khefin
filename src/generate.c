@@ -35,6 +35,7 @@ unsigned short int print_secret(invocation_state_t *invocation,
 			}
 
 			secret_t *secret = malloc(sizeof(secret_t));
+			CHECK_MALLOC(secret, "secret");
 			int result = get_secret_from_authenticator_params(
 			    authenticator, authenticator_params, secret);
 			close_and_free_device_ignoring_errors(authenticator);
@@ -75,6 +76,7 @@ bool device_aaguid_matches(deserialized_cleartext *cleartext,
 	}
 
 	unsigned char *this_device_aaguid = malloc(cleartext->device_aaguid_size);
+	CHECK_MALLOC(this_device_aaguid, "device AAGUID");
 	memcpy(this_device_aaguid, fido_cbor_info_aaguid_ptr(device_info),
 	       this_device_aaguid_size);
 

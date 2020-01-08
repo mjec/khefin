@@ -19,10 +19,7 @@ invocation_state_t *parse_arguments_and_get_passphrase(int argc, char **argv) {
 	}
 
 	invocation_state_t *result = malloc(sizeof(invocation_state_t));
-	if (result == NULL) {
-		err(EXIT_OUT_OF_MEMORY,
-		    "Unable to allocate memory for invocation state");
-	}
+	CHECK_MALLOC(result, "invocation state");
 	result->device = NULL;
 	result->file = NULL;
 	result->passphrase = NULL;
@@ -67,16 +64,19 @@ invocation_state_t *parse_arguments_and_get_passphrase(int argc, char **argv) {
 		switch (c) {
 		case 'd':
 			result->device = malloc(strlen(optarg) + 1);
+			CHECK_MALLOC(result->device, "device path in invocation state");
 			strcpy(result->device, optarg);
 			break;
 
 		case 'f':
 			result->file = malloc(strlen(optarg) + 1);
+			CHECK_MALLOC(result->file, "file path in invocation state");
 			strcpy(result->file, optarg);
 			break;
 
 		case 'p':
 			result->passphrase = malloc(strlen(optarg) + 1);
+			CHECK_MALLOC(result->passphrase, "passphrase in invocation state");
 			strcpy(result->passphrase, optarg);
 			break;
 
@@ -115,6 +115,7 @@ invocation_state_t *parse_arguments_and_get_passphrase(int argc, char **argv) {
 			warning_size += strlen(argv[i]) + 3;
 		}
 		char *error_message = malloc(warning_size * (sizeof(char)));
+		CHECK_MALLOC(error_message, "error message for bad invocation");
 
 		strcat(error_message, "invalid argument");
 		if (extra_args > 1) {
@@ -168,9 +169,7 @@ invocation_state_t *parse_arguments_and_get_passphrase(int argc, char **argv) {
 	if (result->passphrase == NULL &&
 	    (result->subcommand == enrol || result->subcommand == generate)) {
 		result->passphrase = malloc(LONGEST_VALID_PASSPHRASE + 1);
-		if (result->passphrase == NULL) {
-			err(EXIT_OUT_OF_MEMORY, "Unable to allocate memory for passphrase");
-		}
+		CHECK_MALLOC(result->passphrase, "passphrase");
 
 		if (isatty(STDIN_FILENO)) {
 			struct termios terminal_settings;

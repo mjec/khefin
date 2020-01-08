@@ -24,6 +24,8 @@ void enrol_device(invocation_state_t *invocation) {
 
 	authenticator_params = allocate_parameters(0, SALT_SIZE_BYTES);
 	authenticator_params->salt = malloc(SALT_SIZE_BYTES);
+	CHECK_MALLOC(authenticator_params->salt,
+	             "salt in authenticator parameters");
 	randombytes_buf(authenticator_params->salt, SALT_SIZE_BYTES);
 
 	for (int i = 0; i < RELYING_PARTY_ID_SIZE; i++) {
@@ -41,6 +43,7 @@ void enrol_device(invocation_state_t *invocation) {
 
 	cleartext->device_aaguid_size = fido_cbor_info_aaguid_len(device_info);
 	cleartext->device_aaguid = malloc(cleartext->device_aaguid_size);
+	CHECK_MALLOC(cleartext->device_aaguid, "device AAGUID");
 	memcpy(cleartext->device_aaguid, fido_cbor_info_aaguid_ptr(device_info),
 	       cleartext->device_aaguid_size);
 	free_device_info(device_info);

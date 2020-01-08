@@ -10,10 +10,7 @@
 deserialized_cleartext *
 deserialize_cleartext_from_cbor_v1(cbor_item_t *cbor_root) {
 	deserialized_cleartext *clear = malloc(sizeof(deserialized_cleartext));
-	if (clear == NULL) {
-		errx(EXIT_OUT_OF_MEMORY, "Out of memory attempting to allocate "
-		                         "deserialized cleartext struct");
-	}
+	CHECK_MALLOC(clear, "keyfile");
 
 	if (cbor_array_size(cbor_root) != CLEAR_COUNT_OF_FIELDS) {
 		errx(EXIT_DESERIALIZATION_ERROR,
@@ -52,6 +49,7 @@ deserialize_cleartext_from_cbor_v1(cbor_item_t *cbor_root) {
 	clear->device_aaguid_size = cbor_bytestring_length(cbor_device_aaguid);
 	if (clear->device_aaguid_size > 0) {
 		clear->device_aaguid = malloc(clear->device_aaguid_size);
+		CHECK_MALLOC(clear->device_aaguid, "device AAGUID in keyfile");
 		memcpy(clear->device_aaguid, cbor_bytestring_handle(cbor_device_aaguid),
 		       clear->device_aaguid_size);
 	} else {
@@ -72,6 +70,7 @@ deserialize_cleartext_from_cbor_v1(cbor_item_t *cbor_root) {
 	clear->kdf_salt_size = cbor_bytestring_length(cbor_kdf_salt);
 	if (clear->kdf_salt_size > 0) {
 		clear->kdf_salt = malloc(clear->kdf_salt_size);
+		CHECK_MALLOC(clear->kdf_salt, "salt in keyfile")
 		memcpy(clear->kdf_salt, cbor_bytestring_handle(cbor_kdf_salt),
 		       clear->kdf_salt_size);
 	} else {
@@ -130,6 +129,7 @@ deserialize_cleartext_from_cbor_v1(cbor_item_t *cbor_root) {
 	clear->nonce_size = cbor_bytestring_length(cbor_nonce);
 	if (clear->nonce_size > 0) {
 		clear->nonce = malloc(clear->nonce_size);
+		CHECK_MALLOC(clear->nonce, "nonce in keyfile");
 		memcpy(clear->nonce, cbor_bytestring_handle(cbor_nonce),
 		       clear->nonce_size);
 	} else {
@@ -151,6 +151,7 @@ deserialize_cleartext_from_cbor_v1(cbor_item_t *cbor_root) {
 	clear->encrypted_data_size = cbor_bytestring_length(cbor_encrypted_data);
 	if (clear->encrypted_data_size > 0) {
 		clear->encrypted_data = malloc(clear->encrypted_data_size);
+		CHECK_MALLOC(clear->encrypted_data, "encrypted data blob in keyfile");
 		memcpy(clear->encrypted_data,
 		       cbor_bytestring_handle(cbor_encrypted_data),
 		       clear->encrypted_data_size);
@@ -209,11 +210,7 @@ cbor_item_t *serialize_cleartext_to_cbor_v1(deserialized_cleartext *clear) {
 
 deserialized_secrets *deserialize_secrets_from_cbor_v1(cbor_item_t *cbor_root) {
 	deserialized_secrets *secrets = malloc(sizeof(deserialized_secrets));
-	if (secrets == NULL) {
-		errx(
-		    EXIT_OUT_OF_MEMORY,
-		    "Out of memory attempting to allocate deserialized secrets struct");
-	}
+	CHECK_MALLOC(secrets, "decrypted secret blob");
 
 	if (cbor_array_size(cbor_root) != ENCRYPTED_COUNT_OF_FIELDS) {
 		errx(EXIT_DESERIALIZATION_ERROR,
@@ -255,6 +252,8 @@ deserialized_secrets *deserialize_secrets_from_cbor_v1(cbor_item_t *cbor_root) {
 	size_t relying_party_size = cbor_string_length(cbor_relying_party_id);
 	if (relying_party_size > 0) {
 		secrets->relying_party_id = malloc(relying_party_size + 1);
+		CHECK_MALLOC(secrets->relying_party_id,
+		             "relying party id in decrypted secret blob");
 		strncpy(secrets->relying_party_id,
 		        (const char *restrict)cbor_string_handle(cbor_relying_party_id),
 		        relying_party_size + 1);
@@ -276,6 +275,8 @@ deserialized_secrets *deserialize_secrets_from_cbor_v1(cbor_item_t *cbor_root) {
 	secrets->credential_id_size = cbor_bytestring_length(cbor_credential_id);
 	if (secrets->credential_id_size > 0) {
 		secrets->credential_id = malloc(secrets->credential_id_size);
+		CHECK_MALLOC(secrets->credential_id,
+		             "credential id in decrypted secret blob");
 		memcpy(secrets->credential_id,
 		       cbor_bytestring_handle(cbor_credential_id),
 		       secrets->credential_id_size);
@@ -297,6 +298,7 @@ deserialized_secrets *deserialize_secrets_from_cbor_v1(cbor_item_t *cbor_root) {
 	secrets->salt_size = cbor_bytestring_length(cbor_salt);
 	if (secrets->salt_size > 0) {
 		secrets->salt = malloc(secrets->salt_size);
+		CHECK_MALLOC(secrets->salt, "salt in decrypted secret blob");
 		memcpy(secrets->salt, cbor_bytestring_handle(cbor_salt),
 		       secrets->salt_size);
 	} else {

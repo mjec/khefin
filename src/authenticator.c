@@ -12,6 +12,7 @@ devices_list_t *list_devices(void) {
 	size_t count;
 	int r;
 	devices_list_t *result = malloc(sizeof(devices_list_t));
+	CHECK_MALLOC(result, "list of devices");
 
 	if ((list = fido_dev_info_new(MAX_DEVICES_TO_LIST)) == NULL) {
 		errx(EXIT_OUT_OF_MEMORY, "Unable to create new list of devices");
@@ -133,9 +134,12 @@ authenticator_parameters_t *allocate_parameters(size_t credential_id_size,
                                                 size_t salt_size) {
 	authenticator_parameters_t *params =
 	    malloc(sizeof(authenticator_parameters_t));
+	CHECK_MALLOC(params, "authenticator parameters");
 
 	if (credential_id_size) {
 		params->credential_id = malloc(credential_id_size);
+		CHECK_MALLOC(params->credential_id,
+		             "credential id in authenticator parameters");
 		params->credential_id_size = credential_id_size;
 	} else {
 		params->credential_id = NULL;
@@ -144,6 +148,7 @@ authenticator_parameters_t *allocate_parameters(size_t credential_id_size,
 
 	if (salt_size) {
 		params->salt = malloc(salt_size);
+		CHECK_MALLOC(params->salt, "salt in authenticator parameters");
 		params->salt_size = salt_size;
 	} else {
 		params->salt = NULL;
@@ -152,6 +157,8 @@ authenticator_parameters_t *allocate_parameters(size_t credential_id_size,
 
 	params->relying_party_id =
 	    malloc(RELYING_PARTY_ID_SIZE + RELYING_PARTY_SUFFIX_SIZE + 1);
+	CHECK_MALLOC(params->relying_party_id,
+	             "relying party id in authenticator parameters");
 
 	// This data is required, but isn't meaninfully used, so we zero it out
 	params->user_id = calloc(1, 1);
@@ -159,6 +166,8 @@ authenticator_parameters_t *allocate_parameters(size_t credential_id_size,
 
 	// CDH must be 32 bytes
 	params->client_data_hash = malloc(CLIENT_DATA_HASH_SIZE_BYTES);
+	CHECK_MALLOC(params->client_data_hash,
+	             "client data hash in authenticator parameters");
 	params->client_data_hash_size = CLIENT_DATA_HASH_SIZE_BYTES;
 	for (int i = 0; i < params->client_data_hash_size; i++) {
 		params->client_data_hash[i] = 'A';
@@ -185,23 +194,24 @@ void free_parameters(authenticator_parameters_t *params) {
 		return;
 	}
 
-	if (params->user_id) {
+	if (params->user_id != NULL) {
 		free(params->user_id);
 	}
-	if (params->client_data_hash) {
+
+	if (params->client_data_hash != NULL) {
 		free(params->client_data_hash);
 	}
 
 	// The following parameters are secret
-	if (params->relying_party_id) {
+	if (params->relying_party_id != NULL) {
 		sodium_memzero(params->relying_party_id, RELYING_PARTY_ID_SIZE);
 		free(params->relying_party_id);
 	}
-	if (params->credential_id) {
+	if (params->credential_id != NULL) {
 		sodium_memzero(params->credential_id, params->credential_id_size);
 		free(params->credential_id);
 	}
-	if (params->salt) {
+	if (params->salt != NULL) {
 		sodium_memzero(params->salt, params->salt_size);
 		free(params->salt);
 	}
@@ -280,6 +290,8 @@ void create_credential(fido_dev_t *device, authenticator_parameters_t *params) {
 	}
 
 	params->credential_id = malloc(cred_id_size);
+	CHECK_MALLOC(params->credential_id,
+	             "credential id in authenticator parameters");
 	params->credential_id_size = cred_id_size;
 	memcpy(params->credential_id, cred_id, cred_id_size);
 
@@ -396,6 +408,7 @@ int get_secret_from_authenticator_params(
 
 	secret_struct->secret_size = secret_size;
 	secret_struct->secret = malloc(secret_struct->secret_size);
+	CHECK_MALLOC(secret_struct->secret, "secret");
 	memcpy(secret_struct->secret, secret_pointer, secret_size);
 	fido_assert_free(&assertion);
 

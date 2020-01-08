@@ -3,6 +3,11 @@
 
 #include <err.h>
 
+#define CHECK_MALLOC(result, what)                                             \
+	if ((result) == NULL) {                                                    \
+		errx(EXIT_OUT_OF_MEMORY, "Unable to allocate memory for %s", what);    \
+	}
+
 // Three categories of error:
 //  - user errors, like a bad passphrase
 //  - runtime errors, like out of memory

@@ -14,7 +14,9 @@ build_authenticator_parameters_from_deserialized_cleartext_and_passphrase(
     deserialized_cleartext *cleartext, char *passphrase) {
 	unsigned char *decrypted =
 	    malloc(cleartext->encrypted_data_size - crypto_secretbox_MACBYTES);
+	CHECK_MALLOC(cleartext->encrypted_data, "encrypted data");
 	unsigned char *key_bytes = malloc(crypto_secretbox_KEYBYTES);
+	CHECK_MALLOC(key_bytes, "password-derived key");
 	if (crypto_pwhash(key_bytes, crypto_secretbox_KEYBYTES, passphrase,
 	                  strlen(passphrase), cleartext->kdf_salt,
 	                  cleartext->opslimit, cleartext->memlimit,
@@ -49,27 +51,35 @@ deserialized_cleartext *
 build_deserialized_cleartext_from_authenticator_parameters_and_passphrase(
     authenticator_parameters_t *authenticator_params, char *passphrase) {
 	deserialized_cleartext *cleartext = malloc(sizeof(deserialized_cleartext));
+	CHECK_MALLOC(cleartext, "encrypted keyfile");
 	cleartext->version = SERIALIZATION_MAX_VERSION;
 	cleartext->opslimit = crypto_pwhash_OPSLIMIT_MODERATE;
 	cleartext->memlimit = crypto_pwhash_MEMLIMIT_MODERATE;
 	cleartext->algorithm = crypto_pwhash_ALG_ARGON2I13;
 	cleartext->kdf_salt = malloc(crypto_pwhash_SALTBYTES);
+	CHECK_MALLOC(cleartext->kdf_salt, "salt in encrypted keyfile");
 	randombytes_buf(cleartext->kdf_salt, crypto_pwhash_SALTBYTES);
 	cleartext->kdf_salt_size = crypto_pwhash_SALTBYTES;
 	cleartext->nonce = malloc(crypto_box_NONCEBYTES);
+	CHECK_MALLOC(cleartext->nonce, "nonce in encrypted keyfile");
 	randombytes_buf(cleartext->nonce, crypto_box_NONCEBYTES);
 	cleartext->nonce_size = crypto_box_NONCEBYTES;
 
 	deserialized_secrets *secrets = malloc(sizeof(deserialized_secrets));
+	CHECK_MALLOC(secrets, "secrets");
 	secrets->version = cleartext->version;
 	secrets->relying_party_id =
 	    malloc(strlen(authenticator_params->relying_party_id) + 1);
+	CHECK_MALLOC(secrets->relying_party_id,
+	             "relying party id in encrypted keyfile")
 	strcpy(secrets->relying_party_id, authenticator_params->relying_party_id);
 	secrets->credential_id = malloc(authenticator_params->credential_id_size);
+	CHECK_MALLOC(secrets->credential_id, "credential id in encrypted keyfile")
 	memcpy(secrets->credential_id, authenticator_params->credential_id,
 	       authenticator_params->credential_id_size);
 	secrets->credential_id_size = authenticator_params->credential_id_size;
 	secrets->salt = malloc(authenticator_params->salt_size);
+	CHECK_MALLOC(secrets->salt, "encrypted secret in encrypted keyfile")
 	memcpy(secrets->salt, authenticator_params->salt,
 	       authenticator_params->salt_size);
 	secrets->salt_size = authenticator_params->salt_size;
@@ -88,9 +98,12 @@ build_deserialized_cleartext_from_authenticator_parameters_and_passphrase(
 
 	cleartext->encrypted_data =
 	    malloc(serialized_unencrypted_secrets_size + crypto_secretbox_MACBYTES);
+	CHECK_MALLOC(cleartext->encrypted_data,
+	             "encrypted data blob in encrypted keyfile");
 	cleartext->encrypted_data_size =
 	    serialized_unencrypted_secrets_size + crypto_secretbox_MACBYTES;
 	unsigned char *key_bytes = malloc(crypto_secretbox_KEYBYTES);
+	CHECK_MALLOC(key_bytes, "password-derived key");
 	if (crypto_pwhash(key_bytes, crypto_secretbox_KEYBYTES, passphrase,
 	                  strlen(passphrase), cleartext->kdf_salt,
 	                  cleartext->opslimit, cleartext->memlimit,
@@ -247,11 +260,7 @@ deserialized_cleartext *load_cleartext_from_file(const char *path) {
 	}
 
 	unsigned char *buffer = malloc(length);
-	if (buffer == NULL) {
-		errx(EXIT_OUT_OF_MEMORY,
-		     "Unable to allocate memory (%zu bytes) to read file at %s", length,
-		     path);
-	}
+	CHECK_MALLOC(buffer, "buffer for reading keyfile");
 
 	if (fread(buffer, length, 1, fp) != 1) {
 		errx(EXIT_DESERIALIZATION_ERROR,
