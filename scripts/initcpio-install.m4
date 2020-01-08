@@ -36,7 +36,7 @@ You can use a different passphrase for every keyfile, or set the kernel paramete
 
 Those files are copied to \$encrypted_keyfile_dir in the initcpio image, which you can set by a kernel parameter. By default that directory is m4_DEFAULT_ENCRYPTED_KEYFILE_DIR.
 
-To make use of this hook, it must be set to run BEFORE the encrypt hook. On success, this hook will set cryptkey, overriding the preivous setting (which may be absent).
+To make use of this hook, it must be set to run BEFORE the encrypt hook. On success, this hook will set cryptkey, overriding the previous setting (which may be absent).
 
 You will also need to add these keys to a key slot for your disk. You can do this by running m4_APPNAME-add-luks-key.
 

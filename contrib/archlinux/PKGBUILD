@@ -26,6 +26,6 @@ build() {
 
 package() {
   cd "$_pkgname"
-  # Adding file capabilties doesn't work during build, it will be done later through fido2-hmac-secret.install
+  # Adding file capabilities doesn't work during build, it will be done later through fido2-hmac-secret.install
   make DESTDIR="$pkgdir" PREFIX=/usr SETCAP_BINARY=0 install
 }
