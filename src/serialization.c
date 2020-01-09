@@ -5,25 +5,17 @@
 #include <string.h>
 
 #include "authenticator.h"
+#include "cryptography.h"
 #include "exit.h"
 #include "serialization.h"
 #include "serialization/v1.h"
 
 authenticator_parameters_t *
-build_authenticator_parameters_from_deserialized_cleartext_and_passphrase(
-    deserialized_cleartext *cleartext, char *passphrase) {
+build_authenticator_parameters_from_deserialized_cleartext_and_key(
+    deserialized_cleartext *cleartext, unsigned char *key_bytes) {
 	unsigned char *decrypted =
 	    malloc(cleartext->encrypted_data_size - crypto_secretbox_MACBYTES);
 	CHECK_MALLOC(cleartext->encrypted_data, "encrypted data");
-	unsigned char *key_bytes = malloc(crypto_secretbox_KEYBYTES);
-	CHECK_MALLOC(key_bytes, "password-derived key");
-	if (crypto_pwhash(key_bytes, crypto_secretbox_KEYBYTES, passphrase,
-	                  strlen(passphrase), cleartext->kdf_salt,
-	                  cleartext->opslimit, cleartext->memlimit,
-	                  cleartext->algorithm) != 0) {
-		err(EXIT_OUT_OF_MEMORY,
-		    "Unable to derive key from passphrase (out of memory?)");
-	}
 	if (crypto_secretbox_open_easy(decrypted, cleartext->encrypted_data,
 	                               cleartext->encrypted_data_size,
 	                               cleartext->nonce, key_bytes) != 0) {
@@ -52,18 +44,18 @@ build_authenticator_parameters_from_deserialized_cleartext_and_passphrase(
 }
 
 deserialized_cleartext *
-build_deserialized_cleartext_from_authenticator_parameters_and_passphrase(
-    authenticator_parameters_t *authenticator_params, char *passphrase) {
+build_deserialized_cleartext_from_authenticator_parameters_and_key_spec(
+    authenticator_parameters_t *authenticator_params, key_spec_t *key_spec) {
 	deserialized_cleartext *cleartext = malloc(sizeof(deserialized_cleartext));
 	CHECK_MALLOC(cleartext, "encrypted keyfile");
 	cleartext->version = SERIALIZATION_MAX_VERSION;
-	cleartext->opslimit = crypto_pwhash_OPSLIMIT_MODERATE;
-	cleartext->memlimit = crypto_pwhash_MEMLIMIT_MODERATE;
-	cleartext->algorithm = crypto_pwhash_ALG_ARGON2I13;
-	cleartext->kdf_salt = malloc(crypto_pwhash_SALTBYTES);
+	cleartext->opslimit = key_spec->opslimit;
+	cleartext->memlimit = key_spec->memlimit;
+	cleartext->algorithm = key_spec->algorithm;
+	cleartext->kdf_salt = malloc(key_spec->kdf_salt_size);
 	CHECK_MALLOC(cleartext->kdf_salt, "salt in encrypted keyfile");
-	randombytes_buf(cleartext->kdf_salt, crypto_pwhash_SALTBYTES);
-	cleartext->kdf_salt_size = crypto_pwhash_SALTBYTES;
+	memcpy(cleartext->kdf_salt, key_spec->kdf_salt, key_spec->kdf_salt_size);
+	cleartext->kdf_salt_size = key_spec->kdf_salt_size;
 	cleartext->nonce = malloc(crypto_box_NONCEBYTES);
 	CHECK_MALLOC(cleartext->nonce, "nonce in encrypted keyfile");
 	randombytes_buf(cleartext->nonce, crypto_box_NONCEBYTES);
@@ -106,15 +98,7 @@ build_deserialized_cleartext_from_authenticator_parameters_and_passphrase(
 	             "encrypted data blob in encrypted keyfile");
 	cleartext->encrypted_data_size =
 	    serialized_unencrypted_secrets_size + crypto_secretbox_MACBYTES;
-	unsigned char *key_bytes = malloc(crypto_secretbox_KEYBYTES);
-	CHECK_MALLOC(key_bytes, "password-derived key");
-	if (crypto_pwhash(key_bytes, crypto_secretbox_KEYBYTES, passphrase,
-	                  strlen(passphrase), cleartext->kdf_salt,
-	                  cleartext->opslimit, cleartext->memlimit,
-	                  cleartext->algorithm) != 0) {
-		errx(EXIT_OUT_OF_MEMORY,
-		     "Unable to derive key from passphrase (out of memory?)");
-	}
+	unsigned char *key_bytes = derive_key(key_spec);
 	if (crypto_secretbox_easy(cleartext->encrypted_data,
 	                          serialized_unencrypted_secrets,
 	                          serialized_unencrypted_secrets_size,

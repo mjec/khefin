@@ -1,15 +1,21 @@
 #include "help.h"
 
 #include <stdio.h>
+#include <string.h>
 
 void print_version(void) { printf("%s %s\n", APPNAME, APPVERSION); }
 
 void print_usage(char *program_name) {
+	char *program_basename = strrchr(program_name, '/');
+	if (program_basename != NULL && program_basename[1] != (char)0) {
+		program_name = program_basename + 1;
+	}
 	printf("Usage: %s help\n"
 	       "       %s version\n"
 	       "       %s enumerate\n"
-	       "       %s enrol -d <device> -f <file> [-p passphrase] [-o]\n"
-	       "       %s generate -f <file> [-p passphrase]\n",
+	       "       %s enrol -d <device> -f <file> [-p <passphrase>] [-o]"
+	       " [-k <hardness>]\n"
+	       "       %s generate -f <file> [-p <passphrase>]\n",
 	       program_name, program_name, program_name, program_name,
 	       program_name);
 }
@@ -19,8 +25,8 @@ void print_help(char *program_name) {
 	printf(
 	    "%s",
 	    /* clang-format off */
-		// This has manually-inserted hard wraps at 80 characters,
-		// which is inconsistent with clang-format.
+	    // This has manually-inserted hard wraps at 80 characters,
+	    // which is inconsistent with clang-format.
 	    "\n"
 	    "help       print this screen and exit.\n"
 	    "\n"
@@ -51,9 +57,17 @@ void print_help(char *program_name) {
 	    "   -o, --obfuscate-device-info     If specified for enrol, do not store the.\n"
 	    "                                   device vendor and product ID in <file>.\n"
 	    "\n"
+	    "   -k, --kdf-hardness <hardness>   Specify the complexity of the key derivation\n"
+	    "                                   function used to derive a cryptographic key\n"
+	    "                                   from <passphrase>. Valid options are high,\n"
+	    "                                   medium or low. If not specified, a value\n"
+	    "                                   will be chosen automatically based on\n"
+	    "                                   total system RAM.\n"
+	    "\n"
 	    "The output of this program on STDOUT (in either enrol or generate mode) will be\n"
 	    "a sequence of printable, URL-safe ASCII characters, that depend on the\n"
 	    "randomly generated parameters placed in the file, the authenticator device and\n"
-	    "the passphrase. This will be followed by a single newline.\n");
-	/* clang-format on */
+	    "the passphrase. This will be followed by a single newline.\n"
+	    /* clang-format on */
+	);
 }

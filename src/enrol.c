@@ -38,9 +38,11 @@ void enrol_device(invocation_state_t *invocation) {
 	create_credential(authenticator, authenticator_params);
 	close_and_free_device_ignoring_errors(authenticator);
 
+	key_spec_t *key_spec = make_new_key_spec_from_invocation(invocation);
 	cleartext =
-	    build_deserialized_cleartext_from_authenticator_parameters_and_passphrase(
-	        authenticator_params, invocation->passphrase);
+	    build_deserialized_cleartext_from_authenticator_parameters_and_key_spec(
+	        authenticator_params, key_spec);
+	free_key_spec(key_spec);
 
 	cleartext->device_aaguid_size = fido_cbor_info_aaguid_len(device_info);
 	cleartext->device_aaguid = malloc(cleartext->device_aaguid_size);

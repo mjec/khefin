@@ -3,10 +3,11 @@
 
 #include "authenticator.h"
 #include "invocation.h"
-#include "serialization.h"
+#include "serialization_types.h"
 
-unsigned short int print_secret(invocation_state_t *invocation,
-                                devices_list_t *devices_list);
+unsigned short int
+print_secret_consuming_invocation(invocation_state_t *invocation,
+                                  devices_list_t *devices_list);
 bool device_aaguid_matches(deserialized_cleartext *cleartext,
                            fido_cbor_info_t *device_info);
 

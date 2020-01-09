@@ -2,6 +2,7 @@
 
 #include <errno.h>
 #include <getopt.h>
+#include <sodium.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -24,6 +25,7 @@ invocation_state_t *parse_arguments_and_get_passphrase(int argc, char **argv) {
 	result->file = NULL;
 	result->passphrase = NULL;
 	result->obfuscate_device_info = false;
+	result->kdf_hardness = kdf_hardness_unspecified;
 
 	if (strcmp(argv[1], "help") == 0) {
 		result->subcommand = help;
@@ -49,6 +51,7 @@ invocation_state_t *parse_arguments_and_get_passphrase(int argc, char **argv) {
 		    {"passphrase", required_argument, 0, 'p'},
 		    {"obfuscate-device", no_argument, 0, 'o'},
 		    {"help", no_argument, 0, 'h'},
+		    {"kdf-hardness", required_argument, 0, 'k'},
 		    {NULL, 0, NULL, 0},
 		};
 
@@ -56,13 +59,13 @@ invocation_state_t *parse_arguments_and_get_passphrase(int argc, char **argv) {
 		int option_index = 0;
 		size_t buffer_size;
 
-		c = getopt_long(argc, argv, "d:f:p:oh", long_options, &option_index);
+		c = getopt_long(argc, argv, "d:f:p:k:oh", long_options, &option_index);
 
 		if (c == -1) {
 			break;
 		}
 
-		switch (c) {
+		switch (LOWERCASE(c)) {
 		case 'd':
 			buffer_size = strlen(optarg) + 1;
 			result->device = malloc(buffer_size);
@@ -87,6 +90,23 @@ invocation_state_t *parse_arguments_and_get_passphrase(int argc, char **argv) {
 			CHECK_MALLOC(result->passphrase, "passphrase in invocation state");
 			strncpy(result->passphrase, optarg, buffer_size);
 			result->passphrase[buffer_size - 1] = (char)0;
+			break;
+
+		case 'k':
+			switch (LOWERCASE(optarg[0])) {
+			case 'l':
+				result->kdf_hardness = kdf_hardness_low;
+				break;
+			case 'm':
+				result->kdf_hardness = kdf_hardness_medium;
+				break;
+			case 'h':
+				result->kdf_hardness = kdf_hardness_high;
+				break;
+			default:
+				result->kdf_hardness = kdf_hardness_invalid;
+				break;
+			}
 			break;
 
 		case 'o':
@@ -119,9 +139,11 @@ invocation_state_t *parse_arguments_and_get_passphrase(int argc, char **argv) {
 	int extra_args = argc - optind;
 
 	if (extra_args > 0) {
-		char *program_name = strrchr(argv[0], '/') + 1;
-		if (program_name == NULL) {
+		char *program_name = strrchr(argv[0], '/');
+		if (program_name == NULL || program_name[1] == (char)0) {
 			program_name = argv[0];
+		} else {
+			program_name += 1;
 		}
 		fprintf(stderr, "%s: unrecognized argument%s -- ", program_name,
 		        extra_args > 1 ? "s" : "");
@@ -137,30 +159,44 @@ invocation_state_t *parse_arguments_and_get_passphrase(int argc, char **argv) {
 	switch (result->subcommand) {
 	case enrol:
 		invalid_invocation = invalid_invocation || result->device == NULL ||
-		                     result->file == NULL;
+		                     result->file == NULL ||
+		                     result->kdf_hardness == kdf_hardness_invalid;
 		break;
 	case generate:
 		invalid_invocation = invalid_invocation || result->device != NULL ||
 		                     result->file == NULL ||
-		                     result->obfuscate_device_info;
+		                     result->obfuscate_device_info ||
+		                     result->kdf_hardness != kdf_hardness_unspecified;
 		break;
 	case enumerate:
-		invalid_invocation = invalid_invocation || result->device != NULL ||
-		                     result->file != NULL ||
-		                     result->passphrase != NULL ||
-		                     result->obfuscate_device_info;
-		break;
 	case help:
 	case version:
 	default:
-		invalid_invocation =
-		    invalid_invocation || result->obfuscate_device_info;
+		invalid_invocation = invalid_invocation || result->device != NULL ||
+		                     result->file != NULL ||
+		                     result->passphrase != NULL ||
+		                     result->obfuscate_device_info ||
+		                     result->kdf_hardness != kdf_hardness_unspecified;
 		break;
 	}
 
 	if (result->subcommand != help && invalid_invocation) {
 		print_usage(argv[0]);
 		exit(EXIT_BAD_INVOCATION);
+	}
+
+	if (result->subcommand == enrol &&
+	    result->kdf_hardness == kdf_hardness_unspecified) {
+		long pages = sysconf(_SC_PHYS_PAGES);
+		long page_size = sysconf(_SC_PAGE_SIZE);
+		size_t available_memory = pages * page_size;
+		if (available_memory > (crypto_pwhash_MEMLIMIT_SENSITIVE * 2)) {
+			result->kdf_hardness = kdf_hardness_high;
+		} else if (available_memory > (crypto_pwhash_MEMLIMIT_MODERATE * 2)) {
+			result->kdf_hardness = kdf_hardness_medium;
+		} else {
+			result->kdf_hardness = kdf_hardness_low;
+		}
 	}
 
 	if (result->passphrase == NULL &&
@@ -212,4 +248,25 @@ invocation_state_t *parse_arguments_and_get_passphrase(int argc, char **argv) {
 	}
 
 	return result;
+}
+
+void free_invocation(invocation_state_t *invocation) {
+	if (invocation == NULL) {
+		return;
+	}
+
+	if (invocation->passphrase != NULL) {
+		sodium_memzero(invocation->passphrase, strlen(invocation->passphrase));
+		free(invocation->passphrase);
+	}
+
+	if (invocation->device != NULL) {
+		free(invocation->device);
+	}
+
+	if (invocation->file != NULL) {
+		free(invocation->file);
+	}
+
+	free(invocation);
 }

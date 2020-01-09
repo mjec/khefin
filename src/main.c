@@ -29,25 +29,30 @@ int main(int argc, char **argv) {
 	switch (invocation->subcommand) {
 	case help:
 		print_help(argv[0]);
+		free_invocation(invocation);
 		return EXIT_SUCCESS;
 
 	case version:
 		print_version();
+		free_invocation(invocation);
 		return EXIT_SUCCESS;
 
 	case enumerate:
 		devices_list = list_devices();
 		print_devices_list(devices_list);
 		free_devices_list(devices_list);
+		free_invocation(invocation);
 		return EXIT_SUCCESS;
 
 	case enrol:
 		enrol_device(invocation);
+		free_invocation(invocation);
 		return EXIT_SUCCESS;
 
 	case generate:
 		devices_list = list_devices();
-		print_secret_result = print_secret(invocation, devices_list);
+		print_secret_result =
+		    print_secret_consuming_invocation(invocation, devices_list);
 		free_devices_list(devices_list);
 		switch (print_secret_result) {
 		case EXIT_NO_DEVICES:
@@ -62,14 +67,15 @@ int main(int argc, char **argv) {
 			return EXIT_SUCCESS;
 		default:
 			errx(EXIT_PROGRAMMER_ERROR,
-			     "BUG (%s:%d): unhandled return value from print_secret() (%d)",
+			     "BUG (%s:%d): unhandled return value from "
+			     "print_secret_consuming_invocation() (%d)",
 			     __func__, __LINE__, print_secret_result);
 		}
 		break;
 
 	default:
 		errx(EXIT_PROGRAMMER_ERROR,
-		     "BUG (%s:%d): Unhandled but valid subcommand (%d)\n", __func__,
+		     "BUG (%s:%d): unhandled but valid subcommand (%d)\n", __func__,
 		     __LINE__, invocation->subcommand);
 	}
 }

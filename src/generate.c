@@ -4,24 +4,28 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "cryptography.h"
 #include "exit.h"
 #include "serialization.h"
 
-unsigned short int print_secret(invocation_state_t *invocation,
-                                devices_list_t *devices_list) {
+unsigned short int
+print_secret_consuming_invocation(invocation_state_t *invocation,
+                                  devices_list_t *devices_list) {
 	deserialized_cleartext *cleartext =
 	    load_cleartext_from_file(invocation->file);
+	key_spec_t *key_spec = make_key_spec_from_passphrase_and_cleartext(
+	    invocation->passphrase, cleartext);
+	unsigned char *key_bytes = derive_key(key_spec);
+	free_key_spec(key_spec);
+	key_spec = NULL;
 	authenticator_parameters_t *authenticator_params =
-	    build_authenticator_parameters_from_deserialized_cleartext_and_passphrase(
-	        cleartext, invocation->passphrase);
+	    build_authenticator_parameters_from_deserialized_cleartext_and_key(
+	        cleartext, key_bytes);
 
 	// Clean up things we don't need anymore
-	sodium_memzero(invocation->passphrase, strlen(invocation->passphrase));
-	free(invocation->device);
-	free(invocation->file);
-	free(invocation->passphrase);
-	free(invocation);
+	free_invocation(invocation);
 	invocation = NULL;
+	free_key(key_bytes);
 
 	for (size_t i = 0; i < devices_list->count; i++) {
 		const fido_dev_info_t *di = fido_dev_info_ptr(devices_list->list, i);

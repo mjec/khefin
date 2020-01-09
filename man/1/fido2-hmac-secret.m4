@@ -51,6 +51,14 @@ Note that either way, passphrases must \fBnot\fR contain a null (0x00) byte.
 Optional for the \fBenrol\fR subcommand, otherwise prohibited.
 If specified, do not store the \fIdevice\fR AAGUID (identifier of device make and model) in \fIfile\fR.
 
+.TP
+.BR \-k ", " \-\-kdf\-hardness =\fIhardness\fR
+Optional for the \fBenrol\fR subcommand, otherwise prohibited.
+Specify the complexity of the key derivation function used to derive a cryptographic key from \fIpassphrase\fR.
+Valid values for \fIhardness\fR are \fBhigh\fR, \fBmedium\fR or \fBlow\fR.
+If not specified, a value will be chosen automatically based on total system RAM.
+While greater hardness provides better security (at the cost of CPU time and RAM), more important is that \fIpassphrase\fR is long and difficult to guess.
+
 .SH DESCRIPTION
 
 m4_APPNAME produces deterministic output which can only be reproduced without \fIfile\fR, the \fIpassphrase\fR and the same authenticator \fIdevice\fR that was used during the \fBenrol\fR step.

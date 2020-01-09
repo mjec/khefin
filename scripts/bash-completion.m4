@@ -23,6 +23,10 @@ m4_COMPLETION_FUNCTION_NAME`'() {
 			mapfile -t COMPREPLY < <("${words[0]}" enumerate | grep -v '^!' | cut -f 2)
 			return
 			;;
+		--kdf-hardness|-!(-*)k)
+			mapfile -t COMPREPLY < <(compgen -W "low medium high" -- "$cur")
+			return
+			;;
 	esac
 
 	case "${words[1]}" in
@@ -30,7 +34,7 @@ m4_COMPLETION_FUNCTION_NAME`'() {
 			opts="-f --file"
 			;;
 		enrol)
-			opts="-f -d -p -o --file --device --passphrase --obfuscate-device-info"
+			opts="-f -d -p -o -k --file --device --passphrase --obfuscate-device-info --kdf-hardness"
 			;;
 	esac
 
