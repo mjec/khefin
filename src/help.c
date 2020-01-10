@@ -17,6 +17,7 @@ void print_usage(char *program_name) {
 void print_help(char *program_name) {
 	print_usage(program_name);
 	printf(
+	    "%s",
 	    /* clang-format off */
 		// This has manually-inserted hard wraps at 80 characters,
 		// which is inconsistent with clang-format.

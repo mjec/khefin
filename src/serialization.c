@@ -40,7 +40,11 @@ build_authenticator_parameters_from_deserialized_cleartext_and_passphrase(
 	    allocate_parameters(secrets->credential_id_size, secrets->salt_size);
 	memcpy(params->credential_id, secrets->credential_id,
 	       secrets->credential_id_size);
-	strcpy(params->relying_party_id, secrets->relying_party_id);
+	strncpy(params->relying_party_id, secrets->relying_party_id,
+	        RELYING_PARTY_ID_SIZE + RELYING_PARTY_SUFFIX_SIZE + 1);
+	params
+	    ->relying_party_id[RELYING_PARTY_ID_SIZE + RELYING_PARTY_SUFFIX_SIZE] =
+	    (char)0;
 	memcpy(params->salt, secrets->salt, secrets->salt_size);
 	free_secrets(secrets);
 	secrets = NULL;

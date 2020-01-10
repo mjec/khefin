@@ -256,7 +256,8 @@ deserialized_secrets *deserialize_secrets_from_cbor_v1(cbor_item_t *cbor_root) {
 		             "relying party id in decrypted secret blob");
 		strncpy(secrets->relying_party_id,
 		        (const char *restrict)cbor_string_handle(cbor_relying_party_id),
-		        relying_party_size + 1);
+		        relying_party_size);
+		secrets->relying_party_id[relying_party_size] = (char)0;
 	} else {
 		secrets->relying_party_id = NULL;
 	}

@@ -49,6 +49,9 @@ void lock_memory_and_drop_privileges(void) {
 			original_uid = getuid();
 		} else if (getenv("SUDO_UID") != NULL) {
 			original_uid = atoi(getenv("SUDO_UID"));
+			if (original_uid < 1) {
+				original_uid = 0;
+			}
 		} else {
 			original_uid = 0;
 		}

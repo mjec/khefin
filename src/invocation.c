@@ -54,6 +54,7 @@ invocation_state_t *parse_arguments_and_get_passphrase(int argc, char **argv) {
 
 		/* getopt_long stores the option index here. */
 		int option_index = 0;
+		size_t buffer_size;
 
 		c = getopt_long(argc, argv, "d:f:p:oh", long_options, &option_index);
 
@@ -63,21 +64,29 @@ invocation_state_t *parse_arguments_and_get_passphrase(int argc, char **argv) {
 
 		switch (c) {
 		case 'd':
-			result->device = malloc(strlen(optarg) + 1);
+			buffer_size = strlen(optarg) + 1;
+			result->device = malloc(buffer_size);
 			CHECK_MALLOC(result->device, "device path in invocation state");
-			strcpy(result->device, optarg);
+			strncpy(result->device, optarg, buffer_size);
 			break;
 
 		case 'f':
-			result->file = malloc(strlen(optarg) + 1);
+			buffer_size = strlen(optarg) + 1;
+			result->file = malloc(buffer_size);
 			CHECK_MALLOC(result->file, "file path in invocation state");
-			strcpy(result->file, optarg);
+			strncpy(result->file, optarg, buffer_size);
 			break;
 
 		case 'p':
-			result->passphrase = malloc(strlen(optarg) + 1);
+			buffer_size = strlen(optarg);
+			if (buffer_size > LONGEST_VALID_PASSPHRASE) {
+				buffer_size = LONGEST_VALID_PASSPHRASE;
+			}
+			buffer_size++; // for the null byte
+			result->passphrase = malloc(buffer_size);
 			CHECK_MALLOC(result->passphrase, "passphrase in invocation state");
-			strcpy(result->passphrase, optarg);
+			strncpy(result->passphrase, optarg, buffer_size);
+			result->passphrase[buffer_size - 1] = (char)0;
 			break;
 
 		case 'o':
@@ -110,29 +119,17 @@ invocation_state_t *parse_arguments_and_get_passphrase(int argc, char **argv) {
 	int extra_args = argc - optind;
 
 	if (extra_args > 0) {
-		size_t warning_size = strlen("invalid arguments -- \n") + 1;
+		char *program_name = strrchr(argv[0], '/') + 1;
+		if (program_name == NULL) {
+			program_name = argv[0];
+		}
+		fprintf(stderr, "%s: unrecognized argument%s -- ", program_name,
+		        extra_args > 1 ? "s" : "");
+
 		for (int i = optind; i < argc; i++) {
-			warning_size += strlen(argv[i]) + 3;
+			fprintf(stderr, "'%s'%s", argv[i], i < (argc - 1) ? " " : "\n");
 		}
-		char *error_message = malloc(warning_size * (sizeof(char)));
-		CHECK_MALLOC(error_message, "error message for bad invocation");
 
-		strcat(error_message, "invalid argument");
-		if (extra_args > 1) {
-			strcat(error_message, "s");
-		}
-		strcat(error_message, " -- ");
-
-		while (optind < argc) {
-			strcat(error_message, "'");
-			strcat(error_message, argv[optind++]);
-			strcat(error_message, "'");
-			if (optind != argc) {
-				strcat(error_message, " ");
-			}
-		}
-		warnx("%s", error_message);
-		free(error_message);
 		invalid_invocation = true;
 	}
 

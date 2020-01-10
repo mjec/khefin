@@ -33,7 +33,8 @@ void enrol_device(invocation_state_t *invocation) {
 		    RPID_ENCODING_TABLE[randombytes_uniform(RPID_ENCODING_TABLE_SIZE)];
 	}
 	authenticator_params->relying_party_id[RELYING_PARTY_ID_SIZE] = (char)0;
-	strcat(authenticator_params->relying_party_id, RELYING_PARTY_SUFFIX);
+	strncat(authenticator_params->relying_party_id, RELYING_PARTY_SUFFIX,
+	        RELYING_PARTY_SUFFIX_SIZE);
 	create_credential(authenticator, authenticator_params);
 	close_and_free_device_ignoring_errors(authenticator);
 
