@@ -23,6 +23,8 @@ void lock_memory_and_drop_privileges(void) {
 	}
 #endif
 
+#ifndef DEBUG
+
 	// Set memory to not-dumpable
 	r = prctl(PR_SET_DUMPABLE, 0);
 #if WARN_ON_MEMORY_LOCK_ERRORS
@@ -42,6 +44,8 @@ void lock_memory_and_drop_privileges(void) {
 		     "crash");
 	}
 #endif
+
+#endif // ifndef DEBUG
 
 	// Drop privileges if running as root
 	if (geteuid() == 0) {
