@@ -26,6 +26,7 @@ print_secret_consuming_invocation(invocation_state_t *invocation,
 	free_invocation(invocation);
 	invocation = NULL;
 	free_key(key_bytes);
+	key_bytes = NULL;
 
 	for (size_t i = 0; i < devices_list->count; i++) {
 		const fido_dev_info_t *di = fido_dev_info_ptr(devices_list->list, i);
@@ -49,13 +50,26 @@ print_secret_consuming_invocation(invocation_state_t *invocation,
 					printf("%02x", secret->secret[j]);
 				}
 				printf("\n");
+				free_parameters(authenticator_params);
+				authenticator_params = NULL;
+
+				free_cleartext(cleartext);
+				cleartext = NULL;
+
+				free_secret(secret);
+				secret = NULL;
 				return EXIT_SUCCESS;
 			}
+			free_secret(secret);
+			secret = NULL;
 			warnx("%s at %s did not return a valid secret: %s (0x%x)",
 			      fido_dev_info_product_string(di), authenticator_path,
 			      fido_strerr(result), result);
 		}
 	}
+
+	free_parameters(authenticator_params);
+	authenticator_params = NULL;
 
 	free_cleartext(cleartext);
 	cleartext = NULL;

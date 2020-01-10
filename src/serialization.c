@@ -26,7 +26,6 @@ build_authenticator_parameters_from_deserialized_cleartext_and_key(
 	deserialized_secrets *secrets = load_secrets_from_bytes(
 	    decrypted, cleartext->encrypted_data_size - crypto_secretbox_MACBYTES);
 	free(decrypted);
-	free(key_bytes);
 
 	authenticator_parameters_t *params =
 	    allocate_parameters(secrets->credential_id_size, secrets->salt_size);
@@ -64,11 +63,9 @@ build_deserialized_cleartext_from_authenticator_parameters_and_key_spec(
 	deserialized_secrets *secrets = malloc(sizeof(deserialized_secrets));
 	CHECK_MALLOC(secrets, "secrets");
 	secrets->version = cleartext->version;
-	secrets->relying_party_id =
-	    malloc(strlen(authenticator_params->relying_party_id) + 1);
+	secrets->relying_party_id = strdup(authenticator_params->relying_party_id);
 	CHECK_MALLOC(secrets->relying_party_id,
 	             "relying party id in encrypted keyfile")
-	strcpy(secrets->relying_party_id, authenticator_params->relying_party_id);
 	secrets->credential_id = malloc(authenticator_params->credential_id_size);
 	CHECK_MALLOC(secrets->credential_id, "credential id in encrypted keyfile")
 	memcpy(secrets->credential_id, authenticator_params->credential_id,
@@ -120,16 +117,20 @@ void free_cleartext(deserialized_cleartext *clear) {
 		return;
 	}
 
-	if (clear->kdf_salt) {
+	if (clear->kdf_salt != NULL) {
 		free(clear->kdf_salt);
 	}
 
-	if (clear->nonce) {
+	if (clear->nonce != NULL) {
 		free(clear->nonce);
 	}
 
-	if (clear->encrypted_data) {
+	if (clear->encrypted_data != NULL) {
 		free(clear->encrypted_data);
+	}
+
+	if (clear->device_aaguid != NULL) {
+		free(clear->device_aaguid);
 	}
 
 	free(clear);
@@ -176,6 +177,7 @@ deserialized_secrets *load_secrets_from_bytes(unsigned char *decrypted,
 	}
 
 	uint8_t version = cbor_get_uint8(cbor_version);
+	cbor_decref(&cbor_version);
 
 	switch (version) {
 	case 1:
@@ -210,9 +212,13 @@ void write_cleartext_to_file(deserialized_cleartext *cleartext,
 		errx(EXIT_OUT_OF_MEMORY, "Unable to serialize cleartext");
 	}
 
+	cbor_decref(&cbor_cleartext);
+
 	if (fwrite(serialized_cleartext, serialized_cleartext_size, 1, fp) != 1) {
 		errx(EXIT_DESERIALIZATION_ERROR, "Unable to write file at %s", path);
 	}
+
+	free(serialized_cleartext);
 
 	fclose(fp);
 }
@@ -255,9 +261,14 @@ deserialized_cleartext *load_cleartext_from_file(const char *path) {
 		     "Unable to read file at %s into buffer", path);
 	}
 
+	fclose(fp);
+
 	/* Assuming `buffer` contains `info.st_size` bytes of input data */
 	struct cbor_load_result result;
 	cbor_item_t *cbor_root = cbor_load(buffer, length, &result);
+
+	free(buffer);
+	buffer = NULL;
 
 	if (result.error.code != CBOR_ERR_NONE) {
 		errx(EXIT_DESERIALIZATION_ERROR,
@@ -283,6 +294,7 @@ deserialized_cleartext *load_cleartext_from_file(const char *path) {
 	}
 
 	uint8_t version = cbor_get_uint8(cbor_version);
+	cbor_decref(&cbor_version);
 
 	switch (version) {
 	case 1:

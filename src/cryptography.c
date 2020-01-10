@@ -41,10 +41,9 @@ make_key_spec_from_passphrase_and_cleartext(char *passphrase,
                                             deserialized_cleartext *cleartext) {
 	key_spec_t *keyspec = malloc(sizeof(key_spec_t));
 	CHECK_MALLOC(keyspec, "password-derived key specificications");
-	keyspec->passphrase = malloc(strlen(passphrase));
+	keyspec->passphrase = strdup(passphrase);
 	CHECK_MALLOC(keyspec->passphrase,
 	             "passphrase in password-derived key specificications");
-	strcpy(keyspec->passphrase, passphrase);
 	keyspec->opslimit = cleartext->opslimit;
 	keyspec->memlimit = cleartext->memlimit;
 	keyspec->algorithm = cleartext->algorithm;
@@ -60,10 +59,9 @@ make_key_spec_from_passphrase_and_cleartext(char *passphrase,
 key_spec_t *make_new_key_spec_from_invocation(invocation_state_t *invocation) {
 	key_spec_t *keyspec = malloc(sizeof(key_spec_t));
 	CHECK_MALLOC(keyspec, "password-derived key specificications");
-	keyspec->passphrase = malloc(strlen(invocation->passphrase));
+	keyspec->passphrase = strdup(invocation->passphrase);
 	CHECK_MALLOC(keyspec->passphrase,
 	             "passphrase in password-derived key specificications");
-	strcpy(keyspec->passphrase, invocation->passphrase);
 
 	switch (invocation->kdf_hardness) {
 	case kdf_hardness_low:

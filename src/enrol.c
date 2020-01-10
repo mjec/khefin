@@ -23,9 +23,6 @@ void enrol_device(invocation_state_t *invocation) {
 	}
 
 	authenticator_params = allocate_parameters(0, SALT_SIZE_BYTES);
-	authenticator_params->salt = malloc(SALT_SIZE_BYTES);
-	CHECK_MALLOC(authenticator_params->salt,
-	             "salt in authenticator parameters");
 	randombytes_buf(authenticator_params->salt, SALT_SIZE_BYTES);
 
 	for (int i = 0; i < RELYING_PARTY_ID_SIZE; i++) {
@@ -57,4 +54,6 @@ void enrol_device(invocation_state_t *invocation) {
 	sodium_memzero(invocation->passphrase, strlen(invocation->passphrase));
 
 	write_cleartext_to_file(cleartext, invocation->file);
+
+	free_cleartext(cleartext);
 }

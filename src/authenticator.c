@@ -203,6 +203,18 @@ void free_parameters(authenticator_parameters_t *params) {
 		free(params->client_data_hash);
 	}
 
+	if (params->user_name != NULL) {
+		free(params->user_name);
+	}
+
+	if (params->user_display_name != NULL) {
+		free(params->user_display_name);
+	}
+
+	if (params->relying_party_name != NULL) {
+		free(params->relying_party_name);
+	}
+
 	// The following parameters are secret
 	if (params->relying_party_id != NULL) {
 		sodium_memzero(params->relying_party_id, RELYING_PARTY_ID_SIZE);
