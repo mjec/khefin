@@ -28,6 +28,6 @@ jobs:
     - name: make initcpio
       run: make initcpio
     - name: make bash-completion
-      run: make initcpio
+      run: make bash-completion
     - name: lint scripts
       run: make shellcheck
