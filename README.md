@@ -3,9 +3,9 @@ A system for using a FIDO2 authenticator with [hmac-secret extension](https://fi
 
 ## Installation
 
-Install dependencies `libfido2`, `libcbor` and `libsodium`, then `make all && sudo make install`.
+For Arch Linux, install the [`fido2-hmac-secret` AUR package](https://aur.archlinux.org/packages/fido2-hmac-secret/).
 
-For Arch Linux, consider using the PKGBUILD and `.install` files in in `contrib/archlinux`.
+Install dependencies `libfido2`, `libcbor` and `libsodium`, then `make all && sudo make install`.
 
 For more, see `INSTALL.md`.
 
