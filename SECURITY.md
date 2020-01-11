@@ -2,7 +2,7 @@
 
 ## Supported Versions
 
-All versions of this package are currently receiving security updates.
+Versions 0.4.0 and above of this package are currently receiving security updates.
 
 ## Reporting a Vulnerability
 

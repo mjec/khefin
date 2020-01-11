@@ -1,6 +1,8 @@
 ## Next version (unreleased)
 _These changes are on the branch `master`, but not yet in a versioned release._
 
+## Version 0.4.0
+
 * Make passphrase prompt output on STDERR instead of STDOUT
 * Add fido2-hmac-secret-add-luks-key script (issue #1)
 * Add setcap cap_ipc_lock+ep in install target, SETCAP_BINARY install flag (defaults to on), and remove setuid (issue #3)
