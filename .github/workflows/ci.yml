@@ -23,11 +23,13 @@ jobs:
       run: make format && git diff --exit-code
     - name: lint C
       run: make lint
-    - name: make release
-      run: make release
-    - name: make initcpio
-      run: make initcpio
-    - name: make bash-completion
-      run: make bash-completion
     - name: lint scripts
       run: make shellcheck
+    - name: make all
+      run: |
+        make clean
+        make all
+    - name: make all with gcc
+      run: |
+        make clean
+        CC=gcc make all

@@ -12,12 +12,12 @@
 #define LOWERCASE(x) ((x) | 0x20)
 
 typedef enum subcommand_t {
-	unknown,
-	help,
-	version,
-	enrol,
-	generate,
-	enumerate,
+	subcommand_unknown,
+	subcommand_help,
+	subcommand_version,
+	subcommand_enrol,
+	subcommand_generate,
+	subcommand_enumerate,
 } subcommand_t;
 
 typedef enum kdf_hardness_t {

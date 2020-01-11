@@ -28,15 +28,15 @@ invocation_state_t *parse_arguments_and_get_passphrase(int argc, char **argv) {
 	result->kdf_hardness = kdf_hardness_unspecified;
 
 	if (strcmp(argv[1], "help") == 0) {
-		result->subcommand = help;
+		result->subcommand = subcommand_help;
 	} else if (strcmp(argv[1], "version") == 0) {
-		result->subcommand = version;
+		result->subcommand = subcommand_version;
 	} else if (strcmp(argv[1], "enrol") == 0) {
-		result->subcommand = enrol;
+		result->subcommand = subcommand_enrol;
 	} else if (strcmp(argv[1], "generate") == 0) {
-		result->subcommand = generate;
+		result->subcommand = subcommand_generate;
 	} else if (strcmp(argv[1], "enumerate") == 0) {
-		result->subcommand = enumerate;
+		result->subcommand = subcommand_enumerate;
 	} else {
 		print_usage(argv[0]);
 		exit(EXIT_BAD_INVOCATION);
@@ -114,7 +114,7 @@ invocation_state_t *parse_arguments_and_get_passphrase(int argc, char **argv) {
 			break;
 
 		case 'h':
-			result->subcommand = help;
+			result->subcommand = subcommand_help;
 			break;
 
 		default:
@@ -123,19 +123,19 @@ invocation_state_t *parse_arguments_and_get_passphrase(int argc, char **argv) {
 		}
 	}
 
-	if (result->subcommand == unknown && optind < argc) {
+	if (result->subcommand == subcommand_unknown && optind < argc) {
 		if (strcmp(argv[optind], "help") == 0) {
-			result->subcommand = help;
+			result->subcommand = subcommand_help;
 		} else if (strcmp(argv[optind], "enrol") == 0) {
-			result->subcommand = enrol;
+			result->subcommand = subcommand_enrol;
 		} else if (strcmp(argv[optind], "generate") == 0) {
-			result->subcommand = generate;
+			result->subcommand = subcommand_generate;
 		}
 	}
 
 	// Add 1 to optind to take account of the subcommand, if we've already seen
 	// it
-	optind += (result->subcommand == unknown) ? 0 : 1;
+	optind += (result->subcommand == subcommand_unknown) ? 0 : 1;
 	int extra_args = argc - optind;
 
 	if (extra_args > 0) {
@@ -157,20 +157,20 @@ invocation_state_t *parse_arguments_and_get_passphrase(int argc, char **argv) {
 
 	// Required arguments
 	switch (result->subcommand) {
-	case enrol:
+	case subcommand_enrol:
 		invalid_invocation = invalid_invocation || result->device == NULL ||
 		                     result->file == NULL ||
 		                     result->kdf_hardness == kdf_hardness_invalid;
 		break;
-	case generate:
+	case subcommand_generate:
 		invalid_invocation = invalid_invocation || result->device != NULL ||
 		                     result->file == NULL ||
 		                     result->obfuscate_device_info ||
 		                     result->kdf_hardness != kdf_hardness_unspecified;
 		break;
-	case enumerate:
-	case help:
-	case version:
+	case subcommand_enumerate:
+	case subcommand_help:
+	case subcommand_version:
 	default:
 		invalid_invocation = invalid_invocation || result->device != NULL ||
 		                     result->file != NULL ||
@@ -180,12 +180,12 @@ invocation_state_t *parse_arguments_and_get_passphrase(int argc, char **argv) {
 		break;
 	}
 
-	if (result->subcommand != help && invalid_invocation) {
+	if (result->subcommand != subcommand_help && invalid_invocation) {
 		print_usage(argv[0]);
 		exit(EXIT_BAD_INVOCATION);
 	}
 
-	if (result->subcommand == enrol &&
+	if (result->subcommand == subcommand_enrol &&
 	    result->kdf_hardness == kdf_hardness_unspecified) {
 		long pages = sysconf(_SC_PHYS_PAGES);
 		long page_size = sysconf(_SC_PAGE_SIZE);
@@ -200,7 +200,7 @@ invocation_state_t *parse_arguments_and_get_passphrase(int argc, char **argv) {
 	}
 
 	if (result->passphrase == NULL &&
-	    (result->subcommand == enrol || result->subcommand == generate)) {
+	    (result->subcommand == subcommand_enrol || result->subcommand == subcommand_generate)) {
 		result->passphrase = malloc(LONGEST_VALID_PASSPHRASE + 1);
 		CHECK_MALLOC(result->passphrase, "passphrase");
 

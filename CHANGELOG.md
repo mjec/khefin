@@ -1,6 +1,9 @@
 ## Next version (unreleased)
 _These changes are on the branch `master`, but not yet in a versioned release._
 
+* Refactor code to make it possible to compile with GCC without warnings
+* Update CI to run make against gcc as well as clang
+
 ## Version 0.4.0
 
 * Make passphrase prompt output on STDERR instead of STDOUT

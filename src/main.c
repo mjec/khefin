@@ -27,29 +27,29 @@ int main(int argc, char **argv) {
 	devices_list_t *devices_list;
 
 	switch (invocation->subcommand) {
-	case help:
+	case subcommand_help:
 		print_help(argv[0]);
 		free_invocation(invocation);
 		return EXIT_SUCCESS;
 
-	case version:
+	case subcommand_version:
 		print_version();
 		free_invocation(invocation);
 		return EXIT_SUCCESS;
 
-	case enumerate:
+	case subcommand_enumerate:
 		devices_list = list_devices();
 		print_devices_list(devices_list);
 		free_devices_list(devices_list);
 		free_invocation(invocation);
 		return EXIT_SUCCESS;
 
-	case enrol:
+	case subcommand_enrol:
 		enrol_device(invocation);
 		free_invocation(invocation);
 		return EXIT_SUCCESS;
 
-	case generate:
+	case subcommand_generate:
 		devices_list = list_devices();
 		print_secret_result =
 		    print_secret_consuming_invocation(invocation, devices_list);
