@@ -1,6 +1,7 @@
 ## Next version (unreleased)
 _These changes are on the branch `master`, but not yet in a versioned release._
 
+* Make passphrase prompt output on STDERR instead of STDOUT
 * Add fido2-hmac-secret-add-luks-key script (issue #1)
 * Add setcap cap_ipc_lock+ep in install target, SETCAP_BINARY install flag (defaults to on), and remove setuid (issue #3)
 * Change ALWAYS_SILENCE_MEMORY_LOCK_ERRORS to WARN_ON_MEMORY_LOCK_ERRORS and have it default to on

@@ -215,7 +215,7 @@ invocation_state_t *parse_arguments_and_get_passphrase(int argc, char **argv) {
 			if (tcsetattr(STDIN_FILENO, TCSANOW, &terminal_settings) != 0) {
 				err(EXIT_UNABLE_TO_GET_PASSPHRASE, "Unable to get passphrase");
 			}
-			printf("Passphrase: ");
+			fprintf(stderr, "Passphrase: ");
 			if (fgets(result->passphrase, LONGEST_VALID_PASSPHRASE, stdin) ==
 			    NULL) {
 				errx(EXIT_UNABLE_TO_GET_PASSPHRASE,
