@@ -200,7 +200,8 @@ invocation_state_t *parse_arguments_and_get_passphrase(int argc, char **argv) {
 	}
 
 	if (result->passphrase == NULL &&
-	    (result->subcommand == subcommand_enrol || result->subcommand == subcommand_generate)) {
+	    (result->subcommand == subcommand_enrol ||
+	     result->subcommand == subcommand_generate)) {
 		result->passphrase = malloc(LONGEST_VALID_PASSPHRASE + 1);
 		CHECK_MALLOC(result->passphrase, "passphrase");
 
