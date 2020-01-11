@@ -21,7 +21,7 @@ pkgver() {
 
 build() {
   cd "$_pkgname"
-  make release bash-completion initcpio
+  make all
 }
 
 package() {
