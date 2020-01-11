@@ -1,2 +1,2 @@
 APPNAME=fido2-hmac-secret
-APPVERSION=0.4.1
+APPVERSION=0.4.2
