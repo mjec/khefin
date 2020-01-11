@@ -13,11 +13,11 @@ void print_usage(char *program_name) {
 	printf("Usage: %s help\n"
 	       "       %s version\n"
 	       "       %s enumerate\n"
-	       "       %s enrol -d <device> -f <file> [-p <passphrase>] [-o]"
-	       " [-k <hardness>]\n"
-	       "       %s generate -f <file> [-p <passphrase>]\n",
-	       program_name, program_name, program_name, program_name,
-	       program_name);
+	       "       %s generate -f <file> [-p <passphrase>] [-m <data>]\n"
+	       "       %s enrol -d <device> -f <file> [-p <passphrase>] [-o]\n"
+	       "       %*s      [-k <hardness>]\n",
+	       program_name, program_name, program_name, program_name, program_name,
+	       (int)strlen(program_name), "  ");
 }
 
 void print_help(char *program_name) {
@@ -63,6 +63,12 @@ void print_help(char *program_name) {
 	    "                                   medium or low. If not specified, a value\n"
 	    "                                   will be chosen automatically based on\n"
 	    "                                   total system RAM.\n"
+		"\n"
+		"   -m, --mixin <data>              Combine <data> with the encrypted salt,\n"
+		"                                   so that the returned value depends on it.\n"
+		"                                   Note that setting <data> to an empty\n"
+		"                                   string behaves differently to not using\n"
+		"                                   this argument at all.\n"
 	    "\n"
 	    "The output of this program on STDOUT (in either enrol or generate mode) will be\n"
 	    "a sequence of printable, URL-safe ASCII characters, that depend on the\n"

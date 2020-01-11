@@ -22,9 +22,13 @@ void enrol_device(invocation_state_t *invocation) {
 		     invocation->device);
 	}
 
-	authenticator_params = allocate_parameters(0, SALT_SIZE_BYTES);
+	authenticator_params = allocate_parameters_except_rpid(0, SALT_SIZE_BYTES);
 	randombytes_buf(authenticator_params->salt, SALT_SIZE_BYTES);
 
+	authenticator_params->relying_party_id =
+	    malloc(RELYING_PARTY_ID_SIZE + RELYING_PARTY_SUFFIX_SIZE + 1);
+	CHECK_MALLOC(authenticator_params->relying_party_id,
+	             "relying party id in authenticator parameters");
 	for (int i = 0; i < RELYING_PARTY_ID_SIZE; i++) {
 		authenticator_params->relying_party_id[i] =
 		    RPID_ENCODING_TABLE[randombytes_uniform(RPID_ENCODING_TABLE_SIZE)];

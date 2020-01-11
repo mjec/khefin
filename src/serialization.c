@@ -11,8 +11,8 @@
 #include "serialization/v1.h"
 
 authenticator_parameters_t *
-build_authenticator_parameters_from_deserialized_cleartext_and_key(
-    deserialized_cleartext *cleartext, unsigned char *key_bytes) {
+build_authenticator_parameters_from_deserialized_cleartext_and_key_and_mixin(
+    deserialized_cleartext *cleartext, unsigned char *key_bytes, char *mixin) {
 	unsigned char *decrypted =
 	    malloc(cleartext->encrypted_data_size - crypto_secretbox_MACBYTES);
 	CHECK_MALLOC(cleartext->encrypted_data, "encrypted data");
@@ -27,18 +27,30 @@ build_authenticator_parameters_from_deserialized_cleartext_and_key(
 	    decrypted, cleartext->encrypted_data_size - crypto_secretbox_MACBYTES);
 	free(decrypted);
 
-	authenticator_parameters_t *params =
-	    allocate_parameters(secrets->credential_id_size, secrets->salt_size);
+	authenticator_parameters_t *params = allocate_parameters_except_rpid(
+	    secrets->credential_id_size, secrets->salt_size);
 	memcpy(params->credential_id, secrets->credential_id,
 	       secrets->credential_id_size);
-	strncpy(params->relying_party_id, secrets->relying_party_id,
-	        RELYING_PARTY_ID_SIZE + RELYING_PARTY_SUFFIX_SIZE + 1);
-	params
-	    ->relying_party_id[RELYING_PARTY_ID_SIZE + RELYING_PARTY_SUFFIX_SIZE] =
-	    (char)0;
+	params->relying_party_id = strdup(secrets->relying_party_id);
+	CHECK_MALLOC(params->relying_party_id,
+	             "relying party id in authenticator parameters");
 	memcpy(params->salt, secrets->salt, secrets->salt_size);
 	free_secrets(secrets);
 	secrets = NULL;
+
+	if (mixin != NULL) {
+		unsigned char *hashed_mixin = malloc(params->salt_size);
+		if (crypto_generichash(hashed_mixin, params->salt_size,
+		                       (unsigned char *)mixin, strlen(mixin), NULL,
+		                       0) != 0) {
+			errx(EXIT_CRYPTOGRAPHY_ERROR, "Unable to hash mixin data");
+		}
+		for (size_t i = 0; i < params->salt_size; i++) {
+			params->salt[i] ^= hashed_mixin[i];
+		}
+		free(hashed_mixin);
+	}
+
 	return params;
 }
 

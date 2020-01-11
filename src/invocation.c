@@ -26,6 +26,7 @@ invocation_state_t *parse_arguments_and_get_passphrase(int argc, char **argv) {
 	result->passphrase = NULL;
 	result->obfuscate_device_info = false;
 	result->kdf_hardness = kdf_hardness_unspecified;
+	result->mixin = NULL;
 
 	if (strcmp(argv[1], "help") == 0) {
 		result->subcommand = subcommand_help;
@@ -49,17 +50,18 @@ invocation_state_t *parse_arguments_and_get_passphrase(int argc, char **argv) {
 		    {"device", required_argument, 0, 'd'},
 		    {"file", required_argument, 0, 'f'},
 		    {"passphrase", required_argument, 0, 'p'},
+		    {"mixin", required_argument, 0, 'm'},
+		    {"kdf-hardness", required_argument, 0, 'k'},
 		    {"obfuscate-device", no_argument, 0, 'o'},
 		    {"help", no_argument, 0, 'h'},
-		    {"kdf-hardness", required_argument, 0, 'k'},
 		    {NULL, 0, NULL, 0},
 		};
 
 		/* getopt_long stores the option index here. */
 		int option_index = 0;
-		size_t buffer_size;
 
-		c = getopt_long(argc, argv, "d:f:p:k:oh", long_options, &option_index);
+		c = getopt_long(argc, argv, "d:f:p:m:k:oh", long_options,
+		                &option_index);
 
 		if (c == -1) {
 			break;
@@ -67,29 +69,23 @@ invocation_state_t *parse_arguments_and_get_passphrase(int argc, char **argv) {
 
 		switch (LOWERCASE(c)) {
 		case 'd':
-			buffer_size = strlen(optarg) + 1;
-			result->device = malloc(buffer_size);
+			result->device = strdup(optarg);
 			CHECK_MALLOC(result->device, "device path in invocation state");
-			strncpy(result->device, optarg, buffer_size);
 			break;
 
 		case 'f':
-			buffer_size = strlen(optarg) + 1;
-			result->file = malloc(buffer_size);
+			result->file = strdup(optarg);
 			CHECK_MALLOC(result->file, "file path in invocation state");
-			strncpy(result->file, optarg, buffer_size);
 			break;
 
 		case 'p':
-			buffer_size = strlen(optarg);
-			if (buffer_size > LONGEST_VALID_PASSPHRASE) {
-				buffer_size = LONGEST_VALID_PASSPHRASE;
-			}
-			buffer_size++; // for the null byte
-			result->passphrase = malloc(buffer_size);
+			result->passphrase = strndup(optarg, LONGEST_VALID_PASSPHRASE);
 			CHECK_MALLOC(result->passphrase, "passphrase in invocation state");
-			strncpy(result->passphrase, optarg, buffer_size);
-			result->passphrase[buffer_size - 1] = (char)0;
+			break;
+
+		case 'm':
+			result->mixin = strdup(optarg);
+			CHECK_MALLOC(result->mixin, "mixin data in invocation state");
 			break;
 
 		case 'k':
@@ -159,7 +155,7 @@ invocation_state_t *parse_arguments_and_get_passphrase(int argc, char **argv) {
 	switch (result->subcommand) {
 	case subcommand_enrol:
 		invalid_invocation = invalid_invocation || result->device == NULL ||
-		                     result->file == NULL ||
+		                     result->file == NULL || result->mixin != NULL ||
 		                     result->kdf_hardness == kdf_hardness_invalid;
 		break;
 	case subcommand_generate:
@@ -173,7 +169,7 @@ invocation_state_t *parse_arguments_and_get_passphrase(int argc, char **argv) {
 	case subcommand_version:
 	default:
 		invalid_invocation = invalid_invocation || result->device != NULL ||
-		                     result->file != NULL ||
+		                     result->file != NULL || result->mixin != NULL ||
 		                     result->passphrase != NULL ||
 		                     result->obfuscate_device_info ||
 		                     result->kdf_hardness != kdf_hardness_unspecified;
@@ -181,6 +177,7 @@ invocation_state_t *parse_arguments_and_get_passphrase(int argc, char **argv) {
 	}
 
 	if (result->subcommand != subcommand_help && invalid_invocation) {
+		free_invocation(result);
 		print_usage(argv[0]);
 		exit(EXIT_BAD_INVOCATION);
 	}
@@ -259,6 +256,10 @@ void free_invocation(invocation_state_t *invocation) {
 	if (invocation->passphrase != NULL) {
 		sodium_memzero(invocation->passphrase, strlen(invocation->passphrase));
 		free(invocation->passphrase);
+	}
+
+	if (invocation->mixin != NULL) {
+		free(invocation->mixin);
 	}
 
 	if (invocation->device != NULL) {

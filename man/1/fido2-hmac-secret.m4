@@ -59,6 +59,12 @@ Valid values for \fIhardness\fR are \fBhigh\fR, \fBmedium\fR or \fBlow\fR.
 If not specified, a value will be chosen automatically based on total system RAM.
 While greater hardness provides better security (at the cost of CPU time and RAM), more important is that \fIpassphrase\fR is long and difficult to guess.
 
+.TP
+.BR \-m ", " \-\-mixin =\fIdata\fR
+Optional for the \fBgenerate\fR subcommand, otherwise prohibited.
+Combine \fIdata\fR with the encrypted salt, so that the returned value depends on it.
+Note that setting \fIdata\fR to an empty string behaves differently to not using this argument at all.
+
 .SH DESCRIPTION
 
 m4_APPNAME produces deterministic output which can only be reproduced without \fIfile\fR, the \fIpassphrase\fR and the same authenticator \fIdevice\fR that was used during the \fBenrol\fR step.

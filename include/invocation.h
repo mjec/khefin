@@ -35,7 +35,7 @@ typedef struct invocation_state_t {
 	char *passphrase;
 	bool obfuscate_device_info;
 	kdf_hardness_t kdf_hardness;
-
+	char *mixin;
 } invocation_state_t;
 
 invocation_state_t *parse_arguments_and_get_passphrase(int argc, char **argv);

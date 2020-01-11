@@ -19,8 +19,8 @@ print_secret_consuming_invocation(invocation_state_t *invocation,
 	free_key_spec(key_spec);
 	key_spec = NULL;
 	authenticator_parameters_t *authenticator_params =
-	    build_authenticator_parameters_from_deserialized_cleartext_and_key(
-	        cleartext, key_bytes);
+	    build_authenticator_parameters_from_deserialized_cleartext_and_key_and_mixin(
+	        cleartext, key_bytes, invocation->mixin);
 
 	// Clean up things we don't need anymore
 	free_invocation(invocation);

@@ -131,8 +131,8 @@ void close_and_free_device(fido_dev_t *device) {
 	fido_dev_free(&device);
 }
 
-authenticator_parameters_t *allocate_parameters(size_t credential_id_size,
-                                                size_t salt_size) {
+authenticator_parameters_t *
+allocate_parameters_except_rpid(size_t credential_id_size, size_t salt_size) {
 	authenticator_parameters_t *params =
 	    malloc(sizeof(authenticator_parameters_t));
 	CHECK_MALLOC(params, "authenticator parameters");
@@ -155,11 +155,6 @@ authenticator_parameters_t *allocate_parameters(size_t credential_id_size,
 		params->salt = NULL;
 		params->salt_size = 0;
 	}
-
-	params->relying_party_id =
-	    malloc(RELYING_PARTY_ID_SIZE + RELYING_PARTY_SUFFIX_SIZE + 1);
-	CHECK_MALLOC(params->relying_party_id,
-	             "relying party id in authenticator parameters");
 
 	// This data is required, but isn't meaninfully used, so we zero it out
 	params->user_id = calloc(1, 1);

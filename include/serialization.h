@@ -29,8 +29,8 @@
 #endif
 
 authenticator_parameters_t *
-build_authenticator_parameters_from_deserialized_cleartext_and_key(
-    deserialized_cleartext *cleartext, unsigned char *key_bytes);
+build_authenticator_parameters_from_deserialized_cleartext_and_key_and_mixin(
+    deserialized_cleartext *cleartext, unsigned char *key_bytes, char *mixin);
 deserialized_cleartext *
 build_deserialized_cleartext_from_authenticator_parameters_and_key_spec(
     authenticator_parameters_t *authenticator_params, key_spec_t *key_spec);

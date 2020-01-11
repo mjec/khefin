@@ -48,8 +48,8 @@ void free_device_info(fido_cbor_info_t *cbor_info);
 void close_and_free_device_ignoring_errors(fido_dev_t *device);
 void close_and_free_device(fido_dev_t *device);
 
-authenticator_parameters_t *allocate_parameters(size_t credential_id_size,
-                                                size_t salt_size);
+authenticator_parameters_t *
+allocate_parameters_except_rpid(size_t credential_id_size, size_t salt_size);
 /**
  * This function assumes all pointers are to malloc()'d memory
  * except relying_party_id, credential_id and salt, which must

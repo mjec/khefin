@@ -1,6 +1,8 @@
 ## Next version (unreleased)
 _These changes are on the branch `master`, but not yet in a versioned release._
 
+* Add --mixin parameter (issue #4)
+
 ## Version 0.4.1
 
 * Refactor code to make it possible to compile with GCC without warnings
