@@ -1,6 +1,8 @@
 # fido2-hmac-secret
 A system for using a FIDO2 authenticator with [hmac-secret extension](https://fidoalliance.org/specs/fido-v2.0-id-20180227/fido-client-to-authenticator-protocol-v2.0-id-20180227.html#sctn-hmac-secret-extension) support to generate passphrase-protected secrets.
 
+![](https://github.com/mjec/fido2-hmac-secret/workflows/Continuous%20integration/badge.svg)
+
 ## Installation
 
 For Arch Linux, install the [`fido2-hmac-secret` AUR package](https://aur.archlinux.org/packages/fido2-hmac-secret/).
