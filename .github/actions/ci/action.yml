@@ -1,0 +1,14 @@
+name: 'CI'
+description: 'CI for fido2-hmac-secret'
+inputs:
+  what:
+    description: 'What to run (format, lint, shellcheck, clang or gcc)'
+    required: true
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  args:
+    - ${{ inputs.what }}
+branding:
+  icon: 'layers'
+  color: 'purple'

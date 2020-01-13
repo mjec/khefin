@@ -3,33 +3,58 @@ name: Continuous integration
 on: [push, pull_request]
 
 jobs:
-  build:
-
+  format:
     runs-on: ubuntu-latest
-    
     steps:
-    - uses: actions/checkout@v2
+    - name: Checkout code
+      uses: actions/checkout@v2
       with:
         persist-credentials: false
-    - name: install dependencies
-      run: |
-        sudo apt-add-repository ppa:yubico/stable
-        sudo add-apt-repository 'deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic main'
-        sudo apt-get update
-        sudo apt-get install clang-format clang-tidy shellcheck libfido2-dev libcbor-dev libsodium-dev
-        # work around https://bugs.launchpad.net/ubuntu/+source/libcbor/+bug/1858835
-        sudo curl -o /usr/lib/x86_64-linux-gnu/pkgconfig/libcbor.pc https://gist.githubusercontent.com/mjec/ecc2f4421a6d3f2d798bedc23c5665b7/raw/ac817fd599285e9e1a483f72b1801ebb750213a6/libcbor.pc
-    - name: check formatting
-      run: make format && git diff --exit-code
-    - name: lint C
-      run: make lint
-    - name: lint scripts
-      run: make shellcheck
-    - name: make all
-      run: |
-        make clean
-        make all
-    - name: make all with gcc
-      run: |
-        make clean
-        CC=gcc make all
+    - name: Run make format
+      uses: ./.github/actions/ci
+      with:
+        what: format
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+      with:
+        persist-credentials: false
+    - name: Run make lint
+      uses: ./.github/actions/ci
+      with:
+        what: lint
+  shellcheck:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+      with:
+        persist-credentials: false
+    - name: Run make shellcheck
+      uses: ./.github/actions/ci
+      with:
+        what: shellcheck
+  build-clang:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+      with:
+        persist-credentials: false
+    - name: Build with clang
+      uses: ./.github/actions/ci
+      with:
+        what: clang
+  build-gcc:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+      with:
+        persist-credentials: false
+    - name: Build with gcc
+      uses: ./.github/actions/ci
+      with:
+        what: gcc
