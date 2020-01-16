@@ -11,10 +11,10 @@ case "$1" in
 		make shellcheck
 		;;
 	"clang")
-		make all
+		make all -j
 		;;
 	"gcc")
-		CC=gcc make all
+		CC=gcc make all -j
 		;;
 	*)
 		echo "Unrecognized command"
