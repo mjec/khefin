@@ -11,7 +11,7 @@ undefined="undefined 110d43d6-f20a-4f29-bae4-1a58f813980c"
 decrypted_keyfile_device="8931c13b-8f4f-468e-b372-967e12955c54"
 
 run_hook() {
-	encrypted_keyfile_dir=${encrypted_keyfile_dir-m4_DEFAULT_ENCRYPTED_KEYFILE_DIR}
+	encrypted_keyfile_dir=${encrypted_keyfile_dir-m4_INITCPIO_DEFAULT_ENCRYPTED_KEYFILE_DIR}
 
 	# if [ "${decrypted_keyfile_path-$undefined}" = "$undefined" ]; then
 	# 	return
@@ -38,7 +38,7 @@ run_hook() {
 
 	# This ! [ $x -gt 0 ] construction means that we do the body even if $x is not a number
 	if ! [ "${encrypted_keyfile_passphrase_attempts-NaN}" -gt 0 ] > /dev/null 2>&1; then
-		encrypted_keyfile_passphrase_attempts=m4_DEFAULT_MAX_PASSPHRASE_ATTEMPTS
+		encrypted_keyfile_passphrase_attempts=m4_INITCPIO_DEFAULT_MAX_PASSPHRASE_ATTEMPTS
 	fi
 
 	for encrypted_keyfile in "$encrypted_keyfile_dir"/* "$encrypted_keyfile_dir"/.*; do

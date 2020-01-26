@@ -19,6 +19,8 @@ If you want a [bash-completion](https://github.com/scop/bash-completion) script,
 
 If you want `mkinitcpio` hooks add the `initcpio` target.
 
+If you want `ssh-askpass` add the `ssh-askpass` target.
+
 ### Build flags
 
 | Flag | Type | Default | Meaning |
