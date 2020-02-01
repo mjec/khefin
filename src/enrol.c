@@ -6,6 +6,7 @@
 #include <string.h>
 
 #include "exit.h"
+#include "files.h"
 #include "serialization.h"
 
 void enrol_device(invocation_state_t *invocation) {
@@ -57,7 +58,8 @@ void enrol_device(invocation_state_t *invocation) {
 	// the rest of invocation later.
 	sodium_memzero(invocation->passphrase, strlen(invocation->passphrase));
 
-	write_cleartext_to_file(cleartext, invocation->file);
+	encoded_file *f = write_cleartext(cleartext, invocation->file);
+	write_file(f);
 
 	free_cleartext(cleartext);
 }

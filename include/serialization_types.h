@@ -4,6 +4,12 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+typedef struct encoded_file {
+	char *path;
+	unsigned char *data;
+	size_t length;
+} encoded_file;
+
 typedef struct deserialized_cleartext {
 	uint8_t version;
 	unsigned char *device_aaguid;

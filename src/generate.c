@@ -6,13 +6,16 @@
 
 #include "cryptography.h"
 #include "exit.h"
+#include "files.h"
 #include "serialization.h"
 
 unsigned short int
 print_secret_consuming_invocation(invocation_state_t *invocation,
                                   devices_list_t *devices_list) {
-	deserialized_cleartext *cleartext =
-	    load_cleartext_from_file(invocation->file);
+	encoded_file *f = read_file(invocation->file);
+	deserialized_cleartext *cleartext = load_cleartext(f);
+	free_encoded_file(f);
+
 	key_spec_t *key_spec = make_key_spec_from_passphrase_and_cleartext(
 	    invocation->passphrase, cleartext);
 	unsigned char *key_bytes = derive_key(key_spec);

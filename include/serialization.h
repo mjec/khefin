@@ -9,10 +9,6 @@
 
 #define SERIALIZATION_MAX_VERSION 1
 
-#ifndef LARGEST_VALID_PAYLOAD_SIZE_BYTES
-#define LARGEST_VALID_PAYLOAD_SIZE_BYTES 10485760
-#endif
-
 #define OBFUSCATED_DEVICE_SENTINEL 0
 
 #ifdef DEBUG
@@ -36,9 +32,9 @@ build_deserialized_cleartext_from_authenticator_parameters_and_key_spec(
     authenticator_parameters_t *authenticator_params, key_spec_t *key_spec);
 void free_cleartext(deserialized_cleartext *clear);
 void free_secrets(deserialized_secrets *secret);
-void write_cleartext_to_file(deserialized_cleartext *cleartext,
-                             const char *path);
-deserialized_cleartext *load_cleartext_from_file(const char *path);
+encoded_file *write_cleartext(deserialized_cleartext *cleartext,
+                              const char *path);
+deserialized_cleartext *load_cleartext(encoded_file *file);
 deserialized_secrets *load_secrets_from_bytes(unsigned char *decrypted,
                                               size_t decrypted_size);
 const char *get_cbor_error_string(cbor_error_code code);

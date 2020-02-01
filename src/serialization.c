@@ -203,106 +203,51 @@ deserialized_secrets *load_secrets_from_bytes(unsigned char *decrypted,
 	}
 }
 
-void write_cleartext_to_file(deserialized_cleartext *cleartext,
-                             const char *path) {
-	FILE *fp = fopen(path, "w");
-	if (fp == NULL) {
-		errx(EXIT_DESERIALIZATION_ERROR, "Unable to open file at %s", path);
-	}
-
-	if (fseek(fp, 0, SEEK_SET) != 0) {
-		errx(EXIT_DESERIALIZATION_ERROR,
-		     "Unable to seek to start of file at %s", path);
-	}
+encoded_file *write_cleartext(deserialized_cleartext *cleartext,
+                              const char *path) {
+	encoded_file *result = malloc(sizeof(encoded_file));
+	CHECK_MALLOC(result, "encoded file structure")
+	result->path = malloc(strlen(path));
+	CHECK_MALLOC(result->path, "encoded file path")
+	strncpy(result->path, path, strlen(path));
 
 	cbor_item_t *cbor_cleartext = serialize_cleartext_to_cbor_v1(cleartext);
 
-	unsigned char *serialized_cleartext;
-	size_t serialized_cleartext_size;
-	if (cbor_serialize_alloc(cbor_cleartext, &serialized_cleartext,
-	                         &serialized_cleartext_size) == 0) {
+	if (cbor_serialize_alloc(cbor_cleartext, &result->data, &result->length) ==
+	    0) {
 		errx(EXIT_OUT_OF_MEMORY, "Unable to serialize cleartext");
 	}
 
 	cbor_decref(&cbor_cleartext);
 
-	if (fwrite(serialized_cleartext, serialized_cleartext_size, 1, fp) != 1) {
-		errx(EXIT_DESERIALIZATION_ERROR, "Unable to write file at %s", path);
-	}
-
-	free(serialized_cleartext);
-
-	fclose(fp);
+	return result;
 }
 
-deserialized_cleartext *load_cleartext_from_file(const char *path) {
-	long int ftell_result;
-
-	FILE *fp = fopen(path, "r");
-	if (fp == NULL) {
-		errx(EXIT_DESERIALIZATION_ERROR, "Unable to open file at %s", path);
-	}
-
-	if (fseek(fp, 0, SEEK_END) != 0) {
-		errx(EXIT_DESERIALIZATION_ERROR, "Unable to seek to end of file at %s",
-		     path);
-	}
-
-	if ((ftell_result = ftell(fp)) < 0) {
-		errx(EXIT_DESERIALIZATION_ERROR, "Unable to get size of file at %s",
-		     path);
-	}
-	size_t length = (size_t)ftell_result;
-
-	if (fseek(fp, 0, SEEK_SET) != 0) {
-		errx(EXIT_DESERIALIZATION_ERROR,
-		     "Unable to seek to start of file at %s", path);
-	}
-
-	if (length > LARGEST_VALID_PAYLOAD_SIZE_BYTES) {
-		errx(EXIT_DESERIALIZATION_ERROR,
-		     "File at %s is too big (more than %d bytes); refusing to load it",
-		     path, LARGEST_VALID_PAYLOAD_SIZE_BYTES);
-	}
-
-	unsigned char *buffer = malloc(length);
-	CHECK_MALLOC(buffer, "buffer for reading keyfile");
-
-	if (fread(buffer, length, 1, fp) != 1) {
-		errx(EXIT_DESERIALIZATION_ERROR,
-		     "Unable to read file at %s into buffer", path);
-	}
-
-	fclose(fp);
-
-	/* Assuming `buffer` contains `info.st_size` bytes of input data */
+deserialized_cleartext *load_cleartext(encoded_file *file) {
 	struct cbor_load_result result;
-	cbor_item_t *cbor_root = cbor_load(buffer, length, &result);
-
-	free(buffer);
-	buffer = NULL;
+	cbor_item_t *cbor_root = cbor_load(file->data, file->length, &result);
 
 	if (result.error.code != CBOR_ERR_NONE) {
 		errx(EXIT_DESERIALIZATION_ERROR,
-		     "Unable to deserialize file at %s; is it not CBOR-encoded? CBOR "
-		     "error "
+		     "Unable to deserialize %s; is it not CBOR-encoded? CBOR error "
 		     "code %d: %s",
-		     path, result.error.code, get_cbor_error_string(result.error.code));
+		     file->path, result.error.code,
+		     get_cbor_error_string(result.error.code));
 	}
 
 	if (!cbor_isa_array(cbor_root)) {
 		errx(EXIT_DESERIALIZATION_ERROR,
-		     "File at %s has the wrong format (should be a CBOR array at root)",
-		     path);
+		     "%s has the wrong format (should be a CBOR array at root)",
+		     file->path);
 	}
 
 	cbor_item_t *cbor_version = cbor_array_get(cbor_root, 0);
 	if (!cbor_isa_uint(cbor_version) ||
 	    cbor_int_get_width(cbor_version) != CBOR_INT_8) {
 		errx(EXIT_DESERIALIZATION_ERROR,
-		     "File at %s has the wrong format (first field should be a version "
-		     "number stored as an 8-bit unsigned integer)",
-		     path);
+		     "%s has the wrong format (first field should be a version number "
+		     "stored as an 8-bit unsigned integer)",
+		     file->path);
 	}
 
 	uint8_t version = cbor_get_uint8(cbor_version);
@@ -313,7 +258,7 @@ deserialized_cleartext *load_cleartext_from_file(const char *path) {
 		return deserialize_cleartext_from_cbor_v1(cbor_root);
 	default:
 		errx(EXIT_DESERIALIZATION_ERROR,
-		     "Unrecognized file version (we only support up to %d, got version "
+		     "Unrecognized data version (we only support up to %d, got version "
 		     "%d)",
 		     SERIALIZATION_MAX_VERSION, version);
 		break;
