@@ -1,5 +1,5 @@
-#ifndef fido2hmacsecret_cryptography_H
-#define fido2hmacsecret_cryptography_H
+#ifndef CRYPTOGRAPHY_H
+#define CRYPTOGRAPHY_H
 
 #include "invocation.h"
 #include "serialization_types.h"

@@ -1,5 +1,5 @@
-#ifndef fido2hmacsecret_invocation_H
-#define fido2hmacsecret_invocation_H
+#ifndef INVOCATION_H
+#define INVOCATION_H
 
 #include <stdbool.h>
 

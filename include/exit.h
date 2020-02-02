@@ -1,5 +1,5 @@
-#ifndef fido2hmacsecret_exit_H
-#define fido2hmacsecret_exit_H
+#ifndef EXIT_H
+#define EXIT_H
 
 #include <err.h>
 

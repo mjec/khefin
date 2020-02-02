@@ -1,5 +1,5 @@
-#ifndef fido2hmacsecret_serialization_types_H
-#define fido2hmacsecret_serialization_types_H
+#ifndef SERIALIZATION_TYPES_H
+#define SERIALIZATION_TYPES_H
 
 #include <stdint.h>
 #include <stdlib.h>

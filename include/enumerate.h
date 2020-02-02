@@ -1,5 +1,5 @@
-#ifndef fido2hmacsecret_enumerate_H
-#define fido2hmacsecret_enumerate_H
+#ifndef ENUMERATE_H
+#define ENUMERATE_H
 
 #include "authenticator.h"
 

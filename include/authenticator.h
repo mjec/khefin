@@ -1,5 +1,5 @@
-#ifndef fido2hmacsecret_authenticator_H
-#define fido2hmacsecret_authenticator_H
+#ifndef AUTHENTICATOR_H
+#define AUTHENTICATOR_H
 
 #define RELYING_PARTY_ID_SIZE 32
 #define RELYING_PARTY_SUFFIX ".v1.fido2-hmac-secret.localhost"

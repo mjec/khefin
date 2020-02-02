@@ -1,5 +1,5 @@
-#ifndef fido2hmacsecret_enrol_H
-#define fido2hmacsecret_enrol_H
+#ifndef ENROL_H
+#define ENROL_H
 
 #include "authenticator.h"
 #include "invocation.h"

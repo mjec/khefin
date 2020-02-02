@@ -1,5 +1,5 @@
-#ifndef fido2hmacsecret_help_H
-#define fido2hmacsecret_help_H
+#ifndef HELP_H
+#define HELP_H
 
 #ifndef APPNAME
 #pragma message("APPNAME not defined; are you using the Makefile?")

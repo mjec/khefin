@@ -1,5 +1,5 @@
-#ifndef fido2hmacsecret_serialization_v1_H
-#define fido2hmacsecret_serialization_v1_H
+#ifndef SERIALIZATION_V1_H
+#define SERIALIZATION_V1_H
 
 #include <cbor.h>
 

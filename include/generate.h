@@ -1,5 +1,5 @@
-#ifndef fido2hmacsecret_generate_H
-#define fido2hmacsecret_generate_H
+#ifndef GENERATE_H
+#define GENERATE_H
 
 #include "authenticator.h"
 #include "invocation.h"

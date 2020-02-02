@@ -1,5 +1,5 @@
-#ifndef fido2hmacsecret_files_H
-#define fido2hmacsecret_files_H
+#ifndef FILES_H
+#define FILES_H
 
 #include "serialization_types.h"
 
