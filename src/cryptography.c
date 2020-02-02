@@ -2,6 +2,7 @@
 
 #include "exit.h"
 #include "invocation.h"
+#include "memory.h"
 #include <sodium.h>
 #include <stdlib.h>
 #include <string.h>
@@ -14,8 +15,8 @@ unsigned char *derive_key(key_spec_t *key_spec) {
 		    key_spec->kdf_salt_size, crypto_pwhash_SALTBYTES);
 	}
 
-	unsigned char *key_bytes = malloc(KEY_SIZE);
-	CHECK_MALLOC(key_bytes, "passphrase-derived key");
+	unsigned char *key_bytes =
+	    malloc_or_exit(KEY_SIZE, "passphrase-derived key");
 
 	if (crypto_pwhash(key_bytes, KEY_SIZE, key_spec->passphrase,
 	                  strlen(key_spec->passphrase), key_spec->kdf_salt,
@@ -39,17 +40,16 @@ void free_key(unsigned char *key) {
 key_spec_t *
 make_key_spec_from_passphrase_and_cleartext(char *passphrase,
                                             deserialized_cleartext *cleartext) {
-	key_spec_t *keyspec = malloc(sizeof(key_spec_t));
-	CHECK_MALLOC(keyspec, "password-derived key specificications");
-	keyspec->passphrase = strdup(passphrase);
-	CHECK_MALLOC(keyspec->passphrase,
-	             "passphrase in password-derived key specificications");
+	key_spec_t *keyspec = malloc_or_exit(
+	    sizeof(key_spec_t), "password-derived key specificications");
+	keyspec->passphrase = strdup_or_exit(
+	    passphrase, "passphrase in password-derived key specificications");
 	keyspec->opslimit = cleartext->opslimit;
 	keyspec->memlimit = cleartext->memlimit;
 	keyspec->algorithm = cleartext->algorithm;
-	keyspec->kdf_salt = malloc(cleartext->kdf_salt_size);
-	CHECK_MALLOC(keyspec->kdf_salt,
-	             "salt in password-derived key specificications");
+	keyspec->kdf_salt =
+	    malloc_or_exit(cleartext->kdf_salt_size,
+	                   "salt in password-derived key specificications");
 	memcpy(keyspec->kdf_salt, cleartext->kdf_salt, cleartext->kdf_salt_size);
 	keyspec->kdf_salt_size = cleartext->kdf_salt_size;
 
@@ -57,11 +57,11 @@ make_key_spec_from_passphrase_and_cleartext(char *passphrase,
 }
 
 key_spec_t *make_new_key_spec_from_invocation(invocation_state_t *invocation) {
-	key_spec_t *keyspec = malloc(sizeof(key_spec_t));
-	CHECK_MALLOC(keyspec, "password-derived key specificications");
-	keyspec->passphrase = strdup(invocation->passphrase);
-	CHECK_MALLOC(keyspec->passphrase,
-	             "passphrase in password-derived key specificications");
+	key_spec_t *keyspec = malloc_or_exit(
+	    sizeof(key_spec_t), "password-derived key specificications");
+	keyspec->passphrase =
+	    strdup_or_exit(invocation->passphrase,
+	                   "passphrase in password-derived key specificications");
 
 	switch (invocation->kdf_hardness) {
 	case kdf_hardness_low:
@@ -91,9 +91,9 @@ key_spec_t *make_new_key_spec_from_invocation(invocation_state_t *invocation) {
 	}
 
 	keyspec->algorithm = crypto_pwhash_ALG_ARGON2I13;
-	keyspec->kdf_salt = malloc(crypto_pwhash_SALTBYTES);
-	CHECK_MALLOC(keyspec->kdf_salt,
-	             "salt in password-derived key specificications");
+	keyspec->kdf_salt =
+	    malloc_or_exit(crypto_pwhash_SALTBYTES,
+	                   "salt in password-derived key specificications");
 	randombytes_buf(keyspec->kdf_salt, crypto_pwhash_SALTBYTES);
 	keyspec->kdf_salt_size = crypto_pwhash_SALTBYTES;
 

@@ -6,6 +6,7 @@
 #include <string.h>
 
 #include "exit.h"
+#include "memory.h"
 #include "files.h"
 #include "serialization.h"
 
@@ -27,9 +28,8 @@ void enrol_device(invocation_state_t *invocation) {
 	randombytes_buf(authenticator_params->salt, SALT_SIZE_BYTES);
 
 	authenticator_params->relying_party_id =
-	    malloc(RELYING_PARTY_ID_SIZE + RELYING_PARTY_SUFFIX_SIZE + 1);
-	CHECK_MALLOC(authenticator_params->relying_party_id,
-	             "relying party id in authenticator parameters");
+	    malloc_or_exit(RELYING_PARTY_ID_SIZE + RELYING_PARTY_SUFFIX_SIZE + 1,
+	                   "relying party id in authenticator parameters");
 	for (int i = 0; i < RELYING_PARTY_ID_SIZE; i++) {
 		authenticator_params->relying_party_id[i] =
 		    RPID_ENCODING_TABLE[randombytes_uniform(RPID_ENCODING_TABLE_SIZE)];
@@ -47,8 +47,8 @@ void enrol_device(invocation_state_t *invocation) {
 	free_key_spec(key_spec);
 
 	cleartext->device_aaguid_size = fido_cbor_info_aaguid_len(device_info);
-	cleartext->device_aaguid = malloc(cleartext->device_aaguid_size);
-	CHECK_MALLOC(cleartext->device_aaguid, "device AAGUID");
+	cleartext->device_aaguid =
+	    malloc_or_exit(cleartext->device_aaguid_size, "device AAGUID");
 	memcpy(cleartext->device_aaguid, fido_cbor_info_aaguid_ptr(device_info),
 	       cleartext->device_aaguid_size);
 	free_device_info(device_info);

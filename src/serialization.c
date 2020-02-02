@@ -9,13 +9,14 @@
 #include "exit.h"
 #include "serialization.h"
 #include "serialization/v1.h"
+#include "memory.h"
 
 authenticator_parameters_t *
 build_authenticator_parameters_from_deserialized_cleartext_and_key_and_mixin(
     deserialized_cleartext *cleartext, unsigned char *key_bytes, char *mixin) {
-	unsigned char *decrypted =
-	    malloc(cleartext->encrypted_data_size - crypto_secretbox_MACBYTES);
-	CHECK_MALLOC(cleartext->encrypted_data, "encrypted data");
+	unsigned char *decrypted = malloc_or_exit(cleartext->encrypted_data_size -
+	                                              crypto_secretbox_MACBYTES,
+	                                          "encrypted data");
 	if (crypto_secretbox_open_easy(decrypted, cleartext->encrypted_data,
 	                               cleartext->encrypted_data_size,
 	                               cleartext->nonce, key_bytes) != 0) {
@@ -31,15 +32,16 @@ build_authenticator_parameters_from_deserialized_cleartext_and_key_and_mixin(
 	    secrets->credential_id_size, secrets->salt_size);
 	memcpy(params->credential_id, secrets->credential_id,
 	       secrets->credential_id_size);
-	params->relying_party_id = strdup(secrets->relying_party_id);
-	CHECK_MALLOC(params->relying_party_id,
-	             "relying party id in authenticator parameters");
+	params->relying_party_id =
+	    strdup_or_exit(secrets->relying_party_id,
+	                   "relying party id in authenticator parameters");
 	memcpy(params->salt, secrets->salt, secrets->salt_size);
 	free_secrets(secrets);
 	secrets = NULL;
 
 	if (mixin != NULL) {
-		unsigned char *hashed_mixin = malloc(params->salt_size);
+		unsigned char *hashed_mixin =
+		    malloc_or_exit(params->salt_size, "mixin salt");
 		if (crypto_generichash(hashed_mixin, params->salt_size,
 		                       (unsigned char *)mixin, strlen(mixin), NULL,
 		                       0) != 0) {
@@ -57,34 +59,35 @@ build_authenticator_parameters_from_deserialized_cleartext_and_key_and_mixin(
 deserialized_cleartext *
 build_deserialized_cleartext_from_authenticator_parameters_and_key_spec(
     authenticator_parameters_t *authenticator_params, key_spec_t *key_spec) {
-	deserialized_cleartext *cleartext = malloc(sizeof(deserialized_cleartext));
-	CHECK_MALLOC(cleartext, "encrypted keyfile");
+	deserialized_cleartext *cleartext =
+	    malloc_or_exit(sizeof(deserialized_cleartext), "encrypted keyfile");
 	cleartext->version = SERIALIZATION_MAX_VERSION;
 	cleartext->opslimit = key_spec->opslimit;
 	cleartext->memlimit = key_spec->memlimit;
 	cleartext->algorithm = key_spec->algorithm;
-	cleartext->kdf_salt = malloc(key_spec->kdf_salt_size);
-	CHECK_MALLOC(cleartext->kdf_salt, "salt in encrypted keyfile");
+	cleartext->kdf_salt =
+	    malloc_or_exit(key_spec->kdf_salt_size, "salt in encrypted keyfile");
 	memcpy(cleartext->kdf_salt, key_spec->kdf_salt, key_spec->kdf_salt_size);
 	cleartext->kdf_salt_size = key_spec->kdf_salt_size;
-	cleartext->nonce = malloc(crypto_box_NONCEBYTES);
-	CHECK_MALLOC(cleartext->nonce, "nonce in encrypted keyfile");
+	cleartext->nonce =
+	    malloc_or_exit(crypto_box_NONCEBYTES, "nonce in encrypted keyfile");
 	randombytes_buf(cleartext->nonce, crypto_box_NONCEBYTES);
 	cleartext->nonce_size = crypto_box_NONCEBYTES;
 
-	deserialized_secrets *secrets = malloc(sizeof(deserialized_secrets));
-	CHECK_MALLOC(secrets, "secrets");
+	deserialized_secrets *secrets =
+	    malloc_or_exit(sizeof(deserialized_secrets), "secrets");
 	secrets->version = cleartext->version;
-	secrets->relying_party_id = strdup(authenticator_params->relying_party_id);
-	CHECK_MALLOC(secrets->relying_party_id,
-	             "relying party id in encrypted keyfile")
-	secrets->credential_id = malloc(authenticator_params->credential_id_size);
-	CHECK_MALLOC(secrets->credential_id, "credential id in encrypted keyfile")
+	secrets->relying_party_id =
+	    strdup_or_exit(authenticator_params->relying_party_id,
+	                   "relying party id in encrypted keyfile");
+	secrets->credential_id =
+	    malloc_or_exit(authenticator_params->credential_id_size,
+	                   "credential id in encrypted keyfile");
 	memcpy(secrets->credential_id, authenticator_params->credential_id,
 	       authenticator_params->credential_id_size);
 	secrets->credential_id_size = authenticator_params->credential_id_size;
-	secrets->salt = malloc(authenticator_params->salt_size);
-	CHECK_MALLOC(secrets->salt, "encrypted secret in encrypted keyfile")
+	secrets->salt = malloc_or_exit(authenticator_params->salt_size,
+	                               "encrypted secret in encrypted keyfile");
 	memcpy(secrets->salt, authenticator_params->salt,
 	       authenticator_params->salt_size);
 	secrets->salt_size = authenticator_params->salt_size;
@@ -101,10 +104,9 @@ build_deserialized_cleartext_from_authenticator_parameters_and_key_spec(
 		errx(EXIT_OUT_OF_MEMORY, "Unable to serialize secrets");
 	}
 
-	cleartext->encrypted_data =
-	    malloc(serialized_unencrypted_secrets_size + crypto_secretbox_MACBYTES);
-	CHECK_MALLOC(cleartext->encrypted_data,
-	             "encrypted data blob in encrypted keyfile");
+	cleartext->encrypted_data = malloc_or_exit(
+	    serialized_unencrypted_secrets_size + crypto_secretbox_MACBYTES,
+	    "encrypted data blob in encrypted keyfile");
 	cleartext->encrypted_data_size =
 	    serialized_unencrypted_secrets_size + crypto_secretbox_MACBYTES;
 	unsigned char *key_bytes = derive_key(key_spec);
@@ -205,10 +207,9 @@ deserialized_secrets *load_secrets_from_bytes(unsigned char *decrypted,
 
 encoded_file *write_cleartext(deserialized_cleartext *cleartext,
                               const char *path) {
-	encoded_file *result = malloc(sizeof(encoded_file));
-	CHECK_MALLOC(result, "encoded file structure")
-	result->path = malloc(strlen(path));
-	CHECK_MALLOC(result->path, "encoded file path")
+	encoded_file *result =
+	    malloc_or_exit(sizeof(encoded_file), "encoded file structure");
+	result->path = malloc_or_exit(strlen(path), "encoded file path");
 	strncpy(result->path, path, strlen(path));
 
 	cbor_item_t *cbor_cleartext = serialize_cleartext_to_cbor_v1(cleartext);

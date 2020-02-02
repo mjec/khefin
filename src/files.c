@@ -1,11 +1,12 @@
 #include "files.h"
 #include "exit.h"
+#include "memory.h"
 #include <stdio.h>
 #include <string.h>
 
 encoded_file *read_file(const char *path) {
-	encoded_file *result = malloc(sizeof(encoded_file));
-	CHECK_MALLOC(result, "encoded file structure");
+	encoded_file *result =
+	    malloc_or_exit(sizeof(encoded_file), "encoded file structure");
 
 	long int ftell_result;
 
@@ -36,8 +37,8 @@ encoded_file *read_file(const char *path) {
 		     path, LARGEST_VALID_PAYLOAD_SIZE_BYTES);
 	}
 
-	unsigned char *buffer = malloc(length);
-	CHECK_MALLOC(buffer, "buffer for reading keyfile");
+	unsigned char *buffer =
+	    malloc_or_exit(length, "buffer for reading keyfile");
 
 	if (fread(buffer, length, 1, fp) != 1) {
 		errx(EXIT_DESERIALIZATION_ERROR,
@@ -46,8 +47,7 @@ encoded_file *read_file(const char *path) {
 
 	fclose(fp);
 
-	result->path = malloc(strlen(path));
-	CHECK_MALLOC(result->path, "encoded file path");
+	result->path = malloc_or_exit(strlen(path), "encoded file path");
 	strncpy(result->path, path, strlen(path));
 	result->data = buffer;
 	result->length = length;

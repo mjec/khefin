@@ -7,6 +7,7 @@
 #include <sys/prctl.h>
 #include <sys/resource.h>
 #include <unistd.h>
+#include <string.h>
 
 #include "exit.h"
 
@@ -79,4 +80,28 @@ void lock_memory_and_drop_privileges(void) {
 			}
 		}
 	}
+}
+
+void *malloc_or_exit(size_t n, const char *what) {
+	void *result = malloc(n);
+	if (result == NULL) {
+		errx(EXIT_OUT_OF_MEMORY, "Unable to allocate memory for %s", what);
+	}
+	return result;
+}
+
+char *strdup_or_exit(const char *str, const char *what) {
+	char *result = strdup(str);
+	if (result == NULL) {
+		errx(EXIT_OUT_OF_MEMORY, "Unable to allocate memory for %s", what);
+	}
+	return result;
+}
+
+char *strndup_or_exit(const char *str, size_t n, const char *what) {
+	char *result = strndup(str, n);
+	if (result == NULL) {
+		errx(EXIT_OUT_OF_MEMORY, "Unable to allocate memory for %s", what);
+	}
+	return result;
 }

@@ -6,13 +6,14 @@
 
 #include "exit.h"
 #include "serialization.h"
+#include "memory.h"
 
 devices_list_t *list_devices(void) {
 	fido_dev_info_t *list;
 	size_t count;
 	int r;
-	devices_list_t *result = malloc(sizeof(devices_list_t));
-	CHECK_MALLOC(result, "list of devices");
+	devices_list_t *result =
+	    malloc_or_exit(sizeof(devices_list_t), "list of devices");
 
 	if ((list = fido_dev_info_new(MAX_DEVICES_TO_LIST)) == NULL) {
 		errx(EXIT_OUT_OF_MEMORY, "Unable to create new list of devices");
@@ -133,14 +134,12 @@ void close_and_free_device(fido_dev_t *device) {
 
 authenticator_parameters_t *
 allocate_parameters_except_rpid(size_t credential_id_size, size_t salt_size) {
-	authenticator_parameters_t *params =
-	    malloc(sizeof(authenticator_parameters_t));
-	CHECK_MALLOC(params, "authenticator parameters");
+	authenticator_parameters_t *params = malloc_or_exit(
+	    sizeof(authenticator_parameters_t), "authenticator parameters");
 
 	if (credential_id_size) {
-		params->credential_id = malloc(credential_id_size);
-		CHECK_MALLOC(params->credential_id,
-		             "credential id in authenticator parameters");
+		params->credential_id = malloc_or_exit(
+		    credential_id_size, "credential id in authenticator parameters");
 		params->credential_id_size = credential_id_size;
 	} else {
 		params->credential_id = NULL;
@@ -148,8 +147,8 @@ allocate_parameters_except_rpid(size_t credential_id_size, size_t salt_size) {
 	}
 
 	if (salt_size) {
-		params->salt = malloc(salt_size);
-		CHECK_MALLOC(params->salt, "salt in authenticator parameters");
+		params->salt =
+		    malloc_or_exit(salt_size, "salt in authenticator parameters");
 		params->salt_size = salt_size;
 	} else {
 		params->salt = NULL;
@@ -161,9 +160,9 @@ allocate_parameters_except_rpid(size_t credential_id_size, size_t salt_size) {
 	params->user_id_size = 1;
 
 	// CDH must be 32 bytes
-	params->client_data_hash = malloc(CLIENT_DATA_HASH_SIZE_BYTES);
-	CHECK_MALLOC(params->client_data_hash,
-	             "client data hash in authenticator parameters");
+	params->client_data_hash =
+	    malloc_or_exit(CLIENT_DATA_HASH_SIZE_BYTES,
+	                   "client data hash in authenticator parameters");
 	params->client_data_hash_size = CLIENT_DATA_HASH_SIZE_BYTES;
 	for (int i = 0; i < params->client_data_hash_size; i++) {
 		params->client_data_hash[i] = 'A';
@@ -283,7 +282,8 @@ void create_credential(fido_dev_t *device, authenticator_parameters_t *params) {
 		fido_cred_free(&credential);
 		close_and_free_device_ignoring_errors(device);
 		errx(EXIT_AUTHENTICATOR_ERROR,
-		     "Unable to disable use of resident key: %s (0x%x)", fido_strerr(r), r);
+		     "Unable to disable use of resident key: %s (0x%x)", fido_strerr(r),
+		     r);
 	}
 
 	// TODO: PIN support
@@ -304,9 +304,8 @@ void create_credential(fido_dev_t *device, authenticator_parameters_t *params) {
 		errx(EXIT_AUTHENTICATOR_ERROR, "Unable to read credential ID");
 	}
 
-	params->credential_id = malloc(cred_id_size);
-	CHECK_MALLOC(params->credential_id,
-	             "credential id in authenticator parameters");
+	params->credential_id = malloc_or_exit(
+	    cred_id_size, "credential id in authenticator parameters");
 	params->credential_id_size = cred_id_size;
 	memcpy(params->credential_id, cred_id, cred_id_size);
 
@@ -422,8 +421,8 @@ int get_secret_from_authenticator_params(
 	}
 
 	secret_struct->secret_size = secret_size;
-	secret_struct->secret = malloc(secret_struct->secret_size);
-	CHECK_MALLOC(secret_struct->secret, "secret");
+	secret_struct->secret =
+	    malloc_or_exit(secret_struct->secret_size, "secret");
 	memcpy(secret_struct->secret, secret_pointer, secret_size);
 	fido_assert_free(&assertion);
 

@@ -12,6 +12,7 @@
 
 #include "exit.h"
 #include "help.h"
+#include "memory.h"
 
 invocation_state_t *parse_arguments_and_get_passphrase(int argc, char **argv) {
 	if (argc < 2) {
@@ -19,8 +20,8 @@ invocation_state_t *parse_arguments_and_get_passphrase(int argc, char **argv) {
 		exit(EXIT_BAD_INVOCATION);
 	}
 
-	invocation_state_t *result = malloc(sizeof(invocation_state_t));
-	CHECK_MALLOC(result, "invocation state");
+	invocation_state_t *result =
+	    malloc_or_exit(sizeof(invocation_state_t), "invocation state");
 	result->device = NULL;
 	result->file = NULL;
 	result->passphrase = NULL;
@@ -69,23 +70,24 @@ invocation_state_t *parse_arguments_and_get_passphrase(int argc, char **argv) {
 
 		switch (LOWERCASE(c)) {
 		case 'd':
-			result->device = strdup(optarg);
-			CHECK_MALLOC(result->device, "device path in invocation state");
+			result->device =
+			    strdup_or_exit(optarg, "device path in invocation state");
 			break;
 
 		case 'f':
-			result->file = strdup(optarg);
-			CHECK_MALLOC(result->file, "file path in invocation state");
+			result->file =
+			    strdup_or_exit(optarg, "file path in invocation state");
 			break;
 
 		case 'p':
-			result->passphrase = strndup(optarg, LONGEST_VALID_PASSPHRASE);
-			CHECK_MALLOC(result->passphrase, "passphrase in invocation state");
+			result->passphrase =
+			    strndup_or_exit(optarg, LONGEST_VALID_PASSPHRASE,
+			                    "passphrase in invocation state");
 			break;
 
 		case 'm':
-			result->mixin = strdup(optarg);
-			CHECK_MALLOC(result->mixin, "mixin data in invocation state");
+			result->mixin =
+			    strdup_or_exit(optarg, "mixin data in invocation state");
 			break;
 
 		case 'k':
@@ -199,8 +201,8 @@ invocation_state_t *parse_arguments_and_get_passphrase(int argc, char **argv) {
 	if (result->passphrase == NULL &&
 	    (result->subcommand == subcommand_enrol ||
 	     result->subcommand == subcommand_generate)) {
-		result->passphrase = malloc(LONGEST_VALID_PASSPHRASE + 1);
-		CHECK_MALLOC(result->passphrase, "passphrase");
+		result->passphrase =
+		    malloc_or_exit(LONGEST_VALID_PASSPHRASE + 1, "passphrase");
 
 		if (isatty(STDIN_FILENO)) {
 			struct termios terminal_settings;

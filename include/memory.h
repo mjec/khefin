@@ -14,4 +14,8 @@
 
 void lock_memory_and_drop_privileges(void);
 
+void *malloc_or_exit(size_t n, const char *what);
+char *strdup_or_exit(const char *str, const char *what);
+char *strndup_or_exit(const char *str, size_t n, const char *what);
+
 #endif
