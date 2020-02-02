@@ -207,10 +207,8 @@ deserialized_secrets *load_secrets_from_bytes(unsigned char *decrypted,
 
 encoded_file *write_cleartext(deserialized_cleartext *cleartext,
                               const char *path) {
-	encoded_file *result =
-	    malloc_or_exit(sizeof(encoded_file), "encoded file structure");
-	result->path = malloc_or_exit(strlen(path), "encoded file path");
-	strncpy(result->path, path, strlen(path));
+	encoded_file *result = malloc_or_exit(sizeof(encoded_file), "encoded file structure");
+	result->path = strdup_or_exit(path, "encoded file path");
 
 	cbor_item_t *cbor_cleartext = serialize_cleartext_to_cbor_v1(cleartext);
 
