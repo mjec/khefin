@@ -5,8 +5,8 @@
 #include <string.h>
 
 #include "exit.h"
-#include "serialization.h"
 #include "memory.h"
+#include "serialization.h"
 
 devices_list_t *list_devices(void) {
 	fido_dev_info_t *list;

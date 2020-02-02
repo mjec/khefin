@@ -7,9 +7,9 @@
 #include "authenticator.h"
 #include "cryptography.h"
 #include "exit.h"
+#include "memory.h"
 #include "serialization.h"
 #include "serialization/v1.h"
-#include "memory.h"
 
 authenticator_parameters_t *
 build_authenticator_parameters_from_deserialized_cleartext_and_key_and_mixin(
@@ -207,7 +207,8 @@ deserialized_secrets *load_secrets_from_bytes(unsigned char *decrypted,
 
 encoded_file *write_cleartext(deserialized_cleartext *cleartext,
                               const char *path) {
-	encoded_file *result = malloc_or_exit(sizeof(encoded_file), "encoded file structure");
+	encoded_file *result =
+	    malloc_or_exit(sizeof(encoded_file), "encoded file structure");
 	result->path = strdup_or_exit(path, "encoded file path");
 
 	cbor_item_t *cbor_cleartext = serialize_cleartext_to_cbor_v1(cleartext);

@@ -6,8 +6,8 @@
 #include <string.h>
 
 #include "exit.h"
-#include "memory.h"
 #include "files.h"
+#include "memory.h"
 #include "serialization.h"
 
 void enrol_device(invocation_state_t *invocation) {

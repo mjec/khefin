@@ -7,8 +7,8 @@
 #include "cryptography.h"
 #include "exit.h"
 #include "files.h"
-#include "serialization.h"
 #include "memory.h"
+#include "serialization.h"
 
 unsigned short int
 print_secret_consuming_invocation(invocation_state_t *invocation,
