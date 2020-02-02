@@ -279,6 +279,13 @@ void create_credential(fido_dev_t *device, authenticator_parameters_t *params) {
 		     "Unable to set client data hash: %s (0x%x)", fido_strerr(r), r);
 	}
 
+	if ((r = fido_cred_set_rk(credential, FIDO_OPT_FALSE)) != FIDO_OK) {
+		fido_cred_free(&credential);
+		close_and_free_device_ignoring_errors(device);
+		errx(EXIT_AUTHENTICATOR_ERROR,
+		     "Unable to disable use of resident key: %s (0x%x)", fido_strerr(r), r);
+	}
+
 	// TODO: PIN support
 	if ((r = fido_dev_make_cred(device, credential, NULL)) != FIDO_OK) {
 		fido_cred_free(&credential);
