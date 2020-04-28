@@ -1,4 +1,7 @@
+# Changelog
+
 ## Next version (unreleased)
+
 _These changes are on the branch `master`, but not yet in a versioned release._
 
 ## Version 0.4.3
