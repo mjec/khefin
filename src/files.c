@@ -77,7 +77,11 @@ void write_file(encoded_file *file) {
 }
 
 void free_encoded_file(encoded_file *file) {
-	free(file->path);
-	free(file->data);
+	if (file->path) {
+		free(file->path);
+	}
+	if (file->data) {
+		free(file->data);
+	}
 	free(file);
 }

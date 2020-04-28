@@ -60,6 +60,7 @@ void enrol_device(invocation_state_t *invocation) {
 
 	encoded_file *f = write_cleartext(cleartext, invocation->file);
 	write_file(f);
+	free_encoded_file(f);
 
 	free_cleartext(cleartext);
 }
