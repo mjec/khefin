@@ -79,8 +79,8 @@ clean: cleandep cleanobj cleandist
 
 # Development build targets
 .PHONY: debug
-debug: CFLAGS:=-g -DDEBUG $(CFLAGS)
-debug: LDFLAGS:=-g -DDEBUG $(LDFLAGS)
+debug: CFLAGS:=-fsanitize=address -fno-omit-frame-pointer -g -DDEBUG $(CFLAGS)
+debug: LDFLAGS:=-fsanitize=address -fno-omit-frame-pointer -g -DDEBUG $(LDFLAGS)
 debug: $(BINPATH)
 
 .PHONY: lint

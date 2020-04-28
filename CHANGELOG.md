@@ -4,6 +4,7 @@
 
 _These changes are on the branch `master`, but not yet in a versioned release._
 
+* Debug builds use address sanitizer
 * Fix memory leak in `enrol_device` (issue #18)
 
 ## Version 0.4.3
