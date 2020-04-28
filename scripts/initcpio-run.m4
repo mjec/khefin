@@ -13,10 +13,6 @@ decrypted_keyfile_device="8931c13b-8f4f-468e-b372-967e12955c54"
 run_hook() {
 	encrypted_keyfile_dir=${encrypted_keyfile_dir-m4_INITCPIO_DEFAULT_ENCRYPTED_KEYFILE_DIR}
 
-	# if [ "${decrypted_keyfile_path-$undefined}" = "$undefined" ]; then
-	# 	return
-	# fi
-
 	# From m4_APPNAME man page, EXIT CODES section:
 	#   34     No authenticator device connected
 	m4_APPNAME enumerate > /dev/null
