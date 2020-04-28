@@ -83,9 +83,14 @@ debug: CFLAGS:=-fsanitize=address -fno-omit-frame-pointer -g -DDEBUG $(CFLAGS)
 debug: LDFLAGS:=-fsanitize=address -fno-omit-frame-pointer -g -DDEBUG $(LDFLAGS)
 debug: $(BINPATH)
 
+# Targets for tests and checks
 .PHONY: lint
 lint:
 	clang-tidy --fix $(SRCS) -- $(INCLUDEFLAGS) $(DEFINEFLAGS)
+
+.PHONY: check-lint
+check-lint:
+	clang-tidy $(SRCS) -- $(INCLUDEFLAGS) $(DEFINEFLAGS)
 
 .PHONY: shellcheck
 shellcheck:
@@ -94,6 +99,10 @@ shellcheck:
 .PHONY: format
 format:
 	clang-format -style=file -i $(SRCS) $(HEADERS)
+
+.PHONY: check-format
+check-format:
+	clang-format -style=file -Werror --dry-run $(SRCS) $(HEADERS)
 
 # Invidiual source file targets
 $(BINPATH): $(OBJS)

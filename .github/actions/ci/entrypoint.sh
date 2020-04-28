@@ -2,10 +2,10 @@
 
 case "$1" in
 	"format")
-		make format && git diff --exit-code
+		make check-format
 		;;
 	"lint")
-		make lint
+		make check-lint
 		;;
 	"shellcheck")
 		make shellcheck
