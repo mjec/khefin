@@ -42,6 +42,6 @@ You will also need to add these keys to a key slot for your disk. You can do thi
 
 If an authenticator is not plugged in, or you get the passphrase wrong too many times, this hook will not write your cryptsetup keyfile and the encrypt hook will fall back to prompting you for a passphrase.
 
-Note that you MUST plug the authenticator in BEFORE the hook runs, which normally means before you turn on your computer.
+By default if the authenticator is not plugged in before the boot hook runs, you will be prompted to insert it and press a key. You can disable this behavior (meaning that the hook will be skipped if the authenticator is not plugged in) by setting the do_not_prompt_for_authenticator kernel parameter.
 HELPEOF
 }

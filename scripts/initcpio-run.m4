@@ -17,13 +17,27 @@ run_hook() {
 	#   34     No authenticator device connected
 	m4_APPNAME enumerate > /dev/null
 	if [ "$?" -eq 34 ]; then
-		return
+		if [ "${do_not_prompt_for_authenticator:-$undefined}" != "$undefined" ]; then
+			printf "No authenticator device found; skipping m4_APPNAME.\n"
+			return
+		else
+			printf "Insert your authenticator device and press any key to continue.\n"
+			printf "If you press a key without inserting your authenticator, the m4_APPNAME hook will be skipped.\n"
+			stty -icanon -echo
+			dd bs=1 count=1 2>/dev/null
+			stty icanon echo
+			m4_APPNAME enumerate > /dev/null
+			if [ "$?" -eq 34 ]; then
+				printf "No authenticator device found; skipping m4_APPNAME hook.\n"
+				return
+			fi
+		fi
 	fi
 
 	if [ "${encrypted_keyfile_passphrase-$undefined}" != "$undefined" ]; then
 		# Never prompt
 		passphrase_prompt_option=m4_PROMPT_NEVER
-		printf "Using handcoded passphrase for m4_APPNAME.\n"
+		printf "Using hardcoded passphrase for m4_APPNAME.\n"
 	elif [ "${same_passphrase_every_keyfile:-$undefined}" != "$undefined" ]; then
 		# Prompt first time only
 		passphrase_prompt_option=m4_PROMPT_ONCE
