@@ -4,10 +4,10 @@
 
 Before building or running this tool, you'll need the following dependencies installed:
 
- * [libfido2](https://developers.yubico.com/libfido2/)
- * [libcbor](https://libcbor.readthedocs.io/en/v0.5.0/) - also a dependency of libfido2
- * [libsodium](https://download.libsodium.org/doc/)
- * [libcap](https://sites.google.com/site/fullycapable/)
+* [libfido2](https://developers.yubico.com/libfido2/)
+* [libcbor](https://libcbor.readthedocs.io/en/v0.5.0/) - also a dependency of libfido2
+* [libsodium](https://download.libsodium.org/doc/)
+* [libcap](https://sites.google.com/site/fullycapable/)
 
 At the moment I believe this tool is linux-only; issue reports or pull requests to improve portability are gratefully accepted.
 
@@ -17,13 +17,7 @@ At the moment I believe this tool is linux-only; issue reports or pull requests 
 
 If you want a [bash-completion](https://github.com/scop/bash-completion) script, add the `bash-completion` target.
 
-<<<<<<< HEAD
-If you want `mkinitcpio` hooks add the `initcpio` target.
-
-If you want `ssh-askpass` add the `ssh-askpass` target.
-=======
 Run `make help` for a list of other targets.
->>>>>>> e5f2926... fixup -- INSTALL.md with make help
 
 ### Build flags
 

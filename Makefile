@@ -176,23 +176,23 @@ $(DISTDIR)/bin/$(APPNAME)-add-luks-key: $(SCRIPTDIR)/mkinitcpio/add-luks-key.m4 
 	m4 $(M4FLAGS) $(SCRIPTDIR)/mkinitcpio/add-luks-key.m4 > $@
 
 
-.PHONY: initcpio
+.PHONY: mkinitcpio
 #: Build disk encryption scripts for use with mkinitcpio
-initcpio: $(DISTDIR)/lib/initcpio/install/$(APPNAME) $(DISTDIR)/lib/initcpio/hooks/$(APPNAME) $(DISTDIR)/bin/$(APPNAME)-add-luks-key
+mkinitcpio: $(DISTDIR)/lib/initcpio/install/$(APPNAME) $(DISTDIR)/lib/initcpio/hooks/$(APPNAME) $(DISTDIR)/bin/$(APPNAME)-add-luks-key
 
 shellcheck: $(DISTDIR)/lib/initcpio/install/$(APPNAME) $(DISTDIR)/lib/initcpio/hooks/$(APPNAME) $(DISTDIR)/bin/$(APPNAME)-add-luks-key
 
-$(DISTDIR)/lib/initcpio/install/$(APPNAME): $(SCRIPTDIR)/initcpio-install.m4 $(M4VARSPATH)
+$(DISTDIR)/lib/initcpio/install/$(APPNAME): $(SCRIPTDIR)/mkinitcpio/install.m4 $(M4VARSPATH)
 	mkdir -p $(DISTDIR)/lib/initcpio/install
-	m4 $(M4FLAGS) $(SCRIPTDIR)/initcpio-install.m4 > $@
+	m4 $(M4FLAGS) $(SCRIPTDIR)/mkinitcpio/install.m4 > $@
 
-$(DISTDIR)/lib/initcpio/hooks/$(APPNAME): $(SCRIPTDIR)/initcpio-run.m4 $(M4VARSPATH)
+$(DISTDIR)/lib/initcpio/hooks/$(APPNAME): $(SCRIPTDIR)/mkinitcpio/run.m4 $(M4VARSPATH)
 	mkdir -p $(DISTDIR)/lib/initcpio/hooks
-	m4 $(M4FLAGS) $(SCRIPTDIR)/initcpio-run.m4 > $@
+	m4 $(M4FLAGS) $(SCRIPTDIR)/mkinitcpio/run.m4 > $@
 
-$(DISTDIR)/bin/$(APPNAME)-add-luks-key: $(SCRIPTDIR)/add-luks-key.m4 $(M4VARSPATH)
+$(DISTDIR)/bin/$(APPNAME)-add-luks-key: $(SCRIPTDIR)/mkinitcpio/add-luks-key.m4 $(M4VARSPATH)
 	mkdir -p $(DISTDIR)/bin
-	m4 $(M4FLAGS) $(SCRIPTDIR)/add-luks-key.m4 > $@
+	m4 $(M4FLAGS) $(SCRIPTDIR)/mkinitcpio/add-luks-key.m4 > $@
 
 .PHONY: ssh-askpass
 #: Build SSH askpass script
