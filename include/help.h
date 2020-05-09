@@ -3,7 +3,7 @@
 
 #ifndef APPNAME
 #pragma message("APPNAME not defined; are you using the Makefile?")
-#define APPNAME "fido2-hmac-secret"
+#define APPNAME "khefin"
 #endif
 
 #ifndef APPVERSION

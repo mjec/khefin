@@ -8,4 +8,4 @@ Versions 0.4.0 and above of this package are currently receiving security update
 
 You can report vulnerabilities by filing a Github issue. This project supports full, immediate disclosure of security issues.
 
-If for some reason you would like to chat, email fido2-hmac-secret@mjec.net.
+If for some reason you would like to chat, email khefin@mjec.net.

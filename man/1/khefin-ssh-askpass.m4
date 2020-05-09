@@ -54,7 +54,7 @@ Can be changed by setting the \fB`'m4_SSH_ASKPASS_NOTIFY_ENV\fR environment vari
 This file should by readable only by its owner, however that is not checked by this application.
 
 .SH BUGS
-.UR https://github.com/mjec/fido2\-hmac\-secret/issues
+.UR https://github.com/mjec/khefin/issues
 .UE
 has an up\-to\-date list of known issues. Bugs can also be reported there.
 

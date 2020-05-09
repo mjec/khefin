@@ -4,6 +4,7 @@
 
 _These changes are on the branch `master`, but not yet in a versioned release._
 
+* Rename `fido2-hmac-secret` -> `khefin`
 * Add `help` target to Makefile and make it the default target
 * Prompt for authenticator during boot if not present (issue #21)
 * Debug builds use address sanitizer

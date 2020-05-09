@@ -1,5 +1,5 @@
 name: 'CI'
-description: 'CI for fido2-hmac-secret'
+description: 'CI for khefin'
 inputs:
   what:
     description: 'What to run (format, lint, shellcheck, clang or gcc)'

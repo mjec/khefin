@@ -162,10 +162,14 @@ If you are seeing errors like \fBUnable to lock memory, which means secrets may 
 The risk from this is that memory could be swapped to disk, resulting in secrets being written to swap space.
 You can fix this by raising RLIMIT_MEMLOCK, running m4_APPNAME as root, or by giving the binary the CAP_IPC_LOCK capability (so it can bypass RLIMIT_MEMLOCK) by running the following command as root:
 
-.TP
+.RS
 setcap cap_ipc_lock+ep /path/to/m4_APPNAME
+.RE
 
 m4_divert(0)m4_dnl
+The name khefin is a reference to a minor god in the Discworld series of novels by Terry Pratchett.
+In that series, Khefin is the two-faced god of gateways, similar to the Roman god Janus.
+
 .SH SECURITY
 
 This system depends on the security of (and thus can never be more secure than) your authenticator device, the FIDO2 standard, libsodium, HMAC\-SHA256 and your passphrase.
@@ -178,7 +182,7 @@ Examples of such systems which use FIDO2 authenticators are WebAuthn and pam_u2f
 In particular, for providing a second factor for sign\-in or privilege escallation using PAM, pam_u2f is a better solution.
 
 .SH BUGS
-.UR https://github.com/mjec/fido2\-hmac\-secret/issues
+.UR https://github.com/mjec/khefin/issues
 .UE
 has an up\-to\-date list of known issues. Bugs can also be reported there.
 

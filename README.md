@@ -1,11 +1,12 @@
-# fido2-hmac-secret
+# khefin
+
 A system for using a FIDO2 authenticator with [hmac-secret extension](https://fidoalliance.org/specs/fido-v2.0-id-20180227/fido-client-to-authenticator-protocol-v2.0-id-20180227.html#sctn-hmac-secret-extension) support to generate passphrase-protected secrets.
 
-[![](https://github.com/mjec/fido2-hmac-secret/workflows/Continuous%20integration/badge.svg)](https://github.com/mjec/fido2-hmac-secret/actions?query=workflow%3A%22Continuous+integration%22)
+[![Continuous integration status](https://github.com/mjec/khefin/workflows/Continuous%20integration/badge.svg)](https://github.com/mjec/khefin/actions?query=workflow%3A%22Continuous+integration%22)
 
 ## Installation
 
-For Arch Linux, install the [`fido2-hmac-secret` AUR package](https://aur.archlinux.org/packages/fido2-hmac-secret/).
+For Arch Linux, install the [`khefin-git` AUR package](https://aur.archlinux.org/packages/khefin/).
 
 Install dependencies `libfido2`, `libcbor` and `libsodium`, then `make all && sudo make install`.
 
@@ -17,13 +18,15 @@ At the moment I believe this tool is linux-only; issue reports or pull requests 
 
 The man page contains full usage information, but briefly:
 
-`fido2-hmac-secret enumerate` will give you a list of connected authenticator devices, with a leading `!` for any device that is not supported.
+`khefin enumerate` will give you a list of connected authenticator devices, with a leading `!` for any device that is not supported.
 
-`fido2-hmac-secret enrol -d /dev/hidraw0 -f /path/to/encrypted/keyfile` will create (or overwrite!) `/path/to/encrypted/keyfile` with an encrypted keyfile, the output of which depends on the authenticator at `/dev/hidraw0`.
+`khefin enrol -d /dev/hidraw0 -f /path/to/encrypted/keyfile` will create (or overwrite!) `/path/to/encrypted/keyfile` with an encrypted keyfile, the output of which depends on the authenticator at `/dev/hidraw0`.
 
-`fido2-hmac-secret-generate -f /path/to/encrypted/keyfile` will read that encrypted keyfile and output a secret based on it; but this will fail if the originally-used authenticator device is not connected (and the button pressed, if required). This will produce a 128 character ASCII (hex digits) string on STDOUT, followed by a single newline.
+`khefin generate -f /path/to/encrypted/keyfile` will read that encrypted keyfile and output a secret based on it; but this will fail if the originally-used authenticator device is not connected (and the button pressed, if required). This will produce a 128 character ASCII (hex digits) string on STDOUT, followed by a single newline.
 
-`fido2-hmac-secret-add-luks-key /path/to/encrypted/keyfile /dev/disk` will add the result of your encrypted keyfile to a keyslot in the LUKS-encrypted `/dev/disk`. See the manual for this tool for more information. **[Backup your LUKS header](https://gitlab.com/cryptsetup/cryptsetup/wikis/FrequentlyAskedQuestions#6-backup-and-data-recovery) and data before using this.**
+`khefin-add-luks-key /path/to/encrypted/keyfile /dev/disk` will add the result of your encrypted keyfile to a keyslot in the LUKS-encrypted `/dev/disk`. See the manual for this tool for more information. **[Backup your LUKS header](https://gitlab.com/cryptsetup/cryptsetup/wikis/FrequentlyAskedQuestions#6-backup-and-data-recovery) and data before using this.**
+
+`khefin-ssh-askpass` is a drop-in replacement for the `ssh-askpass` binary. See the manual for this tool for more information.
 
 ## Risks
 

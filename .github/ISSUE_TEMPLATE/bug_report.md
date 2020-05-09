@@ -12,7 +12,7 @@ _[A clear and concise description of what the bug is.]_
 
 **To Reproduce**
 Steps to reproduce the behavior:
-1. Run `fido2-hmac-secret ...` _[please include ALL parameters]_
+1. Run `khefin ...` _[please include ALL parameters]_
 2. Type in correct passphrase
 3. See error "..."
 
@@ -21,7 +21,7 @@ _[A clear and concise description of what you expected to happen.]_
 
 **Environment:**
  - Operating system: _[e.g. Arch Linux]_
- - Version: _[e.g. 1.0.0-release; find it by running `fido2-hmac-secret version`]_
+ - Version: _[e.g. 1.0.0-release; find it by running `khefin version`]_
  - Authenticator make and model: _[e.g. blue Yubico Security Key version 2]_
 
 **Additional context**

@@ -23,7 +23,7 @@ This script must be run as root.
 You should also make a backup of \fIencrypted-keyfile\fR, because without this file the new keyslot on \fIdisk\fR cannot be used.
 
 .SH BUGS
-.UR https://github.com/mjec/fido2\-hmac\-secret/issues
+.UR https://github.com/mjec/khefin/issues
 .UE
 has an up\-to\-date list of known issues. Bugs can also be reported there.
 
