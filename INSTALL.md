@@ -17,9 +17,13 @@ At the moment I believe this tool is linux-only; issue reports or pull requests 
 
 If you want a [bash-completion](https://github.com/scop/bash-completion) script, add the `bash-completion` target.
 
+<<<<<<< HEAD
 If you want `mkinitcpio` hooks add the `initcpio` target.
 
 If you want `ssh-askpass` add the `ssh-askpass` target.
+=======
+Run `make help` for a list of other targets.
+>>>>>>> e5f2926... fixup -- INSTALL.md with make help
 
 ### Build flags
 
