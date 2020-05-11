@@ -77,6 +77,21 @@ help:
 	 | sed -n 's/^#: \(.*\)###\([^:]*\):.*/\2###\1/p' \
 	 | column -t  -s '###'
 
+
+check_dep_pkgconfig = @printf "%-20s %-10s " "$(1)" "$(2)"; if pkg-config $(1) > /dev/null 2>&1; then printf "OK\n"; else printf "not found!\n"; fi
+check_dep_command = @printf "%-20s %-10s " "$(1)" "$(2)"; if command -v $(3) > /dev/null; then printf "OK\n"; else printf "not found!\n"; fi
+
+.PHONY: check
+#: Check for the presence of dependencies
+check:
+	$(call check_dep_pkgconfig,libfido2,required)
+	$(call check_dep_pkgconfig,libcbor,required)
+	$(call check_dep_pkgconfig,libsodium,required)
+	$(call check_dep_command,bash,optional,bash)
+	$(call check_dep_command,ssh-agent,optional,ssh-agent)
+	$(call check_dep_command,mkinitcpio,optional,mkinitcpio)
+	$(call check_dep_command,initramfs-tools,optional,mkinitramfs)
+
 # Release build targets
 .PHONY: all
 #: Alias for release manpages bash-completion ssh-askpass
