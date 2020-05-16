@@ -47,8 +47,10 @@ encoded_file *read_file(const char *path) {
 
 	fclose(fp);
 
-	result->path = malloc_or_exit(strlen(path), "encoded file path");
-	strncpy(result->path, path, strlen(path));
+	size_t path_size_including_null = strlen(path) + 1;
+	result->path =
+	    malloc_or_exit(path_size_including_null, "encoded file path");
+	strncpy(result->path, path, path_size_including_null);
 	result->data = buffer;
 	result->length = length;
 
