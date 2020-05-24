@@ -47,6 +47,7 @@ The \fBinitramfs-tools\fR(8) hook that ensures this script can run correctly.
 
 .SH BUGS
 .UR https://github.com/mjec/khefin/issues
+The GitHub issues page
 .UE
 has an up\-to\-date list of known issues. Bugs can also be reported there.
 

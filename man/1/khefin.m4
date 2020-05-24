@@ -183,6 +183,7 @@ In particular, for providing a second factor for sign\-in or privilege escallati
 
 .SH BUGS
 .UR https://github.com/mjec/khefin/issues
+The GitHub issues page
 .UE
 has an up\-to\-date list of known issues. Bugs can also be reported there.
 

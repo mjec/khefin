@@ -55,6 +55,7 @@ This file should by readable only by its owner, however that is not checked by t
 
 .SH BUGS
 .UR https://github.com/mjec/khefin/issues
+The GitHub issues page
 .UE
 has an up\-to\-date list of known issues. Bugs can also be reported there.
 
