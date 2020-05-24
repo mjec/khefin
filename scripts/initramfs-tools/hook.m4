@@ -1,7 +1,7 @@
 #!/bin/sh
 
-# Change this to a full path if m4_APPNAME is not installed on the mkinitramfs path. E.g.:
-# path_to_`'m4_APPNAME="/usr/local/bin/m4_APPNAME"
+`#' Change this to a full path if m4_APPNAME is not installed on the mkinitramfs path. E.g.:
+`#' path_to_`'m4_APPNAME="/usr/local/bin/m4_APPNAME"
 path_to_`'m4_APPNAME="$(command -v m4_APPNAME)"
 
 PREREQ="cryptroot"

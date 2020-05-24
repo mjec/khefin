@@ -13,8 +13,8 @@ decrypted_keyfile_device="8931c13b-8f4f-468e-b372-967e12955c54"
 run_hook() {
 	encrypted_keyfile_dir=${encrypted_keyfile_dir-m4_INITCPIO_DEFAULT_ENCRYPTED_KEYFILE_DIR}
 
-	# From m4_APPNAME man page, EXIT CODES section:
-	#   34     No authenticator device connected
+	`#' From m4_APPNAME man page, EXIT CODES section:
+	`#'   34     No authenticator device connected
 	m4_APPNAME enumerate > /dev/null
 	if [ "$?" -eq 34 ]; then
 		if [ "${do_not_prompt_for_authenticator:-$undefined}" != "$undefined" ]; then
@@ -108,8 +108,8 @@ run_hook() {
 				unset raw_key_length
 				return
 			elif [ $result -eq 33 ] && [ $passphrase_prompt_option -ne m4_PROMPT_NEVER ]; then
-				# From m4_APPNAME man page, EXIT CODES section:
-				#   33     Bad passphrase
+				`#' From m4_APPNAME man page, EXIT CODES section:
+				`#'   33     Bad passphrase
 				unset encrypted_keyfile_passphrase
 			else
 				# Failure but not due to a bad passphrase, so move on to the next keyfile
