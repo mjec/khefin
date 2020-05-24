@@ -7,7 +7,6 @@ Before building or running this tool, you'll need the following dependencies ins
 * [libfido2](https://developers.yubico.com/libfido2/)
 * [libcbor](https://libcbor.readthedocs.io/en/v0.5.0/) - also a dependency of libfido2
 * [libsodium](https://download.libsodium.org/doc/)
-* [libcap](https://sites.google.com/site/fullycapable/)
 
 At the moment I believe this tool is linux-only; issue reports or pull requests to improve portability are gratefully accepted.
 
@@ -29,7 +28,3 @@ Run `make help` for a list of other targets.
 | `DEBUG` | N/A | unset | if set to any value, this will enable debug mode (enabling core dumps, assertions and symbols) |
 
 Standard makefile variables (`CC`, `CFLAGS`, `LDFLAGS`, `DESTDIR`, `PREFIX`) are respected.
-
-You can set the maximum passphrase length (defaults to 1024; everything after this will be ignored) by appending `LONGEST_VALID_PASSPHRASE=<some integer>` after the list of targets.
-
-You disable memory locking warnings (default to on) by setting `WARN_ON_MEMORY_LOCK_ERRORS=0` (see the memory locking section below).
