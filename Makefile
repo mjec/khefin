@@ -2,6 +2,7 @@
 #
 # Comments beginning with #: and imediately preceding a target are printed by the `help` target.
 
+
 ################################################################################
 # DEFINITIONS                                                                  #
 ################################################################################
@@ -15,7 +16,9 @@ WARN_ON_MEMORY_LOCK_ERRORS=1
 SETCAP_BINARY=1
 
 # Paths
+ifeq ($(origin PREFIX),undefined)
 PREFIX=/usr/local
+endif
 SRCDIR=$(abspath ./src)
 INCDIR=$(abspath ./include)
 MANDIR=$(abspath ./man)
@@ -61,8 +64,10 @@ M4FLAGS=-Dm4_APPNAME="$(APPNAME)" \
 	-Dm4_APPDATE="$(APPDATE)" \
 	-Dm4_LONGEST_VALID_PASSPHRASE=$(LONGEST_VALID_PASSPHRASE) \
 	-Dm4_WARN_ON_MEMORY_LOCK_ERRORS=$(WARN_ON_MEMORY_LOCK_ERRORS) \
+	-Dm4_INSTALL_PREFIX=$(PREFIX) \
 	--prefix-builtins \
 	$(M4VARSPATH)
+
 
 ################################################################################
 # COMMON TARGETS                                                               #
@@ -110,24 +115,30 @@ install: release manpages
 	if [ "$(SETCAP_BINARY)" -ne 0 ]; then setcap cap_ipc_lock+ep $(DESTDIR)$(PREFIX)/bin/$(APPNAME); fi
 	install -g 0 -o 0 -p -m 0644 -D $(DISTDIR)/share/man/man1/$(APPNAME).1.gz $(DESTDIR)$(PREFIX)/share/man/man1/$(APPNAME).1.gz
 	if [ -f $(DISTDIR)/share/bash-completion/completions/$(APPNAME) ]; then install -g 0 -o 0 -p -m 0644 -D $(DISTDIR)/share/bash-completion/completions/$(APPNAME) $(DESTDIR)$(PREFIX)/share/bash-completion/completions/$(APPNAME); fi
-	if [ -f $(DISTDIR)/lib/initcpio/install/$(APPNAME) ]; then install -g 0 -o 0 -p -m 0644 -D $(DISTDIR)/lib/initcpio/install/$(APPNAME) $(DESTDIR)$(PREFIX)/lib/initcpio/install/$(APPNAME); fi
-	if [ -f $(DISTDIR)/lib/initcpio/hooks/$(APPNAME) ]; then install -g 0 -o 0 -p -m 0644 -D $(DISTDIR)/lib/initcpio/hooks/$(APPNAME) $(DESTDIR)$(PREFIX)/lib/initcpio/hooks/$(APPNAME); fi
 	if [ -f $(DISTDIR)/bin/$(APPNAME)-add-luks-key ]; then install -g 0 -o 0 -p -m 0755 -D $(DISTDIR)/bin/$(APPNAME)-add-luks-key $(DESTDIR)$(PREFIX)/bin/$(APPNAME)-add-luks-key; fi
 	if [ -f $(DISTDIR)/bin/$(APPNAME)-add-luks-key ] && [ -f $(DISTDIR)/share/man/man8/$(APPNAME)-add-luks-key.8.gz ]; then install -g 0 -o 0 -p -m 0644 -D $(DISTDIR)/share/man/man8/$(APPNAME)-add-luks-key.8.gz $(DESTDIR)$(PREFIX)/share/man/man8/$(APPNAME)-add-luks-key.8.gz; fi
 	if [ -f $(DISTDIR)/bin/$(APPNAME)-ssh-askpass ]; then install -g 0 -o 0 -p -m 0755 -D $(DISTDIR)/bin/$(APPNAME)-ssh-askpass $(DESTDIR)$(PREFIX)/bin/$(APPNAME)-ssh-askpass; fi
 	if [ -f $(DISTDIR)/bin/$(APPNAME)-ssh-askpass ] && [ -f $(DISTDIR)/share/man/man1/$(APPNAME)-ssh-askpass.1.gz ]; then install -g 0 -o 0 -p -m 0644 -D $(DISTDIR)/share/man/man1/$(APPNAME)-ssh-askpass.1.gz $(DESTDIR)$(PREFIX)/share/man/man1/$(APPNAME)-ssh-askpass.1.gz; fi
+	if [ -f $(DISTDIR)/lib/initcpio/install/$(APPNAME) ]; then install -g 0 -o 0 -p -m 0644 -D $(DISTDIR)/lib/initcpio/install/$(APPNAME) $(DESTDIR)$(PREFIX)/lib/initcpio/install/$(APPNAME); fi
+	if [ -f $(DISTDIR)/lib/initcpio/hooks/$(APPNAME) ]; then install -g 0 -o 0 -p -m 0644 -D $(DISTDIR)/lib/initcpio/hooks/$(APPNAME) $(DESTDIR)$(PREFIX)/lib/initcpio/hooks/$(APPNAME); fi
+	if [ -f $(DISTDIR)/etc/initramfs-tools/hooks/crypt$(APPNAME) ]; then install -g 0 -o 0 -p -m 0755 -D $(DISTDIR)/etc/initramfs-tools/hooks/crypt$(APPNAME) $(DESTDIR)/etc/initramfs-tools/hooks/crypt$(APPNAME); fi
+	if [ -f $(DISTDIR)/lib/$(APPNAME)/cryptsetup-keyscript ]; then install -g 0 -o 0 -p -m 0755 -D $(DISTDIR)/lib/$(APPNAME)/cryptsetup-keyscript $(DESTDIR)$(PREFIX)/lib/$(APPNAME)/cryptsetup-keyscript; fi
+	if [ -f $(DISTDIR)/lib/$(APPNAME)/cryptsetup-keyscript ] && [ -f $(DISTDIR)/share/man/man8/$(APPNAME)-cryptsetup-keyscript.8.gz ]; then install -g 0 -o 0 -p -m 0644 -D $(DISTDIR)/share/man/man8/$(APPNAME)-cryptsetup-keyscript.8.gz $(DESTDIR)$(PREFIX)/share/man/man8/$(APPNAME)-cryptsetup-keyscript.8.gz; fi
 
 .PHONY: uninstall
 #: Remove files from $DESTDIR
 uninstall:
+	$(RM) $(DESTDIR)$(PREFIX)/share/man/man8/$(APPNAME)-cryptsetup-keyscript.8.gz
+	$(RM) $(DESTDIR)$(PREFIX)/lib/$(APPNAME)/cryptsetup-keyscript
+	$(RM) $(DESTDIR)/etc/initramfs-tools/hooks/crypt$(APPNAME)
 	$(RM) $(DESTDIR)$(PREFIX)/lib/initcpio/hooks/$(APPNAME)
 	$(RM) $(DESTDIR)$(PREFIX)/lib/initcpio/install/$(APPNAME)
-	$(RM) $(DESTDIR)$(PREFIX)/share/bash-completion/completions/$(APPNAME)
-	$(RM) $(DESTDIR)$(PREFIX)/share/man/man1/$(APPNAME).1.gz
 	$(RM) $(DESTDIR)$(PREFIX)/share/man/man1/$(APPNAME)-ssh-askpass.1.gz
+	$(RM) $(DESTDIR)$(PREFIX)/bin/$(APPNAME)-ssh-askpass
 	$(RM) $(DESTDIR)$(PREFIX)/share/man/man8/$(APPNAME)-add-luks-key.8.gz
 	$(RM) $(DESTDIR)$(PREFIX)/bin/$(APPNAME)-add-luks-key
-	$(RM) $(DESTDIR)$(PREFIX)/bin/$(APPNAME)-ssh-askpass
+	$(RM) $(DESTDIR)$(PREFIX)/share/bash-completion/completions/$(APPNAME)
+	$(RM) $(DESTDIR)$(PREFIX)/share/man/man1/$(APPNAME).1.gz
 	$(RM) $(DESTDIR)$(PREFIX)/bin/$(APPNAME)
 
 .PHONY: clean
@@ -140,13 +151,14 @@ debug: CFLAGS:=-fsanitize=address -fno-omit-frame-pointer -g -DDEBUG $(CFLAGS)
 debug: LDFLAGS:=-fsanitize=address -fno-omit-frame-pointer -g -DDEBUG $(LDFLAGS)
 debug: $(BINPATH)
 
+
 ################################################################################
 # MAN PAGES                                                                    #
 ################################################################################
 
 .PHONY: manpages
 #: Build man pages
-manpages: $(DISTDIR)/share/man/man1/$(APPNAME).1.gz $(DISTDIR)/share/man/man1/$(APPNAME)-ssh-askpass.1.gz $(DISTDIR)/share/man/man8/$(APPNAME)-add-luks-key.8.gz
+manpages: $(DISTDIR)/share/man/man1/$(APPNAME).1.gz $(DISTDIR)/share/man/man1/$(APPNAME)-ssh-askpass.1.gz $(DISTDIR)/share/man/man8/$(APPNAME)-add-luks-key.8.gz $(DISTDIR)/share/man/man8/$(APPNAME)-cryptsetup-keyscript.8.gz
 
 $(DISTDIR)/share/man/man1/%.1.gz: $(DISTDIR)/share/man/man1/%.1
 	gzip -f $<
@@ -164,6 +176,7 @@ $(DISTDIR)/share/man/man8/%.8: $(MANDIR)/8/%.m4 $(METAPATH) $(M4VARSPATH)
 	mkdir -p $(DISTDIR)/share/man/man8
 	m4 $(M4FLAGS) $< > $@
 
+
 ################################################################################
 # COMPLETION SCRIPTS                                                           #
 ################################################################################
@@ -178,6 +191,7 @@ $(DISTDIR)/share/bash-completion/completions/$(APPNAME): $(SCRIPTDIR)/bash-compl
 	mkdir -p $(DISTDIR)/share/bash-completion/completions
 	m4 $(M4FLAGS) $(SCRIPTDIR)/bash-completion.m4 > $@
 
+
 ################################################################################
 # DISK ENCRYPTION                                                              #
 ################################################################################
@@ -186,28 +200,45 @@ $(DISTDIR)/share/bash-completion/completions/$(APPNAME): $(SCRIPTDIR)/bash-compl
 add-luks-key: $(DISTDIR)/bin/$(APPNAME)-add-luks-key
 
 shellcheck: $(DISTDIR)/bin/$(APPNAME)-add-luks-key
-$(DISTDIR)/bin/$(APPNAME)-add-luks-key: $(SCRIPTDIR)/mkinitcpio/add-luks-key.m4 $(M4VARSPATH)
+$(DISTDIR)/bin/$(APPNAME)-add-luks-key: $(SCRIPTDIR)/add-luks-key.m4 $(M4VARSPATH)
 	mkdir -p $(DISTDIR)/bin
-	m4 $(M4FLAGS) $(SCRIPTDIR)/mkinitcpio/add-luks-key.m4 > $@
+	m4 $(M4FLAGS) $< > $@
 
 
 .PHONY: mkinitcpio
 #: Build disk encryption scripts for use with mkinitcpio
-mkinitcpio: $(DISTDIR)/lib/initcpio/install/$(APPNAME) $(DISTDIR)/lib/initcpio/hooks/$(APPNAME) $(DISTDIR)/bin/$(APPNAME)-add-luks-key
+mkinitcpio: add-luks-key $(DISTDIR)/lib/initcpio/install/$(APPNAME) $(DISTDIR)/lib/initcpio/hooks/$(APPNAME)
 
-shellcheck: $(DISTDIR)/lib/initcpio/install/$(APPNAME) $(DISTDIR)/lib/initcpio/hooks/$(APPNAME) $(DISTDIR)/bin/$(APPNAME)-add-luks-key
+shellcheck: $(DISTDIR)/lib/initcpio/install/$(APPNAME) $(DISTDIR)/lib/initcpio/hooks/$(APPNAME)
 
 $(DISTDIR)/lib/initcpio/install/$(APPNAME): $(SCRIPTDIR)/mkinitcpio/install.m4 $(M4VARSPATH)
 	mkdir -p $(DISTDIR)/lib/initcpio/install
-	m4 $(M4FLAGS) $(SCRIPTDIR)/mkinitcpio/install.m4 > $@
+	m4 $(M4FLAGS) $< > $@
 
 $(DISTDIR)/lib/initcpio/hooks/$(APPNAME): $(SCRIPTDIR)/mkinitcpio/run.m4 $(M4VARSPATH)
 	mkdir -p $(DISTDIR)/lib/initcpio/hooks
-	m4 $(M4FLAGS) $(SCRIPTDIR)/mkinitcpio/run.m4 > $@
+	m4 $(M4FLAGS) $< > $@
 
-$(DISTDIR)/bin/$(APPNAME)-add-luks-key: $(SCRIPTDIR)/mkinitcpio/add-luks-key.m4 $(M4VARSPATH)
-	mkdir -p $(DISTDIR)/bin
-	m4 $(M4FLAGS) $(SCRIPTDIR)/mkinitcpio/add-luks-key.m4 > $@
+
+.PHONY: initramfs-tools
+#: Build disk encryption scripts for use with initramfs-tools
+initramfs-tools: add-luks-key $(DISTDIR)/etc/initramfs-tools/hooks/crypt$(APPNAME) $(DISTDIR)/lib/$(APPNAME)/cryptsetup-keyscript
+
+shellcheck: $(DISTDIR)/etc/initramfs-tools/hooks/crypt$(APPNAME) $(DISTDIR)/lib/$(APPNAME)/cryptsetup-keyscript
+
+$(DISTDIR)/etc/initramfs-tools/hooks/crypt$(APPNAME): $(SCRIPTDIR)/initramfs-tools/hook.m4 $(M4VARSPATH)
+	mkdir -p $(DISTDIR)/etc/initramfs-tools/hooks/
+	m4 $(M4FLAGS) $< > $@
+
+$(DISTDIR)/lib/$(APPNAME)/cryptsetup-keyscript: $(SCRIPTDIR)/initramfs-tools/keyscript.m4 $(M4VARSPATH)
+	mkdir -p $(DISTDIR)/lib/$(APPNAME)
+	m4 $(M4FLAGS) $< > $@
+
+
+
+################################################################################
+# SSH-ASKPASS                                                                  #
+################################################################################
 
 .PHONY: ssh-askpass
 #: Build SSH askpass script
@@ -218,6 +249,7 @@ shellcheck: $(DISTDIR)/bin/$(APPNAME)-ssh-askpass
 $(DISTDIR)/bin/$(APPNAME)-ssh-askpass: $(SCRIPTDIR)/ssh-askpass.m4 $(METAPATH) $(M4VARSPATH)
 	mkdir -p $(DISTDIR)/bin
 	m4 $(M4FLAGS) $(SCRIPTDIR)/ssh-askpass.m4 > $@
+
 
 ################################################################################
 # SOURCE CODE CHECKS                                                           #
@@ -246,6 +278,7 @@ format:
 check-format:
 	clang-format -style=file -Werror --dry-run $(SRCS) $(HEADERS)
 
+
 ################################################################################
 # INDIVIDUAL SOURCE FILES                                                      #
 ################################################################################
@@ -260,6 +293,7 @@ $(INCDIR)/help.h: $(METAPATH)
 
 %.d: %.c
 	$(CC) $(CFLAGS) $< -MM -MT $(@:.d=.o) >$@
+
 
 ################################################################################
 # CLEANUP                                                                      #
