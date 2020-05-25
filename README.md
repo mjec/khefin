@@ -6,7 +6,7 @@ A system for using a FIDO2 authenticator with [hmac-secret extension](https://fi
 
 ## Installation
 
-For Arch Linux, install the [`khefin-git` AUR package](https://aur.archlinux.org/packages/khefin/).
+For Arch Linux, install the [`khefin` AUR package](https://aur.archlinux.org/packages/khefin/).
 
 Install dependencies `libfido2`, `libcbor` and `libsodium`, then `make all && sudo make install`.
 
