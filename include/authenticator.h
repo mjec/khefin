@@ -41,6 +41,7 @@ typedef struct devices_list_t {
 devices_list_t *list_devices(void);
 void free_devices_list(devices_list_t *devices_list);
 
+fido_dev_t *get_device_even_if_not_fido2(const char *path);
 fido_dev_t *get_device(const char *path);
 bool device_supports_hmac_secret(fido_cbor_info_t *device_info);
 fido_cbor_info_t *get_device_info(fido_dev_t *device);

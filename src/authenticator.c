@@ -46,7 +46,7 @@ void free_devices_list(devices_list_t *devices_list) {
 	free(devices_list);
 }
 
-fido_dev_t *get_device(const char *path) {
+fido_dev_t *get_device_even_if_not_fido2(const char *path) {
 	fido_dev_t *device;
 	int r;
 
@@ -60,6 +60,12 @@ fido_dev_t *get_device(const char *path) {
 		     "Unable to access device at %s: %s (0x%x)", path, fido_strerr(r),
 		     r);
 	}
+
+	return device;
+}
+
+fido_dev_t *get_device(const char *path) {
+	fido_dev_t *device = get_device_even_if_not_fido2(path);
 
 	if (fido_dev_is_fido2(device) == false) {
 		errx(EXIT_AUTHENTICATOR_ERROR,

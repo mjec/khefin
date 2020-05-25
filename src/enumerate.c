@@ -10,11 +10,15 @@ void print_devices_list(devices_list_t *devices_list) {
 	for (size_t i = 0; i < devices_list->count; i++) {
 		const fido_dev_info_t *device_info =
 		    fido_dev_info_ptr(devices_list->list, i);
-		fido_dev_t *authenticator = get_device(fido_dev_info_path(device_info));
+		fido_dev_t *authenticator =
+		    get_device_even_if_not_fido2(fido_dev_info_path(device_info));
 
 		fido_cbor_info_t *ctap_info = get_device_info(authenticator);
 
-		printf("%s\t", device_supports_hmac_secret(ctap_info) ? " " : "!");
+		bool device_supported = fido_dev_is_fido2(authenticator) &&
+		                        device_supports_hmac_secret(ctap_info);
+
+		printf("%s\t", device_supported ? " " : "!");
 
 		printf("%s\t", fido_dev_info_path(device_info));
 

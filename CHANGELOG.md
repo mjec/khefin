@@ -4,6 +4,8 @@
 
 _These changes are on the branch `master`, but not yet in a versioned release._
 
+* `enumerate` prints devices even if they are not FIDO2-compatible (issue #23)
+
 ## Version 0.5.0
 
 * Add initramfs-tools scripts (issue #19)
