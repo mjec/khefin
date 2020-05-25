@@ -4,6 +4,8 @@
 
 _These changes are on the branch `master`, but not yet in a versioned release._
 
+## Version 0.5.0
+
 * Add initramfs-tools scripts (issue #19)
 * Rename `fido2-hmac-secret` -> `khefin`
 * Add `help` target to Makefile and make it the default target
