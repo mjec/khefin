@@ -4,11 +4,18 @@
 
 Before building or running this tool, you'll need the following dependencies installed:
 
-* [libfido2](https://developers.yubico.com/libfido2/)
+* [libfido2](https://developers.yubico.com/libfido2/) and its dependency libcrypto from OpenSSL
 * [libcbor](https://libcbor.readthedocs.io/en/v0.5.0/) - also a dependency of libfido2
 * [libsodium](https://download.libsodium.org/doc/)
 
 At the moment I believe this tool is linux-only; issue reports or pull requests to improve portability are gratefully accepted.
+
+To build this tool, you'll also need:
+
+* [clang](https://clang.llvm.org/) or [gcc](https://gcc.gnu.org/)
+* [m4](https://www.gnu.org/software/m4/m4.html)
+* [make](https://www.gnu.org/software/make/)
+* [pkg-config](https://www.freedesktop.org/wiki/Software/pkg-config/)
 
 ## Building
 
