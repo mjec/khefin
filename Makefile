@@ -1,6 +1,6 @@
 # khefin Makefile
 #
-# Comments beginning with #: and imediately preceding a target are printed by the `help` target.
+# Comments beginning with #: and immediately preceding a target are printed by the `help` target.
 
 
 ################################################################################

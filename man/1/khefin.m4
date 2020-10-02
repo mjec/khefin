@@ -21,7 +21,7 @@ print version and exit.
 show a list of authenticator devices currently connected.
 
 .B enrol
-create or overwrite \fIfile\fR with randomly\-generated data required to produce a secret for the given \fIpassphrase\fR, using \fIdeivce\fR.
+create or overwrite \fIfile\fR with randomly\-generated data required to produce a secret for the given \fIpassphrase\fR, using \fIdevice\fR.
 
 .B generate
 generate an HMAC across the data contained in \fIfile\fR, once it has been decrypted with the given \fIpassphrase\fR.

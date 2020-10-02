@@ -13,7 +13,7 @@ This is a Bash script that can be used as a drop-in replacement for \fBssh-askpa
 It works by having a passphrase for each SSH key derived using \fB`'m4_APPNAME generate\fR and based on the SSH key's fingerprint.
 
 For this to work, you will need to set \fIssh-keyfile\fR's password to the output of \fB`'m4_APPNAME-ssh-askpass get-passphrase\fI ssh-keyfile\fR.
-You may use \fBssh-keygen -p -f \fIssh-keyfile\fB -N "$(m4_APPNAME-ssh-askpass get-passphrase \fIssh-keyfile\fB)"\fR to do this, however be aware that this will make the passphrase (briefly) availble to other users on the system, who can inspect the command line for \fBssh-keygen\fR.
+You may use \fBssh-keygen -p -f \fIssh-keyfile\fB -N "$(m4_APPNAME-ssh-askpass get-passphrase \fIssh-keyfile\fB)"\fR to do this, however be aware that this will make the passphrase (briefly) available to other users on the system, who can inspect the command line for \fBssh-keygen\fR.
 
 Once that is done, you will need to set the \fBSSH_ASKPASS\fR environment variable to the path to \fB`'m4_APPNAME-ssh-askpass\fR so that \fBssh-agent\fR(1) knows to call it.
 
@@ -36,7 +36,7 @@ In particular, the following ways of calling this script are supported:
 
 .TP
 .BR m4_SSH_ASKPASS_ENCRYPTED_KEYFILE_ENV
-Path to the encrypted keyfile to use ot protect SSH keys.
+Path to the encrypted keyfile to use to protect SSH keys.
 Defaults to \fB`'m4_SSH_ASKPASS_DEFAULT_ENCRYPTED_KEYFILE\fR.
 
 .TP
