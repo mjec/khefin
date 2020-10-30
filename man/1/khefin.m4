@@ -83,13 +83,12 @@ The \fBenumerate\fR subcommand produces a list of connected authenticators, one 
 4. the authenticator AAGUID, e.g. f8a011f3-8c0a-4d15-8006-17111f9edc7d
 .RE
 
-If \fIpassphrase\fR is not provided as a command line argument, then behavior depends on whether the m4_APPNAME is running at a TTY (interactively) or not.
+If \fIpassphrase\fR is not provided as a command line argument, then behavior depends on whether m4_APPNAME is running at a TTY (interactively) or not.
 If m4_APPNAME has a TTY, you will be prompted to enter a passphrase.
-If m4_APPNAME does not have a TTY, the passphrase will be read on STDIN, without any prompt, until end of file is reached.
-Note that in this case, any final newline will be \fBincluded\fR in the passphrase.
-As such if you are piping a passphrase to m4_APPNAME, be sure to use \fBprintf\fR without a trailing newline, or \fBecho -n\fR.
+If m4_APPNAME does not have a TTY, the passphrase will be read on STDIN, without any prompt, until a newline (or EOF) is reached.
+Note that in this case, the newline will \fBnot\fR be included in the passphrase or PIN.
 
-In any case, only the first m4_LONGEST_VALID_PASSPHRASE bytes of a passphrase will be used.
+In every case, only the first m4_LONGEST_VALID_PASSPHRASE bytes of a passphrase will be used.
 
 .SH EXIT STATUS
 
