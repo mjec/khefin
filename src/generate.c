@@ -27,20 +27,44 @@ print_secret_consuming_invocation(invocation_state_t *invocation,
 	        cleartext, key_bytes, invocation->mixin);
 
 	// Clean up things we don't need anymore
-	free_invocation(invocation);
-	invocation = NULL;
 	free_key(key_bytes);
 	key_bytes = NULL;
 
 	for (size_t i = 0; i < devices_list->count; i++) {
 		const fido_dev_info_t *di = fido_dev_info_ptr(devices_list->list, i);
 		const char *authenticator_path = fido_dev_info_path(di);
+		const char *authenticator_product_string =
+		    fido_dev_info_product_string(di);
 		fido_dev_t *authenticator = get_device(authenticator_path);
 		fido_cbor_info_t *device_info = get_device_info(authenticator);
 		if (device_aaguid_matches(cleartext, device_info)) {
 			if (!device_supports_hmac_secret(device_info)) {
 				free_device_info(device_info);
 				continue;
+			}
+
+			if (fido_dev_has_pin(authenticator)) {
+				authenticator_params->authenticator_pin = malloc_or_exit(
+				    LONGEST_VALID_PIN + 1, "authenticator PIN in enrol_device");
+				const char *prompt_format_string =
+				    "authenticator PIN for %s at %s";
+				char *prompt_string =
+				    malloc_or_exit(strlen(prompt_format_string) +
+				                       strlen(authenticator_product_string) +
+				                       strlen(authenticator_path) + 1,
+				                   "PIN prompt");
+				sprintf(prompt_string, prompt_format_string,
+				        authenticator_product_string, authenticator_path);
+
+				if (invocation->authenticator_pin == NULL) {
+					prompt_for_secret(prompt_string, LONGEST_VALID_PIN,
+					                  authenticator_params->authenticator_pin);
+				} else {
+					strncpy(authenticator_params->authenticator_pin,
+					        invocation->authenticator_pin, LONGEST_VALID_PIN);
+				}
+				free(prompt_string);
+				prompt_string = NULL;
 			}
 
 			secret_t *secret = malloc_or_exit(sizeof(secret_t), "secret");
@@ -70,6 +94,9 @@ print_secret_consuming_invocation(invocation_state_t *invocation,
 			      fido_strerr(result), result);
 		}
 	}
+
+	free_invocation(invocation);
+	invocation = NULL;
 
 	free_parameters(authenticator_params);
 	authenticator_params = NULL;

@@ -4,6 +4,9 @@
 
 _These changes are on the branch `master`, but not yet in a versioned release._
 
+* Add PIN support (issue #28)
+* Truncate newline from the end of passphrase provided non-interactively on STDIN
+
 ## Version 0.5.1
 
 * Bumped warrant canary to 30 October 2020

@@ -13,8 +13,10 @@ void print_usage(char *program_name) {
 	printf("Usage: %s help\n"
 	       "       %s version\n"
 	       "       %s enumerate\n"
-	       "       %s generate -f <file> [-p <passphrase>] [-m <data>]\n"
-	       "       %s enrol -d <device> -f <file> [-p <passphrase>] [-o]\n"
+	       "       %s generate -f <file> [-p <passphrase>] [-n <pin>] [-m "
+	       "<data>]\n"
+	       "       %s enrol -d <device> -f <file> [-p <passphrase>] [-n <pin>] "
+	       "[-o]\n"
 	       "       %*s      [-k <hardness>]\n",
 	       program_name, program_name, program_name, program_name, program_name,
 	       (int)strlen(program_name), "  ");
@@ -52,6 +54,10 @@ void print_help(char *program_name) {
 	    "\n"
 	    "   -p, --passphrase <passphrase>   The passphrase to use. If not specified,\n"
 	    "                                   you will be prompted for a passphrase.\n"
+	    "\n"
+		"   -n, --pin <pin>                 The authenticator PIN to use. If not\n"
+		"                                   specified, and your device requires it,\n"
+		"                                   you will be prompted for a PIN.\n"
 	    "\n"
 	    "   -o, --obfuscate-device-info     If specified for enrol, do not store the.\n"
 	    "                                   device vendor and product ID in <file>.\n"

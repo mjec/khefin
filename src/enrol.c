@@ -37,6 +37,19 @@ void enrol_device(invocation_state_t *invocation) {
 	authenticator_params->relying_party_id[RELYING_PARTY_ID_SIZE] = (char)0;
 	strncat(authenticator_params->relying_party_id, RELYING_PARTY_SUFFIX,
 	        RELYING_PARTY_SUFFIX_SIZE + 1);
+
+	if (fido_dev_has_pin(authenticator)) {
+		authenticator_params->authenticator_pin = malloc_or_exit(
+		    LONGEST_VALID_PIN + 1, "authenticator PIN in enrol_device");
+		if (invocation->authenticator_pin == NULL) {
+			prompt_for_secret("authenticator PIN", LONGEST_VALID_PIN,
+			                  authenticator_params->authenticator_pin);
+		} else {
+			strncpy(authenticator_params->authenticator_pin,
+			        invocation->authenticator_pin, LONGEST_VALID_PIN);
+		}
+	}
+
 	create_credential(authenticator, authenticator_params);
 	close_and_free_device_ignoring_errors(authenticator);
 
@@ -54,9 +67,13 @@ void enrol_device(invocation_state_t *invocation) {
 	free_device_info(device_info);
 	free_parameters(authenticator_params);
 	authenticator_params = NULL;
-	// We no longer need the passphrase, so zero it out, even though we'll need
-	// the rest of invocation later.
+	// We no longer need the passphrase or PIN, so zero it out, even though
+	// we'll need the rest of invocation later.
 	sodium_memzero(invocation->passphrase, strlen(invocation->passphrase));
+	if (invocation->authenticator_pin != NULL) {
+		sodium_memzero(invocation->authenticator_pin,
+		               strlen(invocation->authenticator_pin));
+	}
 
 	encoded_file *f = write_cleartext(cleartext, invocation->file);
 	write_file(f);

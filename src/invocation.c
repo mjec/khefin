@@ -25,6 +25,7 @@ invocation_state_t *parse_arguments_and_get_passphrase(int argc, char **argv) {
 	result->device = NULL;
 	result->file = NULL;
 	result->passphrase = NULL;
+	result->authenticator_pin = NULL;
 	result->obfuscate_device_info = false;
 	result->kdf_hardness = kdf_hardness_unspecified;
 	result->mixin = NULL;
@@ -51,6 +52,7 @@ invocation_state_t *parse_arguments_and_get_passphrase(int argc, char **argv) {
 		    {"device", required_argument, 0, 'd'},
 		    {"file", required_argument, 0, 'f'},
 		    {"passphrase", required_argument, 0, 'p'},
+		    {"pin", required_argument, 0, 'n'},
 		    {"mixin", required_argument, 0, 'm'},
 		    {"kdf-hardness", required_argument, 0, 'k'},
 		    {"obfuscate-device", no_argument, 0, 'o'},
@@ -61,7 +63,7 @@ invocation_state_t *parse_arguments_and_get_passphrase(int argc, char **argv) {
 		/* getopt_long stores the option index here. */
 		int option_index = 0;
 
-		c = getopt_long(argc, argv, "d:f:p:m:k:oh", long_options,
+		c = getopt_long(argc, argv, "d:f:p:m:k:n:oh", long_options,
 		                &option_index);
 
 		if (c == -1) {
@@ -83,6 +85,12 @@ invocation_state_t *parse_arguments_and_get_passphrase(int argc, char **argv) {
 			result->passphrase =
 			    strndup_or_exit(optarg, LONGEST_VALID_PASSPHRASE,
 			                    "passphrase in invocation state");
+			break;
+
+		case 'n':
+			result->authenticator_pin =
+			    strndup_or_exit(optarg, LONGEST_VALID_PIN,
+			                    "authenticator PIN in invocation state");
 			break;
 
 		case 'm':
@@ -198,56 +206,71 @@ invocation_state_t *parse_arguments_and_get_passphrase(int argc, char **argv) {
 		}
 	}
 
-	if (result->passphrase == NULL &&
-	    (result->subcommand == subcommand_enrol ||
-	     result->subcommand == subcommand_generate)) {
-		result->passphrase =
-		    malloc_or_exit(LONGEST_VALID_PASSPHRASE + 1, "passphrase");
-
-		if (isatty(STDIN_FILENO)) {
-			struct termios terminal_settings;
-			if (tcgetattr(STDIN_FILENO, &terminal_settings) != 0) {
-				err(EXIT_UNABLE_TO_GET_PASSPHRASE, "Unable to get passphrase");
-			}
-			tcflag_t previous_c_lflag = terminal_settings.c_lflag;
-			terminal_settings.c_lflag &= ~(ECHO | ECHOE | ECHOK);
-			terminal_settings.c_lflag |= ECHONL;
-			if (tcsetattr(STDIN_FILENO, TCSANOW, &terminal_settings) != 0) {
-				err(EXIT_UNABLE_TO_GET_PASSPHRASE, "Unable to get passphrase");
-			}
-			fprintf(stderr, "Passphrase: ");
-			if (fgets(result->passphrase, LONGEST_VALID_PASSPHRASE, stdin) ==
-			    NULL) {
-				errx(EXIT_UNABLE_TO_GET_PASSPHRASE,
-				     "Unable to get passphrase on STDIN: fgets error 0x%02x",
-				     ferror(stdin));
-			}
-
-			// Remove trailing \n
-			if (result->passphrase[strlen(result->passphrase) - 1] ==
-			    NL_CHARACTER_TO_STRIP) {
-				result->passphrase[strlen(result->passphrase) - 1] = 0x00;
-			}
-
-			// Reset settings
-			terminal_settings.c_lflag = previous_c_lflag;
-			if (tcsetattr(STDIN_FILENO, TCSANOW, &terminal_settings) != 0) {
-				err(EXIT_UNABLE_TO_GET_PASSPHRASE,
-				    "Unable to reset terminal after getting passphrase");
-			}
-		} else if (errno == ENOTTY) {
-			if (fgets(result->passphrase, LONGEST_VALID_PASSPHRASE, stdin) ==
-			    NULL) {
-				errx(EXIT_UNABLE_TO_GET_PASSPHRASE,
-				     "Unable to get passphrase on STDIN: fgets error 0x%02x",
-				     ferror(stdin));
-			}
-		} else {
-			err(EXIT_UNABLE_TO_GET_PASSPHRASE, "Unable to get passphrase");
+	if (result->subcommand == subcommand_enrol ||
+	    result->subcommand == subcommand_generate) {
+		if (result->passphrase == NULL) {
+			result->passphrase =
+			    malloc_or_exit(LONGEST_VALID_PASSPHRASE + 1, "passphrase");
+			prompt_for_secret("passphrase", LONGEST_VALID_PASSPHRASE,
+			                  result->passphrase);
 		}
 	}
 
 	return result;
+}
+
+void prompt_for_secret(const char *description, size_t maximum_size,
+                       char *result) {
+	if (isatty(STDIN_FILENO)) {
+		struct termios terminal_settings;
+		if (tcgetattr(STDIN_FILENO, &terminal_settings) != 0) {
+			err(EXIT_UNABLE_TO_GET_USER_SECRET, "Unable to get %s",
+			    description);
+		}
+		tcflag_t previous_c_lflag = terminal_settings.c_lflag;
+		terminal_settings.c_lflag &= ~(ECHO | ECHOE | ECHOK);
+		terminal_settings.c_lflag |= ECHONL;
+		if (tcsetattr(STDIN_FILENO, TCSANOW, &terminal_settings) != 0) {
+			err(EXIT_UNABLE_TO_GET_USER_SECRET, "Unable to get %s",
+			    description);
+		}
+		fprintf(stderr, "%c%s: ", UPPERCASE(description[0]), description + 1);
+		if (fgets(result, maximum_size, stdin) == NULL) {
+			errx(EXIT_UNABLE_TO_GET_USER_SECRET,
+			     "Unable to get %s on STDIN: fgets error 0x%02x", description,
+			     ferror(stdin));
+		}
+
+		// Remove trailing \n
+		if (result[strlen(result) - 1] == NL_CHARACTER_TO_STRIP) {
+			result[strlen(result) - 1] = 0x00;
+		}
+
+		// Reset settings
+		terminal_settings.c_lflag = previous_c_lflag;
+		if (tcsetattr(STDIN_FILENO, TCSANOW, &terminal_settings) != 0) {
+			err(EXIT_UNABLE_TO_GET_USER_SECRET,
+			    "Unable to reset terminal after getting passphrase");
+		} // Remove trailing \n
+		if (result[strlen(result) - 1] == NL_CHARACTER_TO_STRIP) {
+			result[strlen(result) - 1] = 0x00;
+		}
+
+	} else if (errno == ENOTTY) {
+		if (fgets(result, maximum_size, stdin) == NULL) {
+			errx(EXIT_UNABLE_TO_GET_USER_SECRET,
+			     "Unable to get %s on STDIN: fgets error 0x%02x", description,
+			     ferror(stdin));
+		}
+
+		// Remove trailing \n
+		if (result[strlen(result) - 1] == NL_CHARACTER_TO_STRIP) {
+			result[strlen(result) - 1] = 0x00;
+		}
+
+	} else {
+		err(EXIT_UNABLE_TO_GET_USER_SECRET, "Unable to get %s", description);
+	}
 }
 
 void free_invocation(invocation_state_t *invocation) {

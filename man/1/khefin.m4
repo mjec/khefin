@@ -47,6 +47,13 @@ If not specified, you will be prompted to enter a passphrase.
 Note that either way, passphrases must \fBnot\fR contain a null (0x00) byte.
 
 .TP
+.BR \-n ", " \-\-pin =\fIPIN\fR
+Optional for the \fBenrol\fR and \fBgenerate\fR subcommands, otherwise prohibited.
+The PIN for your authenticator \fIdevice\fR.
+If not specified, and required by your authenticator, you will be prompted to enter a PIN.
+Note that either way, PINs must \fBnot\fR contain a null (0x00) byte.
+
+.TP
 .BR \-o ", " \-\-obfuscate\-device\-info
 Optional for the \fBenrol\fR subcommand, otherwise prohibited.
 If specified, do not store the \fIdevice\fR AAGUID (identifier of device make and model) in \fIfile\fR.
@@ -83,10 +90,18 @@ The \fBenumerate\fR subcommand produces a list of connected authenticators, one 
 4. the authenticator AAGUID, e.g. f8a011f3-8c0a-4d15-8006-17111f9edc7d
 .RE
 
-If \fIpassphrase\fR is not provided as a command line argument, then behavior depends on whether m4_APPNAME is running at a TTY (interactively) or not.
-If m4_APPNAME has a TTY, you will be prompted to enter a passphrase.
+If \fIpassphrase\fR and \fIPIN\fR are not provided as command line arguments, then behavior depends on whether m4_APPNAME is running at a TTY (interactively) or not.
+
+If m4_APPNAME has a TTY, you will be prompted to enter a passphrase and, if necessary, a PIN.
+For the \fBgenerate\fR subcommand, you will be prompted for each connected authenticator that has a PIN.
+
 If m4_APPNAME does not have a TTY, the passphrase will be read on STDIN, without any prompt, until a newline (or EOF) is reached.
-Note that in this case, the newline will \fBnot\fR be included in the passphrase or PIN.
+Then, if necessary, the PIN will be read on STDIN, without any prompt, until a newline (or EOF) is reached.
+Note that in this case, the newlines will \fBnot\fR be included in the passphrase or PIN.
+
+If you have multiple authenticators connected, \fBgenerate\fR may require you to provide multiple PINs, one for each PIN-protected connected authenticator.
+The order in which multiple PINs are requested is not guaranteed.
+As such providing an authenticator PIN on non-interactive STDIN is discouraged.
 
 In every case, only the first m4_LONGEST_VALID_PASSPHRASE bytes of a passphrase will be used.
 
@@ -134,11 +149,11 @@ Unable to drop privileges
 
 .TP
 .BR 68
-Unable to get passphrase safely (no TTY or STDIN)
+Unable to get passphrase or PIN safely (no TTY or STDIN, or not enough lines on STDIN)
 
 .TP
 .BR 96
-This is evidence of a bug; please report it (see \fBBUGS\fR below).
+This is evidence of a bug; please report it (see \fBBUGS\fR below)
 
 .SH FILES
 

@@ -181,6 +181,7 @@ allocate_parameters_except_rpid(size_t credential_id_size, size_t salt_size) {
 	params->user_display_name[0] = 'A';
 	params->relying_party_name = calloc(2, 1);
 	params->relying_party_name[0] = 'A';
+	params->authenticator_pin = NULL;
 
 	return params;
 }
@@ -227,6 +228,11 @@ void free_parameters(authenticator_parameters_t *params) {
 	if (params->salt != NULL) {
 		sodium_memzero(params->salt, params->salt_size);
 		free(params->salt);
+	}
+	if (params->authenticator_pin != NULL) {
+		sodium_memzero(params->authenticator_pin,
+		               strlen(params->authenticator_pin));
+		free(params->authenticator_pin);
 	}
 	free(params);
 }
@@ -292,8 +298,8 @@ void create_credential(fido_dev_t *device, authenticator_parameters_t *params) {
 		     r);
 	}
 
-	// TODO: PIN support
-	if ((r = fido_dev_make_cred(device, credential, NULL)) != FIDO_OK) {
+	if ((r = fido_dev_make_cred(device, credential,
+	                            params->authenticator_pin)) != FIDO_OK) {
 		fido_cred_free(&credential);
 		close_and_free_device_ignoring_errors(device);
 		errx(EXIT_AUTHENTICATOR_ERROR,
@@ -402,8 +408,7 @@ int get_secret_from_authenticator_params(
 		     "Unable to run assert_set_up(): %s (0x%x)", fido_strerr(r), r);
 	}
 
-	// TODO: PIN support
-	r = fido_dev_get_assert(device, assertion, NULL);
+	r = fido_dev_get_assert(device, assertion, params->authenticator_pin);
 	if (r != FIDO_OK) {
 		fido_assert_free(&assertion);
 		if (r == FIDO_ERR_INVALID_CREDENTIAL ||

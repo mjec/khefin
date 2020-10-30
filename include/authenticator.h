@@ -31,6 +31,7 @@ typedef struct authenticator_parameters_t {
 	size_t credential_id_size;
 	unsigned char *salt;
 	size_t salt_size;
+	char *authenticator_pin;
 } authenticator_parameters_t;
 
 typedef struct devices_list_t {
