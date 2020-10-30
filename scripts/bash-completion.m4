@@ -12,7 +12,7 @@ m4_COMPLETION_FUNCTION_NAME`'() {
 	_init_completion -s || return
 
 	case "$prev" in
-		help|version|enumerate|--help)
+		help|version|enumerate|--help|--passphrase|-p|--mixin|-m)
 			return
 			;;
 		--file|-!(-*)f)
@@ -31,7 +31,7 @@ m4_COMPLETION_FUNCTION_NAME`'() {
 
 	case "${words[1]}" in
 		generate)
-			opts="-f --file"
+			opts="-f -p -m --file --passphrase --mixin"
 			;;
 		enrol)
 			opts="-f -d -p -o -k --file --device --passphrase --obfuscate-device-info --kdf-hardness"
