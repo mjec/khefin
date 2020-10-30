@@ -42,4 +42,4 @@ The security of this system depends on the security of your authenticator device
 
 ## Warrant canary (but not a warranty)
 
-As at 28 April 2020, I (@mjec) have not received or complied with any government or non-government requests for information or services relating to this software, nor am I aware of any such requests.
+As at 30 October 2020, I (@mjec) have not received or complied with any government or non-government requests for information or services relating to this software, nor am I aware of any such requests.

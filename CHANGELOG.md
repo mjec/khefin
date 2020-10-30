@@ -4,6 +4,7 @@
 
 _These changes are on the branch `master`, but not yet in a versioned release._
 
+* Bumped warrant canary to 30 October 2020
 * Fix misleading section of the manual relating to reading passphrase on STDIN (issue #29)
 * Add missing arguments in bash completion script
 * `enumerate` prints devices even if they are not FIDO2-compatible (issue #23)
