@@ -4,6 +4,8 @@
 
 _These changes are on the branch `master`, but not yet in a versioned release._
 
+## Version 0.5.1
+
 * Bumped warrant canary to 30 October 2020
 * Fix misleading section of the manual relating to reading passphrase on STDIN (issue #29)
 * Add missing arguments in bash completion script
