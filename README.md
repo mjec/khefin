@@ -28,6 +28,12 @@ The man page contains full usage information, but briefly:
 
 `khefin-ssh-askpass` is a drop-in replacement for the `ssh-askpass` binary. See the manual for this tool for more information.
 
+## Authenticator support
+
+This application relies on an extension to the FIDO2 standard, which not all FIDO2 authenticators support. `khefin enumerate` will show a leading `!` for any connected authenticator that is not supported.
+
+For a list of authenticators known to work or not work with this software, see [the GitHub wiki page](https://github.com/mjec/khefin/wiki/Supported-authenticators).
+
 ## Risks
 
 The number one risk is that by playing around with encryption like this you will lose your data. Keep good, offline backups of your data. Test your backups regularly, to ensure files can be recovered without access to any of your usual hardware or software.
