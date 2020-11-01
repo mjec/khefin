@@ -2,7 +2,9 @@
 
 ## Next version (unreleased)
 
-_These changes are on the branch `master`, but not yet in a versioned release._
+_These changes are on the branch `main`, but not yet in a versioned release._
+
+## Version 0.6.0
 
 * Add PIN support (issue #28)
 * Truncate newline from the end of passphrase provided non-interactively on STDIN
