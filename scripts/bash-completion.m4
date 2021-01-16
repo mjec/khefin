@@ -31,10 +31,10 @@ m4_COMPLETION_FUNCTION_NAME`'() {
 
 	case "${words[1]}" in
 		generate)
-			opts="-f -p -n -m --file --passphrase --pin --mixin"
+			opts="-f -p -r -n -m --file --passphrase --passphrase-file --pin --mixin"
 			;;
 		enrol)
-			opts="-f -d -p -n -o -k --file --device --passphrase --pin --obfuscate-device-info --kdf-hardness"
+			opts="-f -d -p -r -n -o -k --file --device --passphrase --passphrase-file --pin --obfuscate-device-info --kdf-hardness"
 			;;
 	esac
 

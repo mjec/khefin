@@ -11,6 +11,7 @@
 #include <unistd.h>
 
 #include "exit.h"
+#include "files.h"
 #include "help.h"
 #include "memory.h"
 
@@ -52,6 +53,7 @@ invocation_state_t *parse_arguments_and_get_passphrase(int argc, char **argv) {
 		    {"device", required_argument, 0, 'd'},
 		    {"file", required_argument, 0, 'f'},
 		    {"passphrase", required_argument, 0, 'p'},
+		    {"passphrase-file", required_argument, 0, 'r'},
 		    {"pin", required_argument, 0, 'n'},
 		    {"mixin", required_argument, 0, 'm'},
 		    {"kdf-hardness", required_argument, 0, 'k'},
@@ -63,7 +65,7 @@ invocation_state_t *parse_arguments_and_get_passphrase(int argc, char **argv) {
 		/* getopt_long stores the option index here. */
 		int option_index = 0;
 
-		c = getopt_long(argc, argv, "d:f:p:m:k:n:oh", long_options,
+		c = getopt_long(argc, argv, "d:f:p:r:m:k:n:oh", long_options,
 		                &option_index);
 
 		if (c == -1) {
@@ -86,6 +88,16 @@ invocation_state_t *parse_arguments_and_get_passphrase(int argc, char **argv) {
 			    strndup_or_exit(optarg, LONGEST_VALID_PASSPHRASE,
 			                    "passphrase in invocation state");
 			break;
+
+		case 'r': {
+			encoded_file *f = read_file(optarg);
+			result->passphrase = strndup_or_exit(
+			    (const char *)f->data,
+			    f->length > LONGEST_VALID_PASSPHRASE ? LONGEST_VALID_PASSPHRASE
+			                                         : f->length,
+			    "passphrase in invocation state");
+			free_encoded_file(f);
+		} break;
 
 		case 'n':
 			result->authenticator_pin =
@@ -242,18 +254,16 @@ void prompt_for_secret(const char *description, size_t maximum_size,
 		}
 
 		// Remove trailing \n
-		if (result[strlen(result) - 1] == NL_CHARACTER_TO_STRIP) {
+		if (strlen(result) > 0 &&
+		    result[strlen(result) - 1] == NL_CHARACTER_TO_STRIP) {
 			result[strlen(result) - 1] = 0x00;
 		}
 
 		// Reset settings
 		terminal_settings.c_lflag = previous_c_lflag;
 		if (tcsetattr(STDIN_FILENO, TCSANOW, &terminal_settings) != 0) {
-			err(EXIT_UNABLE_TO_GET_USER_SECRET,
-			    "Unable to reset terminal after getting passphrase");
-		} // Remove trailing \n
-		if (result[strlen(result) - 1] == NL_CHARACTER_TO_STRIP) {
-			result[strlen(result) - 1] = 0x00;
+			errx(EXIT_UNABLE_TO_GET_USER_SECRET,
+			     "Unable to reset terminal after getting %s", description);
 		}
 
 	} else if (errno == ENOTTY) {

@@ -10,23 +10,25 @@ void print_usage(char *program_name) {
 	if (program_basename != NULL && program_basename[1] != (char)0) {
 		program_name = program_basename + 1;
 	}
-	printf("Usage: %s help\n"
+	printf( // clang-format off
+		   "Usage: %s help\n"
 	       "       %s version\n"
 	       "       %s enumerate\n"
-	       "       %s generate -f <file> [-p <passphrase>] [-n <pin>] [-m "
-	       "<data>]\n"
-	       "       %s enrol -d <device> -f <file> [-p <passphrase>] [-n <pin>] "
-	       "[-o]\n"
-	       "       %*s      [-k <hardness>]\n",
-	       program_name, program_name, program_name, program_name, program_name,
-	       (int)strlen(program_name), "  ");
+	       "       %s generate -f <file> [-p <passphrase> | -r <passphrase-file>]\n"
+		   "       %*s          [-n <pin>] [-m <data>]\n"
+	       "       %s enrol -d <device> -f <file> [-p <passphrase> | -r <passphrase-file>]\n"
+	       "       %*s       [-n <pin>] [-o] [-k <hardness>]\n",
+	    // clang-format on
+	    program_name, program_name, program_name, program_name,
+	    (int)strlen(program_name), " ", program_name, (int)strlen(program_name),
+	    " ");
 }
 
 void print_help(char *program_name) {
 	print_usage(program_name);
 	printf(
 	    "%s",
-	    /* clang-format off */
+	    // clang-format off
 	    // This has manually-inserted hard wraps at 80 characters,
 	    // which is inconsistent with clang-format.
 	    "\n"
@@ -52,8 +54,17 @@ void print_help(char *program_name) {
 	    "                                   write to (for enrol; this file will be\n"
 	    "                                   overwritten), or read from (for generate).\n"
 	    "\n"
-	    "   -p, --passphrase <passphrase>   The passphrase to use. If not specified,\n"
-	    "                                   you will be prompted for a passphrase.\n"
+	    "   -p, --passphrase <passphrase>   The passphrase to use. If neither this nor\n"
+	    "                                   neither this nor --passphrase-file are\n"
+		"                                   specified, you will be prompted for a\n"
+		"                                   passphrase.\n"
+		"\n"
+	    "   -r, --passphrase-file <file>    A file containing the passphrase to use.\n"
+		"                                   Note that the whole file will be used,\n"
+		"                                   including any trailing newline. If\n"
+	    "                                   neither this nor --passphrase are\n"
+		"                                   specified, you will be prompted for a\n"
+		"                                   passphrase.\n"
 	    "\n"
 		"   -n, --pin <pin>                 The authenticator PIN to use. If not\n"
 		"                                   specified, and your device requires it,\n"
@@ -79,6 +90,6 @@ void print_help(char *program_name) {
 	    "a sequence of printable, URL-safe ASCII characters, that depend on the\n"
 	    "randomly generated parameters placed in the file, the authenticator device and\n"
 	    "the passphrase. This will be followed by a single newline.\n"
-	    /* clang-format on */
+	    // clang-format on
 	);
 }

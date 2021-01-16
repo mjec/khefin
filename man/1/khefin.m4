@@ -43,7 +43,15 @@ The path to write to (for \fBenrol\fR; this file will be overwritten) or read fr
 .BR \-p ", " \-\-passphrase =\fIpassphrase\fR
 Optional for the \fBenrol\fR and \fBgenerate\fR subcommands, otherwise prohibited.
 The passphrase to use to encrypt (for \fBenrol\fR) or decrypt (for \fBgenerate\fR) \fIfile\fR.
-If not specified, you will be prompted to enter a passphrase.
+If neither this nor \fIpassphrase-file\fR are specified, you will be prompted to enter a passphrase.
+Note that either way, passphrases must \fBnot\fR contain a null (0x00) byte.
+
+.TP
+.BR \-r ", " \-\-passphrase\-file =\fIpassphrase-file\fR
+Optional for the \fBenrol\fR and \fBgenerate\fR subcommands, otherwise prohibited.
+A file containing the passphrase to use to encrypt (for \fBenrol\fR) or decrypt (for \fBgenerate\fR) \fIfile\fR.
+Note that the entire file contents will be used, including any trailing newline.
+If neither this nor \fIpassphrase\fR are specified, you will be prompted to enter a passphrase.
 Note that either way, passphrases must \fBnot\fR contain a null (0x00) byte.
 
 .TP
