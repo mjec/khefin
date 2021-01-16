@@ -90,6 +90,7 @@ print_secret_consuming_invocation(invocation_state_t *invocation,
 					printf("%02x", secret->secret[j]);
 				}
 				printf("\n");
+				fflush(stdout);
 				free_parameters(authenticator_params);
 				authenticator_params = NULL;
 
