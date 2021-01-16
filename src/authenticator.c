@@ -106,9 +106,10 @@ fido_cbor_info_t *get_device_info(fido_dev_t *device) {
 }
 
 void free_device_info(fido_cbor_info_t *cbor_info) {
-	if (cbor_info) {
-		fido_cbor_info_free(&cbor_info);
+	if (cbor_info == NULL) {
+		return;
 	}
+	fido_cbor_info_free(&cbor_info);
 }
 
 void close_and_free_device_ignoring_errors(fido_dev_t *device) {
@@ -302,6 +303,9 @@ void create_credential(fido_dev_t *device, authenticator_parameters_t *params) {
 	                            params->authenticator_pin)) != FIDO_OK) {
 		fido_cred_free(&credential);
 		close_and_free_device_ignoring_errors(device);
+		if (r == FIDO_ERR_PIN_INVALID) {
+			errx(EXIT_BAD_PIN, "Invalid authenticator PIN");
+		}
 		errx(EXIT_AUTHENTICATOR_ERROR,
 		     "Unable to create credential on FIDO2 device: %s (0x%x)",
 		     fido_strerr(r), r);
@@ -413,7 +417,7 @@ int get_secret_from_authenticator_params(
 		fido_assert_free(&assertion);
 		if (r == FIDO_ERR_INVALID_CREDENTIAL ||
 		    r == FIDO_ERR_USER_ACTION_PENDING || r == FIDO_ERR_NO_CREDENTIALS ||
-		    r == FIDO_ERR_ACTION_TIMEOUT) {
+		    r == FIDO_ERR_ACTION_TIMEOUT || r == FIDO_ERR_PIN_INVALID) {
 			return r;
 		}
 		free_parameters(params);
@@ -444,6 +448,8 @@ void free_secret(secret_t *secret_struct) {
 	if (secret_struct == NULL) {
 		return;
 	}
-	free(secret_struct->secret);
+	if (secret_struct->secret != NULL) {
+		free(secret_struct->secret);
+	}
 	free(secret_struct);
 }

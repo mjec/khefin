@@ -39,11 +39,14 @@ print_secret_consuming_invocation(invocation_state_t *invocation,
 		fido_cbor_info_t *device_info = get_device_info(authenticator);
 		if (device_aaguid_matches(cleartext, device_info)) {
 			if (!device_supports_hmac_secret(device_info)) {
+				close_and_free_device_ignoring_errors(authenticator);
 				free_device_info(device_info);
 				continue;
 			}
 
-			if (fido_dev_has_pin(authenticator)) {
+			bool authenticator_has_pin = fido_dev_has_pin(authenticator);
+
+			if (authenticator_has_pin) {
 				authenticator_params->authenticator_pin = malloc_or_exit(
 				    LONGEST_VALID_PIN + 1, "authenticator PIN in enrol_device");
 				const char *prompt_format_string =
@@ -65,9 +68,19 @@ print_secret_consuming_invocation(invocation_state_t *invocation,
 				}
 				free(prompt_string);
 				prompt_string = NULL;
+
+				if (strlen(authenticator_params->authenticator_pin) == 0) {
+					fprintf(stderr,
+					        "No PIN entered; skipping this authenticator.\n");
+					close_and_free_device_ignoring_errors(authenticator);
+					free_device_info(device_info);
+					continue;
+				}
 			}
 
 			secret_t *secret = malloc_or_exit(sizeof(secret_t), "secret");
+			secret->secret = NULL;
+			secret->secret_size = 0;
 			int result = get_secret_from_authenticator_params(
 			    authenticator, authenticator_params, secret);
 			close_and_free_device_ignoring_errors(authenticator);
@@ -89,9 +102,20 @@ print_secret_consuming_invocation(invocation_state_t *invocation,
 			}
 			free_secret(secret);
 			secret = NULL;
-			warnx("%s at %s did not return a valid secret: %s (0x%x)",
-			      fido_dev_info_product_string(di), authenticator_path,
-			      fido_strerr(result), result);
+			switch (result) {
+			case FIDO_ERR_NO_CREDENTIALS:
+				// no warning here
+				break;
+			case FIDO_ERR_PIN_INVALID:
+				warnx("Invalid PIN for %s at %s",
+				      fido_dev_info_product_string(di), authenticator_path);
+				break;
+			default:
+				warnx("%s at %s did not return a valid secret: %s (0x%x)",
+				      fido_dev_info_product_string(di), authenticator_path,
+				      fido_strerr(result), result);
+				break;
+			}
 		}
 	}
 

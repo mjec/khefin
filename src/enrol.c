@@ -48,6 +48,12 @@ void enrol_device(invocation_state_t *invocation) {
 			strncpy(authenticator_params->authenticator_pin,
 			        invocation->authenticator_pin, LONGEST_VALID_PIN);
 		}
+
+		if (strlen(authenticator_params->authenticator_pin) == 0) {
+			free_device_info(device_info);
+			free_parameters(authenticator_params);
+			errx(EXIT_BAD_PIN, "No PIN specified, unable to continue.");
+		}
 	}
 
 	create_credential(authenticator, authenticator_params);
