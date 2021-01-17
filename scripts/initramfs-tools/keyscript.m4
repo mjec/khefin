@@ -6,7 +6,8 @@ decrypt_`'m4_APPNAME () {
 		>&2 printf "Authenticator device not found!\n"
 		return 1
 	fi
-	if ! /lib/cryptsetup/askpass "Enter passphrase for key $1:" | m4_APPNAME generate -f "$1"; then
+	>&2 printf "Using key %s\n" "$1"
+	if ! m4_APPNAME generate -f "$1"; then
 		return 1
 	fi
 	return 0

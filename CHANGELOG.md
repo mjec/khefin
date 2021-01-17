@@ -4,6 +4,10 @@
 
 _These changes are on the branch `main`, but not yet in a versioned release._
 
+## Version 0.6.1
+
+* Add PIN support in scripts (issue #31)
+
 ## Version 0.6.0
 
 * Add PIN support (issue #28)

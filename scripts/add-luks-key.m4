@@ -29,7 +29,6 @@ cleanup() {
 	cryptsetup close "$decrypted_keyfile_device" 2>/dev/null
 	[ "${loopback_device-$undefined}" != "$undefined" ] && losetup -d "$loopback_device" 2>/dev/null
 	rm -f /tmp/"$decrypted_keyfile_device".* 2>/dev/null
-	unset encrypted_keyfile_passphrase
 	unset raw_key
 }
 
@@ -40,13 +39,8 @@ if [ "$#" -lt 2 ] || [ "$(id -u)" -ne 0 ]; then
 	exit 1
 fi
 
-stty -echo
-printf "Enter your passphrase for %s: " "$1"
-read -r encrypted_keyfile_passphrase
-stty echo
-printf "\n"
-raw_key="$(printf "%s" "$encrypted_keyfile_passphrase" | m4_APPNAME generate -f "$1")"
-unset encrypted_keyfile_passphrase
+printf "Using keyfile: %s\n" "$1"
+raw_key="$(m4_APPNAME generate -f "$1")"
 # shellcheck disable=SC2003
 raw_key_length="$(expr length "$raw_key" + 1)"
 loopback_device="$(losetup -f)"
