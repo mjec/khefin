@@ -4,6 +4,14 @@
 
 _These changes are on the branch `main`, but not yet in a versioned release._
 
+## Version 0.6.1
+
+* Fix PIN support for disk encryption scripts (issue #31)
+* Change initcpio scripts to use ramfs instead of encrypted loopback device
+* Add --passphrase-file option
+* Stop dropping privileges when run under sudo (issue #35)
+* Bump warrant canary to 17 January 2021
+
 ## Version 0.6.0
 
 * Add PIN support (issue #28)
