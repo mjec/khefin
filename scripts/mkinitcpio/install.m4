@@ -16,9 +16,6 @@ build() {
 
 	add_binary m4_APPNAME
 	add_binary stty
-	add_binary tr
-
-	add_module loop
 
 	find "$keyfiles_source_dir" -maxdepth 1 ! -name "$(printf "*\n*")" -type f -print \
 	| while IFS= read -r keyfile; do

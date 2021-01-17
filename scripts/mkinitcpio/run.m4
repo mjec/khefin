@@ -4,13 +4,14 @@ m4_define(`m4_PROMPT_ALWAYS', 2)m4_dnl
 #!/usr/bin/ash
 # shellcheck shell=dash
 
-# Include a UUID, so this value should never appear otherwise
+# Include a UUID in these, so this value should never appear otherwise
 undefined="undefined 110d43d6-f20a-4f29-bae4-1a58f813980c"
-
-# Include a UUID, so this value should never appear otherwise
-decrypted_keyfile_device="8931c13b-8f4f-468e-b372-967e12955c54"
+ramfs_mount_point="/tmp/m4_APPNAME-8931c13b-8f4f-468e-b372-967e12955c54"
+encrypted_keyfile_passphrase_file="$ramfs_mount_point/c43ae4e3-9a88-475f-a178-2adf37fe635a"
+disk_encryption_key_file="$ramfs_mount_point/5a7b3b6c-d8d0-435d-929d-82d9f3d6b8e9"
 
 run_hook() {
+	umask 077
 	encrypted_keyfile_dir=${encrypted_keyfile_dir-m4_INITCPIO_DEFAULT_ENCRYPTED_KEYFILE_DIR}
 
 	`#' From m4_APPNAME man page, EXIT CODES section:
@@ -33,6 +34,15 @@ run_hook() {
 			fi
 		fi
 	fi
+
+	if [ -d "$ramfs_mount_point" ] && [ -n "$(ls -A "$ramfs_mount_point")" ]; then
+		printf "%s unexpectedly exists and is not an empty directory; skipping m4_APPNAME hook.\n" "$ramfs_mount_point" 
+	elif [ -e "$ramfs_mount_point" ]; then
+		printf "%s unexpectedly exists and is not an empty directory; skipping m4_APPNAME hook.\n" "$ramfs_mount_point" 
+	fi
+
+	mkdir -p "$ramfs_mount_point"
+	mount -t ramfs -o size=64k "$ramfs_mount_point" "$ramfs_mount_point"
 
 	if [ "${encrypted_keyfile_passphrase-$undefined}" != "$undefined" ]; then
 		# Never prompt
@@ -81,31 +91,13 @@ run_hook() {
 				printf "Trying to decrypt %s.\n" "$encrypted_keyfile"
 			fi
 
-			raw_key="$(printf '%s' "$encrypted_keyfile_passphrase" | m4_APPNAME generate -f "$encrypted_keyfile")"
+			printf "%s" "$encrypted_keyfile_passphrase" > "$encrypted_keyfile_passphrase_file"
+			m4_APPNAME generate -f "$encrypted_keyfile" -r "$encrypted_keyfile_passphrase_file" > $disk_encryption_key_file
 			result=$?
-			# shellcheck disable=SC2003
-			raw_key_length="$(expr length "$raw_key" + 1)"
+			: < /dev/null > $encrypted_keyfile_passphrase_file
 
 			if [ $result -eq 0 ]; then
-				unset encrypted_keyfile_passphrase
-				m4_translit(m4_APPNAME, `-', `_')_loopback_device="$(losetup -f)"
-				export m4_translit(m4_APPNAME, `-', `_')_loopback_device
-				backing_file=$(mktemp -t "$decrypted_keyfile_device.XXXXXXXX")
-				dd if=/dev/zero of="$backing_file" bs=1024 count=64 2>/dev/null
-				losetup "$m4_translit(m4_APPNAME, `-', `_')_loopback_device" "$backing_file"
-				# Get a random passphrase and pipe it into cryptsetup open. We don't need to keep this.
-				# Use `tr` to remove control characters, DEL (0o177) and 0xff (0o377).
-				# This means removing 33 characters of 256 possibilities, or ~13% of the input.
-				# We generate 600 characters of input, thus expect a ~522 byte useful passphrase.
-				# If the output of /dev/urandom is non-uniform, we have bigger problems ;).
-				dd if=/dev/urandom bs=600 count=1 2>/dev/null \
-					| tr -d "\000-\037\177\377" \
-					| cryptsetup open --type plain "$m4_translit(m4_APPNAME, `-', `_')_loopback_device" "$decrypted_keyfile_device"
-				decrypted_keyfile_path="/dev/mapper/$decrypted_keyfile_device"
-				printf "%s\n" "$raw_key" > "$decrypted_keyfile_path"
-				unset raw_key
-				export cryptkey="$decrypted_keyfile_path:0:$raw_key_length"
-				unset raw_key_length
+				export cryptkey="rootfs:$disk_encryption_key_file"
 				return
 			elif [ $result -eq 33 ] && [ $passphrase_prompt_option -ne m4_PROMPT_NEVER ]; then
 				`#' From m4_APPNAME man page, EXIT CODES section:
@@ -129,7 +121,9 @@ run_hook() {
 }
 
 run_cleanuphook() {
-	cryptsetup close "$decrypted_keyfile_device"
-	losetup -d "$m4_translit(m4_APPNAME, `-', `_')_loopback_device"
-	rm -f /tmp/"$decrypted_keyfile_device".*
+	: < /dev/null > $disk_encryption_key_file
+	rm -f "$disk_encryption_key_file"
+	rm -f "$encrypted_keyfile_passphrase_file"
+	umount -f "$ramfs_mount_point"
+	rm -rf "$ramfs_mount_point"
 }
