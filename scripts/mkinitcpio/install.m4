@@ -31,6 +31,8 @@ This hook allows for generating a keyfile for an encrypted root device using m4_
 
 You can use a different passphrase for every keyfile, or set the kernel parameter same_passphrase_every_keyfile to use a single passphrase for every file. You can hardcode a passphrase with the kernel parameter encrypted_keyfile_passphrase, and change the number of passphrase attempts permitted by setting the encrypted_keyfile_passphrase_attempts variable (this defaults to m4_INITCPIO_DEFAULT_MAX_PASSPHRASE_ATTEMPTS).
 
+Note that a hardcoded passphrase will be visible to all users once the system is booted, and offers no security. This may be useful if you wish to rely solely on the presence of your authenticator for security, or you wish to rely on your authenticator and PIN without a further passphrase.
+
 Those files are copied to \$encrypted_keyfile_dir in the initcpio image, which you can set by a kernel parameter. By default that directory is m4_INITCPIO_DEFAULT_ENCRYPTED_KEYFILE_DIR.
 
 To make use of this hook, it must be set to run BEFORE the encrypt hook. On success, this hook will set cryptkey, overriding the previous setting (which may be absent).
