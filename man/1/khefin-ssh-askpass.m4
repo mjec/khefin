@@ -18,6 +18,8 @@ You may use \fBssh-keygen -p -f \fIssh-keyfile\fB -N "$(m4_APPNAME-ssh-askpass g
 Once that is done, you will need to set the \fBSSH_ASKPASS\fR environment variable to the path to \fB`'m4_APPNAME-ssh-askpass\fR so that \fBssh-agent\fR(1) knows to call it.
 
 .SH NOTES
+Because of the way this script works, it is not possible to use it with an authenticator that has a PIN.
+
 You should also make a backup of your encrypted keyfile (see \fBFILES\fR below), because without this file you will be unable to decrypt your SSH keys.
 
 This script accepts parameters which are not documented here, in accordance with the way ssh-agent calls it.
