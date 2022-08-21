@@ -1,5 +1,7 @@
 # khefin
 
+**As the primary author of `khefin`, I'm announcing my intention to deprecate this tool at the end of 2022.** Please see [Issue #42](https://github.com/mjec/khefin/issues/42) for more.
+
 A system for using a FIDO2 authenticator with [hmac-secret extension](https://fidoalliance.org/specs/fido-v2.0-id-20180227/fido-client-to-authenticator-protocol-v2.0-id-20180227.html#sctn-hmac-secret-extension) support to generate passphrase-protected secrets.
 
 [![Continuous integration status](https://github.com/mjec/khefin/workflows/Continuous%20integration/badge.svg)](https://github.com/mjec/khefin/actions?query=workflow%3A%22Continuous+integration%22)
